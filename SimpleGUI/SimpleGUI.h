@@ -13,7 +13,7 @@ extern "C" {
 
 // if Cocoa and M1
 // I do not want this dependency!
-#include "MicroGlut.h"
+#include "../ext/Linux/MicroGlut.h"
 
 typedef void (*NoArgProcPtr)();
 

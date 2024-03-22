@@ -3,7 +3,7 @@
 
 #include "Camera.h"
 #include "Terrain.h"
-#include "MicroGlut.h"
+#include "../../ext/Linux/MicroGlut.h"
 #include "Utils.h"
 
 class Camera;

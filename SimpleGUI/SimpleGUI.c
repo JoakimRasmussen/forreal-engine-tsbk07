@@ -1077,6 +1077,8 @@ static int hitBox(Item *item, int x, int y)
 	return 0;
 }
 
+//vec3 color = {0, 0, 0};
+
 static int hitColorClicker(Item *item, int x, int y)
 {
 	if (x >= item->hx && y >= item->hy-item->hh && x <= item->hx+item->hw && y <= item->hy)
@@ -1088,15 +1090,37 @@ static int hitColorClicker(Item *item, int x, int y)
 			*((float *)item->var2) = item->g;
 		if (item->var3 != NULL)
 			*((float *)item->var3) = item->b;
-		printf("--------------------\n")
+		printf("--------------------\n");
 		printf("File: simplegui.c\nFunction: hitColorClicker\nLine: 1080\n");
 		printf("Item hit color: %f %f %f\n", item->r, item->g, item->b);
 		printf("Item hit position: %d %d\n", x, y);
-		printf("--------------------\n")
+		printf("--------------------\n");
+
+		//color = hitItemColors(item->r, item->g, item->b, x, y);
+		
 		return 1;
 	}
 	return 0;
 }
+
+/* vec3 hitItemColors(int r, int g, int b, int x, int y)
+{
+	vec3 color = {0, 0, 0};
+	if (x >= 0 && y >= 0 && x < 8 && y < 8)
+	{
+		color.r = r;
+		color.g = g;
+		color.b = b;
+	}
+	return color;
+}
+
+vec3 getHitItemColors()
+{
+	return color;
+} */
+
+
 
 static int hitRadio(Item *item, int x, int y)
 {

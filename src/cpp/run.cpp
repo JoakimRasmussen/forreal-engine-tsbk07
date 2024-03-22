@@ -9,7 +9,7 @@
 #define BOTTOM -0.5
 #define PI 3.14159265
 
-#include "MicroGlut.h"
+#include "../ext/Linux/MicroGlut.h"
 #include "GL_utilities.h"
 #include "VectorUtils4.h"
 #include "LittleOBJLoader.h"
