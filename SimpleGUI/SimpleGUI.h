@@ -17,6 +17,19 @@ extern "C" {
 
 typedef void (*NoArgProcPtr)();
 
+typedef struct Item
+{
+	int itemType;
+	int state;
+	int intData;
+	float sliderMin, sliderMax, r, g, b;
+	char *s;
+	int x, y; // , w, h;
+	int hx, hy, hw, hh; // hot box!
+	void *var1,*var2,*var3; // Pointers to controlled variables
+	int wasHit;
+} Item;
+
 // Create controls
 int sgCreateSlider(int x, int y, int w, float *variable, float min, float max);
 int sgCreateColorBox(int x, int y, float *r, float *g, float *b);
@@ -65,7 +78,7 @@ void sgSetScale(int scale);
 
 // OWN IMPLEMENTATION
 void myCreateGrayScaledColorPalette(int x, int y, float *dr, float *dg, float *db);
-//vec3 myCreateSliderColorGroup(int x, int y, int w, float *r, float *g, float *b);
+Item* myCreateColorClicker(int x, int y, float r, float g, float b, float *dr, float *dg, float *db);
 
 #ifdef __cplusplus
 }

@@ -445,17 +445,6 @@ enum
 	kRightStepper, kLeftStepper
 };
 
-typedef struct Item
-{
-	int itemType;
-	int state;
-	int intData;
-	float sliderMin, sliderMax, r, g, b;
-	char *s;
-	int x, y; // , w, h;
-	int hx, hy, hw, hh; // hot box!
-	void *var1,*var2,*var3; // Pointers to controlled variables
-} Item;
 
 static Item **items = NULL;
 static int itemCount = 0;
@@ -1077,9 +1066,8 @@ static int hitBox(Item *item, int x, int y)
 	return 0;
 }
 
-//vec3 color = {0, 0, 0};
 
-static int hitColorClicker(Item *item, int x, int y)
+Item* hitColorClicker(Item *item, int x, int y)
 {
 	if (x >= item->hx && y >= item->hy-item->hh && x <= item->hx+item->hw && y <= item->hy)
 	{
@@ -1094,33 +1082,15 @@ static int hitColorClicker(Item *item, int x, int y)
 		printf("File: simplegui.c\nFunction: hitColorClicker\nLine: 1080\n");
 		printf("Item hit color: %f %f %f\n", item->r, item->g, item->b);
 		printf("Item hit position: %d %d\n", x, y);
+		printf("Item hit position: %d %d\n", item->hx, item->hy);
 		printf("--------------------\n");
 
-		//color = hitItemColors(item->r, item->g, item->b, x, y);
-		
-		return 1;
+		item->wasHit = 1;
+		return item;
 	}
-	return 0;
+	item->wasHit = 0;
+	return item;
 }
-
-/* vec3 hitItemColors(int r, int g, int b, int x, int y)
-{
-	vec3 color = {0, 0, 0};
-	if (x >= 0 && y >= 0 && x < 8 && y < 8)
-	{
-		color.r = r;
-		color.g = g;
-		color.b = b;
-	}
-	return color;
-}
-
-vec3 getHitItemColors()
-{
-	return color;
-} */
-
-
 
 static int hitRadio(Item *item, int x, int y)
 {
@@ -1435,31 +1405,98 @@ int sgCreateColorClicker(int x, int y, float r, float g, float b, float *dr, flo
 	return i;
 }
 
-/* MY IMPLEMENTATION */
-// Create a color palette with 12 grayscaled colors and save them to a vector
-void myCreateGrayScaledColorPalette(int x, int y, float *dr, float *dg, float *db)
+// Created three sliders with strings to the right of each. Controls three float variables in an array (cast vec3 to *float).
+Item* myCreateColorClicker(int x, int y, float r, float g, float b, float *dr, float *dg, float *db)
 {
+	int i = sgCreateItem(x, y);
+	items[i]->itemType = kColorClicker;
+	items[i]->hw = 16;//w-4;
+	items[i]->hh = 16;//h;
+	items[i]->var1 = dr;
+	items[i]->var2 = dg;
+	items[i]->var3 = db;
+	items[i]->r = r; // Internal color
+	items[i]->g = g;
+	items[i]->b = b;
+	return items[i];
+}
+
+/* MY IMPLEMENTATION */
+/* 
+// Create a color palette with 12 grayscaled colors and save them to a vector
+void myCreateGrayScaledColorPalette(int x, int y, float *dr, float *dg, float *db, int width, int height)
+{
+	myInternalCreateColorPalette(x, y, dr, dg, db, width, height);
+}
+
+void myInternalCreateColorPalette(int x, int y, float *dr, float *dg, float *db, int width, int height)
+{
+	for (int i = 0; i < 12; i++)
+		for (int j = 0; j < 5; j++)
+		{
+			// i = all eight corners except black and white
+			// j = value
+			
+			float r,g,b;
+			
+			switch (i)
+			{
+				case 0:
+					r = 1; g = 0; b = 0;break;
+				case 1:
+					r = 1; g = 0.5; b = 0;break;
+				case 2:
+					r = 1; g = 1; b = 0;break;
+				case 3:
+					r = 0.5; g = 1; b = 0;break;
+				case 4:
+					r = 0; g = 1; b = 0;break;
+				case 5:
+					r = 0; g = 1; b = 0.5;break;
+				case 6:
+					r = 0; g = 1; b = 1;break;
+				case 7:
+					r = 0; g = 0.5; b = 1;break;
+				case 8:
+					r = 0; g = 0; b = 1;break;
+				case 9:
+					r = 0.5; g = 0; b = 1;break;
+				case 10:
+					r = 1.0; g = 0; b = 1;break;
+				case 11:
+					r = 1; g = 0; b = 0.5;break;
+				break;
+			}
+			if (j <= 1)
+			{
+				if (r == 0.5) r = 0.75;
+				if (g == 0.5) g = 0.75;
+				if (b == 0.5) b = 0.75;
+				if (r == 0) r = 0.5;
+				if (g == 0) g = 0.5;
+				if (b == 0) b = 0.5;
+			}
+			float q;
+			if (j == 0)
+				q = 0.75;
+			else
+			if (j == 1)
+				q = 1.0;
+			else
+				q = (float)(6-j)/4.0;
+			if (tiny)
+				sgCreateSmallColorClicker(x + i * 8, y + j * 8, r*q, g*q, b*q, dr, dg, db);
+			else
+				sgCreateColorClicker(x + i * 16, y + j * 16, r*q, g*q, b*q, dr, dg, db);
+		}
 	for (int i = 0; i < 12; i++)
 	{
 		// Grayscales!
-		sgCreateColorClicker(x + i * 16, y, i / 11.0, i/11.0, i/11.0, dr, dg, db);
+		if (tiny)
+			sgCreateSmallColorClicker(x + i * 8, y + 5 * 8, i / 11.0, i/11.0, i/11.0, dr, dg, db);
+		else
+			sgCreateColorClicker(x + i * 16, y + 5 * 16, i / 11.0, i/11.0, i/11.0, dr, dg, db);
 	}
-
-}
-
-// Created three sliders and a "drop" color box for color selection. Controls three float variables.
-/* typedef struct vec3 myCreateSliderColorGroup(int x, int y, int w, float *r, float *g, float *b)
-{
-	sgCreateColorDrop(x, y+20, r, g, b);
-	int rs = sgCreateSlider(x+30, y, w, r, 0, 1);
-	int gs = sgCreateSlider(x+30, y+20, w, g, 0, 1);
-	int bs = sgCreateSlider(x+30, y+40, w, b, 0, 1);
-	
-	sgSetSliderFillColor(rs, 1, 0, 0);
-	sgSetSliderFillColor(gs, 0, 1, 0);
-	sgSetSliderFillColor(bs, 0, 0, 1);
-
-	return vec3(rs, gs, bs);
 } */
 
 // Created three sliders with strings to the right of each. Controls three float variables in an array (cast vec3 to *float).
@@ -1665,8 +1702,11 @@ int sgMouse(int state, int x, int y)
 				break;
 			case kColorClicker:
 			case kSmallColorClicker:
-				if (hitColorClicker(items[i], x, y))
+				printf("items[i]->wasHit: %d\n", items[i]->wasHit);
+				hitColorClicker(items[i], x, y);
+				if (items[i]->wasHit)
 				{
+					printf("got here?\n");
 					lasthit = i;
 					hasHitColorClicker = 1;
 					return 1;
@@ -1770,7 +1810,8 @@ int sgMouseDrag(int x, int y)
 		if (items[i]->itemType == kColorClicker || items[i]->itemType == kSmallColorClicker)
 			if (hasHitColorClicker)
 			// I should also check if it is in the same range as the clicked color clicker.
-				if (hitColorClicker(items[i], x, y))
+			hitColorClicker(items[i], x, y);
+				if (items[i]->wasHit)
 				{
 					lasthit = i;
 					return 1;

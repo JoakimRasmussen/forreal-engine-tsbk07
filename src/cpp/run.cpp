@@ -94,33 +94,42 @@ void SetToBlue()
 
 float test = 100;
 
+
 void initGUI(void)
 {
 	sgCreateStaticString(400, 160, "This is a demo of SimpleGUI");
-	// A slider and a float display
 
 	sgCreateStaticString(40, 220, "Slider color group");
 	sgCreateSliderColorGroup(20, 240, 150, &testr, &testg, &testb);
 
-	// Radio group: Connect to same variable!
-	// sgCreateStaticString(40, 400, "Single line editor:");
-	// sgCreateDynamicString(40, 420, testString);
-	
-	/* sgCreateColorPalette(40, 340, &testr, &testg, &testb);
-	sgCreateStaticString(150, 330, "Palette");
-	sgCreateButton(150, 350, "RESET", HitButton); */
-
-	/* sgCreateMenu(40, 300, "Colors menu");
-	sgCreateMenuItem("Set to red", SetToRed);
-	sgCreateMenuItem("Set to green", SetToGreen); 
-	sgCreateMenuItem("Set to blue", SetToBlue); */
-
 	// Create a color clicker in the middle of the screen in black
-	myCreateGrayScaledColorPalette(40, 500, &testr, &testg, &testb);
+	//myCreateGrayScaledColorPalette(40, 500, &testr, &testg, &testb);
+
+	Item* item = myCreateColorClicker(40, 600, 0, 10, 0, &testr, &testg, &testb);
+
+	printf("item %p\n", item);
+	printf("item color %f %f %f\n", item->b, item->g, item->r);
+	printf("item position: %d %d\n", item->x, item->y);
+
 
 	sgSetPosition(70, 20);
 }
 
+void onMouse(int button, int state, int x, int y) {
+  if(state != GLUT_DOWN)
+    return;
+
+  GLbyte color[4];
+  GLfloat depth;
+  GLuint index;
+  
+  glReadPixels(x, 1080 - y - 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
+  glReadPixels(x, 1080 - y - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+  glReadPixels(x, 1080 - y - 1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
+
+  printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx, depth %f, stencil index %u\n",
+         x, y, color[0], color[1], color[2], color[3], depth, index);
+}
 void keyboard(unsigned char key, int x, int y)
 {
 	// The "single line editor", edit the string
@@ -138,13 +147,11 @@ void keyboard(unsigned char key, int x, int y)
 	
 	glutPostRedisplay();
 }
-
 void mouse(int button, int state, int x, int y)
 {
 	if (button == 0) sgMouse(state, x, y);
 	glutPostRedisplay();
 }
-
 void drag(int x, int y)
 {
 	sgMouseDrag(x, y);
@@ -225,7 +232,7 @@ void display(void)
 	// updateSplat();
 	
 	printError("pre display!");
-	
+
 	glUseProgram(program);
 
 	// Upload world-to-view matrix
@@ -243,7 +250,6 @@ void display(void)
 	// Draw terrain
 	PlaceModel(tm, program, 0, 0, 0, 0, 0, 0);
 	DrawModel(tm, program, "in_Position", "in_Normal", "in_TexCoord");
-
 
 	/* ------------- GUI ------------------ */
 	sgDraw();
@@ -265,6 +271,7 @@ int main(int argc, char **argv)
 	glutDisplayFunc(display);
 	// glutPassiveMotionFunc(InputController::handleMouseMotionBridge);
 	glutKeyboardFunc(keyboard);
+	//glutMouseFunc(onMouse);
 	glutMouseFunc(mouse);
 	glutMotionFunc(drag);
 	init();

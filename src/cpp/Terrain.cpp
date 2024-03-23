@@ -199,6 +199,10 @@ void Terrain::createSplatMap()
 
 
 
+
+
+
+
 Model* Terrain::setTerrainModel(const char* heightmap) {
 	LoadTGATextureData(heightmap, &ttex);
 	terrainModel = generateTerrain(&ttex);
