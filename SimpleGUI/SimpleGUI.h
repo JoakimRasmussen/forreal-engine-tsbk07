@@ -14,6 +14,7 @@ extern "C" {
 // if Cocoa and M1
 // I do not want this dependency!
 #include "../ext/Linux/MicroGlut.h"
+#include "LoadTGA.h"
 
 typedef void (*NoArgProcPtr)();
 
@@ -79,6 +80,9 @@ void sgSetScale(int scale);
 // OWN IMPLEMENTATION
 void myCreateGrayScaledColorPalette(int x, int y, float *dr, float *dg, float *db);
 Item* myCreateColorClicker(int x, int y, float r, float g, float b, float *dr, float *dg, float *db);
+Item** myGetItems();
+int myGetItemCount();
+Item* getHitItem();
 
 #ifdef __cplusplus
 }

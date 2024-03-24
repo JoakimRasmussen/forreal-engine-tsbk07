@@ -21,6 +21,8 @@
 #include "../h/Terrain.h"
 #include "../h/GameMode.h"
 
+void readColorOfTerrain();
+
 // Variables
 // Time based frames
 GLfloat deltaTime = 0.0f;
@@ -57,7 +59,7 @@ GLfloat projectionMatrix[] =
 
 /* ----------------------- GUI BEGIN ------------------------ */
 
-float testr, testg, testb, testf = 5;
+float testr, testg, testb, testf, testRef = 5;
 int testboolean;
 int testradio;
 char testString[1024] = "Type here";
@@ -92,27 +94,47 @@ void SetToBlue()
 	testb = 1;
 }
 
-float test = 100;
+void readColorOfTerrain()
+{
+	TextureData* texas = terrain->getTextureData();
+	// Loop over texas and print out the color of each pixel
+	for(int i = 0; i < texas->width * texas->height; i++)
+	{
+		printf("Color of pixel %d: %d\n", i, texas->imageData[i]);
+	}
+	printf("Width: %d, Height: %d\n", texas->width, texas->height);
+	printf("Total amount of pixels: %d\n", texas->width * texas->height);
+	printf("Total amount of vertices in tm: %d\n", tm->numVertices);
+	printf("tm->numIndices: %d\n", tm->numIndices);
+}
 
+void updateSplat(void)
+{
+	// Update splat map
+	glActiveTexture(GL_TEXTURE3);
+	LoadTGATextureSimple("splatmap123.tga", &map);
+	glBindTexture(GL_TEXTURE_2D, map);
+	glUniform1i(glGetUniformLocation(program, "map"), 3); // Texture unit 3
+}
 
 void initGUI(void)
 {
 	sgCreateStaticString(400, 160, "This is a demo of SimpleGUI");
 
-	sgCreateStaticString(40, 220, "Slider color group");
-	sgCreateSliderColorGroup(20, 240, 150, &testr, &testg, &testb);
+	/* sgCreateStaticString(40, 220, "Slider color group");
+	sgCreateSliderColorGroup(20, 240, 150, &testr, &testg, &testb); */
+	sgSetScale(2);
 
 	// Create a color clicker in the middle of the screen in black
-	//myCreateGrayScaledColorPalette(40, 500, &testr, &testg, &testb);
+	// myCreateGrayScaledColorPalette(40, 500, &testr, &testg, &testb);
 
-	Item* item = myCreateColorClicker(40, 600, 0, 10, 0, &testr, &testg, &testb);
+	/* Item* ii = myCreateColorClicker(40, 500, 0, 0, 0, &testr, &testg, &testb);
+	Item* iii = myCreateColorClicker(40, 600, 0, 256, 0, &testr, &testg, &testb); */
+	Item** items = myGetItems();
 
-	printf("item %p\n", item);
-	printf("item color %f %f %f\n", item->b, item->g, item->r);
-	printf("item position: %d %d\n", item->x, item->y);
-
-
-	sgSetPosition(70, 20);
+	sgCreateSlider(40, 600, 200, &terrain->currentElevation, 1, 10);
+	sgCreateStaticString(40, 550, "Elevation slider: ");
+	sgCreateDisplayFloat(40, 570, "Elevation value: ", &terrain->currentElevation);
 }
 
 void onMouse(int button, int state, int x, int y) {
@@ -205,16 +227,6 @@ void init(void)
 
 	// Init GUI
 	initGUI();
-
-}
-
-void updateSplat(void)
-{
-	// Update splat map
-	glActiveTexture(GL_TEXTURE3);
-	LoadTGATextureSimple("splatmap123.tga", &map);
-	glBindTexture(GL_TEXTURE_2D, map);
-	glUniform1i(glGetUniformLocation(program, "map"), 3); // Texture unit 3
 }
 
 void display(void)
@@ -228,8 +240,18 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	inputController->handleKeyboardInput(deltaTime);
-	// Update splat map
-	// updateSplat();
+
+	/* TESTING */
+	Item* hitItem = getHitItem();
+	if(hitItem != NULL)
+	{
+		printf("Hit item position x = %d, y = %d: \n", hitItem->x, hitItem->y);
+	}
+	/* TESTING */
+
+	// Update height of terrain
+	terrain->updateTerrain();
+
 	
 	printError("pre display!");
 
@@ -248,6 +270,7 @@ void display(void)
 	glUniform3f(glGetUniformLocation(program, "lightPosition"), 5, 5, 5);
 
 	// Draw terrain
+	tm = terrain->getTerrainModel();
 	PlaceModel(tm, program, 0, 0, 0, 0, 0, 0);
 	DrawModel(tm, program, "in_Position", "in_Normal", "in_TexCoord");
 

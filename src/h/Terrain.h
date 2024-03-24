@@ -10,17 +10,23 @@ class Terrain {
 public:
 
     Terrain();
-    Model* generateTerrain(TextureData* tex);
+    Model* generateTerrain(TextureData* tex, float currentElevation);
     Model* setTerrainModel(const char* heightmap);
     float getHeightAtPoint(float x, float z) const;
     void createSplatMap();
+    TextureData* getTextureData();
+    void updateTerrain();
+    Model* getTerrainModel();
 
+    // Could be (should be...?) private with a getter
+    float currentElevation = 5.0;
+    float previousElevation = 5.0;
+    float quadSize = 1.0;
 
 private:
     TextureData ttex;
     TextureData* tex;
     Model* terrainModel;
-    float quadSize = 1.0;
 };
 
 #endif

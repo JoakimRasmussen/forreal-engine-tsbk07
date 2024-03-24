@@ -2,7 +2,7 @@
 
 Terrain::Terrain() {}
 
-Model* Terrain::generateTerrain(TextureData* tex) {
+Model* Terrain::generateTerrain(TextureData* tex, float currentElevation) {
     // Generate the terrain mesh
     int vertexCount = tex->width * tex->height;
 	int triangleCount = (tex->width-1) * (tex->height-1) * 2;
@@ -18,7 +18,7 @@ Model* Terrain::generateTerrain(TextureData* tex) {
 		{
 			// Vertex array. You need to scale this properly
 			vertexArray[(x + z * tex->width)].x = x * quadSize / 1.0;
-			vertexArray[(x + z * tex->width)].y = tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / 10.0; 
+			vertexArray[(x + z * tex->width)].y = tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / currentElevation; 
 			vertexArray[(x + z * tex->width)].z = z * quadSize / 1.0;
 			// Texture coordinates. You may want to scale them.
 			texCoordArray[(x + z * tex->width)].x = ((float)x * 1) / tex->width; // repeat the texture 1 time
@@ -110,7 +110,7 @@ Model* Terrain::generateTerrain(TextureData* tex) {
 			}
 		}
 
-	Model* model = LoadDataToModel(
+	terrainModel = LoadDataToModel(
 			vertexArray,
 			normalArray,
 			texCoordArray,
@@ -119,8 +119,9 @@ Model* Terrain::generateTerrain(TextureData* tex) {
 			vertexCount,
 			triangleCount*3);
 
-	return model;
+	return terrainModel;
 }
+
 
 float Terrain::getHeightAtPoint(float x, float z) const {
     // Height map starts at (0,0) and spans positively (normalized to 1.0 for the width and height of the terrain)
@@ -197,14 +198,27 @@ void Terrain::createSplatMap()
 	delete imageData;
 }
 
-
-
-
+void Terrain::updateTerrain()
+{
+	if (currentElevation - previousElevation != 0.0)
+	{
+		terrainModel = generateTerrain(&ttex, currentElevation);
+		previousElevation = currentElevation;
+	}
+}
 
 
 
 Model* Terrain::setTerrainModel(const char* heightmap) {
 	LoadTGATextureData(heightmap, &ttex);
-	terrainModel = generateTerrain(&ttex);
+	terrainModel = generateTerrain(&ttex, currentElevation);
+	return terrainModel;
+}
+
+TextureData* Terrain::getTextureData() {
+	return &ttex;
+}
+
+Model* Terrain::getTerrainModel() {
 	return terrainModel;
 }

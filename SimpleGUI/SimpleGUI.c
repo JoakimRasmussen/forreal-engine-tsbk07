@@ -448,6 +448,7 @@ enum
 
 static Item **items = NULL;
 static int itemCount = 0;
+Item* hitItem = NULL;
 
 static float frameRed = 1.0;
 static float frameGreen = 1.0;
@@ -1066,7 +1067,7 @@ static int hitBox(Item *item, int x, int y)
 	return 0;
 }
 
-
+/* Updated to return item instead of bool. (Thus added int wasHit in struct)*/
 Item* hitColorClicker(Item *item, int x, int y)
 {
 	if (x >= item->hx && y >= item->hy-item->hh && x <= item->hx+item->hw && y <= item->hy)
@@ -1084,12 +1085,28 @@ Item* hitColorClicker(Item *item, int x, int y)
 		printf("Item hit position: %d %d\n", x, y);
 		printf("Item hit position: %d %d\n", item->hx, item->hy);
 		printf("--------------------\n");
-
+		hitItem = item;
 		item->wasHit = 1;
 		return item;
 	}
 	item->wasHit = 0;
 	return item;
+}
+
+/* OUR, returns a array of every item created */
+Item** myGetItems()
+{
+	return items;
+}
+/* OUR, returns the amount of items, good for loops */
+int myGetItemCount()
+{
+	return itemCount;
+}
+/* OUR, returns the item that was latest clicked (CAREFUL OF NULL POINTER!!!) */
+Item* getHitItem()
+{
+	return hitItem;
 }
 
 static int hitRadio(Item *item, int x, int y)
@@ -1179,6 +1196,30 @@ static int sgCreateItem(int x, int y)
 
 // A slider. Should connect to a variable, which is set to a value between 0 and 1.
 int sgCreateSlider(int x, int y, int w, float *variable, float min, float max)
+{
+	int i = sgCreateItem(x, y);
+	items[i]->itemType = kSlider;
+	
+	w = (w / 8)*8; // or w = w and 0xfff8
+	
+	items[i]->hw = w; // - 8;
+	items[i]->hh = 16; // items[i]->h;
+
+	items[i]->state = (w-16) / 8; // # of segments
+	items[i]->intData = 0; // or calc from *variable
+	items[i]->var1 = variable;
+	
+	items[i]->sliderMin = min;
+	items[i]->sliderMax = max;
+	
+	items[i]->r = sliderFillRed;
+	items[i]->g = sliderFillGreen;	
+	items[i]->b = sliderFillBlue;	
+	
+	return i;
+}
+
+int testsgCreateSlider(int x, int y, int w, float *variable, float min, float max)
 {
 	int i = sgCreateItem(x, y);
 	items[i]->itemType = kSlider;
@@ -1421,84 +1462,6 @@ Item* myCreateColorClicker(int x, int y, float r, float g, float b, float *dr, f
 	return items[i];
 }
 
-/* MY IMPLEMENTATION */
-/* 
-// Create a color palette with 12 grayscaled colors and save them to a vector
-void myCreateGrayScaledColorPalette(int x, int y, float *dr, float *dg, float *db, int width, int height)
-{
-	myInternalCreateColorPalette(x, y, dr, dg, db, width, height);
-}
-
-void myInternalCreateColorPalette(int x, int y, float *dr, float *dg, float *db, int width, int height)
-{
-	for (int i = 0; i < 12; i++)
-		for (int j = 0; j < 5; j++)
-		{
-			// i = all eight corners except black and white
-			// j = value
-			
-			float r,g,b;
-			
-			switch (i)
-			{
-				case 0:
-					r = 1; g = 0; b = 0;break;
-				case 1:
-					r = 1; g = 0.5; b = 0;break;
-				case 2:
-					r = 1; g = 1; b = 0;break;
-				case 3:
-					r = 0.5; g = 1; b = 0;break;
-				case 4:
-					r = 0; g = 1; b = 0;break;
-				case 5:
-					r = 0; g = 1; b = 0.5;break;
-				case 6:
-					r = 0; g = 1; b = 1;break;
-				case 7:
-					r = 0; g = 0.5; b = 1;break;
-				case 8:
-					r = 0; g = 0; b = 1;break;
-				case 9:
-					r = 0.5; g = 0; b = 1;break;
-				case 10:
-					r = 1.0; g = 0; b = 1;break;
-				case 11:
-					r = 1; g = 0; b = 0.5;break;
-				break;
-			}
-			if (j <= 1)
-			{
-				if (r == 0.5) r = 0.75;
-				if (g == 0.5) g = 0.75;
-				if (b == 0.5) b = 0.75;
-				if (r == 0) r = 0.5;
-				if (g == 0) g = 0.5;
-				if (b == 0) b = 0.5;
-			}
-			float q;
-			if (j == 0)
-				q = 0.75;
-			else
-			if (j == 1)
-				q = 1.0;
-			else
-				q = (float)(6-j)/4.0;
-			if (tiny)
-				sgCreateSmallColorClicker(x + i * 8, y + j * 8, r*q, g*q, b*q, dr, dg, db);
-			else
-				sgCreateColorClicker(x + i * 16, y + j * 16, r*q, g*q, b*q, dr, dg, db);
-		}
-	for (int i = 0; i < 12; i++)
-	{
-		// Grayscales!
-		if (tiny)
-			sgCreateSmallColorClicker(x + i * 8, y + 5 * 8, i / 11.0, i/11.0, i/11.0, dr, dg, db);
-		else
-			sgCreateColorClicker(x + i * 16, y + 5 * 16, i / 11.0, i/11.0, i/11.0, dr, dg, db);
-	}
-} */
-
 // Created three sliders with strings to the right of each. Controls three float variables in an array (cast vec3 to *float).
 int sgCreateSmallColorClicker(int x, int y, float r, float g, float b, float *dr, float *dg, float *db)
 {
@@ -1586,6 +1549,17 @@ void internalCreateColorPalette(int x, int y, float *dr, float *dg, float *db, i
 			sgCreateColorClicker(x + i * 16, y + 5 * 16, i / 11.0, i/11.0, i/11.0, dr, dg, db);
 	}
 }
+
+
+void myCreateGrayScaledColorPalette(int x, int y, float *dr, float *dg, float *db)
+{
+	for (int i = 0; i < 12; i++)
+	{
+		sgCreateColorClicker(x + i * 16, y + 5 * 16, i / 11.0, i/11.0, i/11.0, dr, dg, db);
+	}
+}
+
+
 
 void sgCreateColorPalette(int x, int y, float *dr, float *dg, float *db)
 {
