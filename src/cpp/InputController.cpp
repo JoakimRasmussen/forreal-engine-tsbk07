@@ -87,8 +87,57 @@ void InputController::handleMouseMotion(int x, int y) {
 	camera->forwardVector = normalize(direction);
 }
 
+
+void InputController::guiKeyboard(unsigned char key, int x, int y)
+{
+	// The "single line editor", edit the string
+	int l = strlen(testString);
+	if ((key == 127) && (l > 0))
+	{
+		testString[l-1] = 0;
+	}
+	else
+	if (key >= 32 && l < 128)
+	{
+		testString[l] = key;
+		testString[l+1] = 0;
+	}
+	
+	glutPostRedisplay();
+}
+
+void InputController::guiMouse(int button, int state, int x, int y)
+{
+	if (button == 0) sgMouse(state, x, y);
+	glutPostRedisplay();
+}
+
+void InputController::guiDrag(int x, int y)
+{
+	sgMouseDrag(x, y);
+	glutPostRedisplay();
+}
+
+void InputController::guiMouseBridge(int button, int state, int x, int y) {
+	if (instance != nullptr) {
+		instance->guiMouse(button, state, x, y);
+	}
+}
+
+void InputController::guiDragBridge(int x, int y) {
+	if (instance != nullptr) {
+		instance->guiDrag(x, y);
+	}
+}
+
 void InputController::handleMouseMotionBridge(int x, int y) {
     if (instance != nullptr) {
         instance->handleMouseMotion(x, y);
     }
+}
+
+void InputController::guiKeyboardBridge(unsigned char key, int x, int y) {
+	if (instance != nullptr) {
+		instance->guiKeyboard(key, x, y);
+	}
 }

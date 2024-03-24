@@ -20,6 +20,7 @@
 #include "../h/InputController.h"
 #include "../h/Terrain.h"
 #include "../h/GameMode.h"
+#include "../h/GUI.h"
 
 void readColorOfTerrain();
 
@@ -32,12 +33,15 @@ vec3 cameraPosition = vec3(0.0f, 5.0f, 8.0f);
 vec3 forwardVector = vec3(2.0f, 0.0f, 2.0f);
 vec3 cameraUpVector = vec3(0, 1, 0);
 GLfloat cameraSpeed = 0.01f;
+
 // Camera object
 Camera* camera = new Camera(cameraPosition, forwardVector, cameraUpVector, cameraSpeed);
 // Terrain object
 Terrain* terrain = new Terrain();
 // Input controller object
 InputController* inputController = new InputController(camera, terrain);
+// Gui object
+GUI* gui = new GUI();
 
 // Reference to shader program
 GLuint program;
@@ -117,25 +121,6 @@ void updateSplat(void)
 	glUniform1i(glGetUniformLocation(program, "map"), 3); // Texture unit 3
 }
 
-void initGUI(void)
-{
-	sgCreateStaticString(400, 160, "This is a demo of SimpleGUI");
-
-	/* sgCreateStaticString(40, 220, "Slider color group");
-	sgCreateSliderColorGroup(20, 240, 150, &testr, &testg, &testb); */
-	sgSetScale(2);
-
-	// Create a color clicker in the middle of the screen in black
-	// myCreateGrayScaledColorPalette(40, 500, &testr, &testg, &testb);
-
-	/* Item* ii = myCreateColorClicker(40, 500, 0, 0, 0, &testr, &testg, &testb);
-	Item* iii = myCreateColorClicker(40, 600, 0, 256, 0, &testr, &testg, &testb); */
-	Item** items = myGetItems();
-
-	sgCreateSlider(40, 600, 200, &terrain->currentElevation, 1, 10);
-	sgCreateStaticString(40, 550, "Elevation slider: ");
-	sgCreateDisplayFloat(40, 570, "Elevation value: ", &terrain->currentElevation);
-}
 
 void onMouse(int button, int state, int x, int y) {
   if(state != GLUT_DOWN)
@@ -151,33 +136,6 @@ void onMouse(int button, int state, int x, int y) {
 
   printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx, depth %f, stencil index %u\n",
          x, y, color[0], color[1], color[2], color[3], depth, index);
-}
-void keyboard(unsigned char key, int x, int y)
-{
-	// The "single line editor", edit the string
-	int l = strlen(testString);
-	if ((key == 127) && (l > 0))
-	{
-		testString[l-1] = 0;
-	}
-	else
-	if (key >= 32 && l < 128)
-	{
-		testString[l] = key;
-		testString[l+1] = 0;
-	}
-	
-	glutPostRedisplay();
-}
-void mouse(int button, int state, int x, int y)
-{
-	if (button == 0) sgMouse(state, x, y);
-	glutPostRedisplay();
-}
-void drag(int x, int y)
-{
-	sgMouseDrag(x, y);
-	glutPostRedisplay();
 }
 
 /* -------------------- GUI END ------------------------- */
@@ -226,7 +184,7 @@ void init(void)
 	printError("init terrain!");
 
 	// Init GUI
-	initGUI();
+	gui->initTerrainGUI(terrain);
 }
 
 void display(void)
@@ -275,7 +233,7 @@ void display(void)
 	DrawModel(tm, program, "in_Position", "in_Normal", "in_TexCoord");
 
 	/* ------------- GUI ------------------ */
-	sgDraw();
+	gui->drawGUI();
 	/* ------------- GUI ------------------ */
 
 	printError("display 2");
@@ -293,10 +251,10 @@ int main(int argc, char **argv)
 	glutCreateWindow ("TSBK07 Project");
 	glutDisplayFunc(display);
 	// glutPassiveMotionFunc(InputController::handleMouseMotionBridge);
-	glutKeyboardFunc(keyboard);
+	glutKeyboardFunc(InputController::guiKeyboardBridge);
 	//glutMouseFunc(onMouse);
-	glutMouseFunc(mouse);
-	glutMotionFunc(drag);
+	glutMouseFunc(InputController::guiMouseBridge);
+	glutMotionFunc(InputController::guiDragBridge);
 	init();
 	glutRepeatingTimer(20);
 	glutMainLoop();
