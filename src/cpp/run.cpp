@@ -53,6 +53,7 @@ GLuint splat1, splat2, splat3, map;
 GLuint tex1, tex2;
 Model *tm;
 Model *bunnyModel;
+Model *sphereModel;
 
 std::vector<GameObject> gameObjects;
 
@@ -191,6 +192,7 @@ void init(void)
 	// Load bunny model
 	// bunnyModel = LoadModel("objects/groundsphere.obj");
 	bunnyModel = LoadModel("models/bunny.obj");
+	sphereModel = LoadModel("objects/groundsphere.obj");
 
 	// Init GUI
 	gui->initTerrainGUI(terrain);
@@ -247,17 +249,30 @@ void display(void)
 
 		// Create a new GameObject for the bunny
 		GameObject bunny(bunnyModel, x, y, z);  // Replace x, y, z with the desired position
-
+		GameObject sphere(sphereModel, x+10, y+10,z+10);
 		// Add the bunny to the gameObjects vector
 		gameObjects.push_back(bunny);
-
-		for (const auto& gameObject : gameObjects) {
-    	printf("GameObject at position (%f, %f, %f)\n", gameObject.x, gameObject.y, gameObject.z);
-}
-
+		gameObjects.push_back(sphere);
 	}
-	/* ------------- GUI ------------------ */
+	/* ------------- END of GUI ------------------ */
 
+	for (const auto& gameObject : gameObjects) {
+			// printf("GameObject at position (%f, %f, %f)\n", gameObject.x, gameObject.y, gameObject.z);
+
+			// Get the model and position of the game object
+			Model* model = gameObject.getModel();
+			GLfloat x = gameObject.x;
+			GLfloat y = gameObject.y;
+			GLfloat z = gameObject.z;
+
+			// Print
+			// printf("Model: %p, x: %f, y: %f, z: %f\n", model, x, y, z);
+			// printf("Original Bunny model: %p\n", bunnyModel);
+			// printf("Orignial Sphere model: %p\n", sphereModel);
+			// // Place and draw the model
+			PlaceModel(model, program, x, y, z, 0, 0, 0);
+			DrawModel(model, program, "in_Position", "in_Normal", "in_TexCoord");
+		}
 	printError("display 2");
 	
 	glutSwapBuffers();
