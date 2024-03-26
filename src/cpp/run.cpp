@@ -240,19 +240,24 @@ void display(void)
 	{
 		printf("Placing bunny in main\n");
 		GUI::PlaceBunny = false;
-		x = 0;
-		y = 0;
-		z = 0;
+
+
+		// Place bunny in front of camera
+
+		
+		x = camera->getPosition().x + 5*camera->getForwardVector().x;
+		z = camera->getPosition().z + 5*camera->getForwardVector().z;
+
+		// Get the height of the terrain at the bunny's position
+		y = terrain->getHeightAtPoint(x, z);
 
 		// // Load the bunny model
 		// Model* bunnyModel = LoadModel("bunny.obj");  // Replace "bunny.obj" with the path to your model file
 
 		// Create a new GameObject for the bunny
 		GameObject bunny(bunnyModel, x, y, z);  // Replace x, y, z with the desired position
-		GameObject sphere(sphereModel, x+10, y+10,z+10);
 		// Add the bunny to the gameObjects vector
 		gameObjects.push_back(bunny);
-		gameObjects.push_back(sphere);
 	}
 	/* ------------- END of GUI ------------------ */
 
@@ -283,7 +288,8 @@ int main(int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitContextVersion(3, 2);
-	glutInitWindowSize (1980, 1020);
+	// glutInitWindowSize (1980, 1020);
+	glutInitWindowSize (1080, 720);
 	glutCreateWindow ("TSBK07 Project");
 	glutDisplayFunc(display);
 	// glutPassiveMotionFunc(InputController::handleMouseMotionBridge);
