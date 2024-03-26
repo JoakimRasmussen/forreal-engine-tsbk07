@@ -138,8 +138,6 @@ void onMouse(int button, int state, int x, int y) {
          x, y, color[0], color[1], color[2], color[3], depth, index);
 }
 
-/* -------------------- GUI END ------------------------- */
-
 void init(void)
 {
 	// GL inits
@@ -149,18 +147,36 @@ void init(void)
 	printError("GL inits");
 
 	// Load and compile shader
-	program = loadShaders("shaders/terrainsplat.vert", "shaders/terrainsplat.frag");
+	program = loadShaders("shaders/terrain.vert", "shaders/terrain.frag");
 	glUseProgram(program);
 	printError("init shader");
 
 	// Load textures
 	LoadTGATextureSimple("textures/maskros512.tga", &tex1);
+	LoadTGATextureSimple("textures/rock.tga", &tex2);
+
+	// Bind and activate textures
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tex1);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, tex2);
+
+	// Upload texture units on GPU
+	glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
+	glUniform1i(glGetUniformLocation(program, "maskrosTexture"), 0); // Texture unit 0
+	glUniform1i(glGetUniformLocation(program, "rockTexture"), 1); // Texture unit 1
+
+	/*
+	SPLATMAP
 	LoadTGATextureSimple("textures/grass.tga", &splat1);
 	LoadTGATextureSimple("textures/dirt.tga", &splat2);
 	LoadTGATextureSimple("textures/conc.tga", &splat3);
 	LoadTGATextureSimple("textures/splatmap123.tga", &map);
+	*/
 
 	// Bind and activate textures
+	/*
+	SPLATMAP
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, splat1);
 	glActiveTexture(GL_TEXTURE1);
@@ -169,15 +185,17 @@ void init(void)
 	glBindTexture(GL_TEXTURE_2D, splat3);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, map);
+	*/
 
 	// Upload texture units on GPU
+	/*
 	glUniform1i(glGetUniformLocation(program, "grass"), 0); // Texture unit 0
 	glUniform1i(glGetUniformLocation(program, "dirt"), 1); // Texture unit 1
 	glUniform1i(glGetUniformLocation(program, "conc"), 2); // Texture unit 2
 	glUniform1i(glGetUniformLocation(program, "map"), 3); // Texture unit 3
-
-	glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 	glUniform1i(glGetUniformLocation(program, "opt"), 1);
+	*/
+
 	
 	// Load terrain model
 	tm = terrain->setTerrainModel("terrain/fft-terrain.tga");
@@ -226,6 +244,8 @@ void display(void)
 	glUniform3f(glGetUniformLocation(program, "cameraPosition"), x, y, z);
 	// Upload light sources
 	glUniform3f(glGetUniformLocation(program, "lightPosition"), 5, 5, 5);
+	// Send mountain height
+	glUniform1f(glGetUniformLocation(program, "mountainHeight"), terrain->currentMountainHeight);
 
 	// Draw terrain
 	tm = terrain->getTerrainModel();
@@ -252,9 +272,9 @@ int main(int argc, char **argv)
 	glutDisplayFunc(display);
 	// glutPassiveMotionFunc(InputController::handleMouseMotionBridge);
 	glutKeyboardFunc(InputController::guiKeyboardBridge);
-	//glutMouseFunc(onMouse);
 	glutMouseFunc(InputController::guiMouseBridge);
 	glutMotionFunc(InputController::guiDragBridge);
+	//glutMouseFunc(onMouse);
 	init();
 	glutRepeatingTimer(20);
 	glutMainLoop();

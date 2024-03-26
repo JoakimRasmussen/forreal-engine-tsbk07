@@ -24,6 +24,12 @@ void GUI::initTerrainGUI(Terrain* terrain)
 	sgCreateStaticString(40, 20, "Elevation slider");
 	sgCreateSlider(40, 40, 200, &terrain->currentElevation, 1, 20);
 	sgCreateDisplayFloat(40, 60, "Elevation value: ", &terrain->currentElevation);
+
+	sgCreateStaticString(40, 80, "--------------------------");
+
+	sgCreateStaticString(40, 100, "Mountain slider");
+	sgCreateSlider(40, 120, 200, &terrain->currentMountainHeight, 1, 100);
+	sgCreateDisplayFloat(40, 140, "Mountain value: ", &terrain->currentMountainHeight);
 }
 
 void GUI::drawGUI()
