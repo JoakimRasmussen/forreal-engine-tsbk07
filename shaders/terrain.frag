@@ -21,11 +21,11 @@ void main(void)
 	vec3 lightDirection = normalize(lightPosition - surface);
 	
 	// Diffuse
-	diffuse = dot(normalize(ex_Normal), lightDirection);
+	diffuse = dot(normalize(ex_Normal), light);
 	diffuse = max(0.001, diffuse); // No negative light
 	
 	// Specular
-	vec3 r = reflect(-lightDirection, normalize(ex_Normal));
+	vec3 r = reflect(-light, normalize(ex_Normal));
 	vec3 v = normalize(-surface); // View direction
 	specular = dot(r, v);
 	if (specular > 0.0)

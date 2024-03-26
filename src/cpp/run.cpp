@@ -165,37 +165,6 @@ void init(void)
 	glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 	glUniform1i(glGetUniformLocation(program, "maskrosTexture"), 0); // Texture unit 0
 	glUniform1i(glGetUniformLocation(program, "rockTexture"), 1); // Texture unit 1
-
-	/*
-	SPLATMAP
-	LoadTGATextureSimple("textures/grass.tga", &splat1);
-	LoadTGATextureSimple("textures/dirt.tga", &splat2);
-	LoadTGATextureSimple("textures/conc.tga", &splat3);
-	LoadTGATextureSimple("textures/splatmap123.tga", &map);
-	*/
-
-	// Bind and activate textures
-	/*
-	SPLATMAP
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, splat1);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, splat2);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, splat3);
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, map);
-	*/
-
-	// Upload texture units on GPU
-	/*
-	glUniform1i(glGetUniformLocation(program, "grass"), 0); // Texture unit 0
-	glUniform1i(glGetUniformLocation(program, "dirt"), 1); // Texture unit 1
-	glUniform1i(glGetUniformLocation(program, "conc"), 2); // Texture unit 2
-	glUniform1i(glGetUniformLocation(program, "map"), 3); // Texture unit 3
-	glUniform1i(glGetUniformLocation(program, "opt"), 1);
-	*/
-
 	
 	// Load terrain model
 	tm = terrain->setTerrainModel("terrain/fft-terrain.tga");
