@@ -1,8 +1,11 @@
 #include "../h/GUI.h"
 
+// Define PlaceBunny
+bool GUI::PlaceBunny = false;
 
 GUI::GUI() {
     // Constructor implementation
+	PlaceBunny = false;
 }
 
 void GUI::initTerrainGUI(Terrain* terrain)
@@ -24,9 +27,16 @@ void GUI::initTerrainGUI(Terrain* terrain)
 	sgCreateStaticString(40, 20, "Elevation slider");
 	sgCreateSlider(40, 40, 200, &terrain->currentElevation, 1, 20);
 	sgCreateDisplayFloat(40, 60, "Elevation value: ", &terrain->currentElevation);
+	sgCreateButton(40, 80, "Place Bunny", PlaceBunnyButton);
 }
 
 void GUI::drawGUI()
 {
 	sgDraw();
+}
+
+void GUI::PlaceBunnyButton()
+{
+	PlaceBunny = true;
+	// printf("Placing bunny\n");
 }

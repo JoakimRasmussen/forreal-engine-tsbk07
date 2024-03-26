@@ -9,6 +9,7 @@
 #define BOTTOM -0.5
 #define PI 3.14159265
 
+#include <vector>
 #include "../ext/Linux/MicroGlut.h"
 #include "GL_utilities.h"
 #include "VectorUtils4.h"
@@ -21,6 +22,7 @@
 #include "../h/Terrain.h"
 #include "../h/GameMode.h"
 #include "../h/GUI.h"
+#include "../h/GameObject.h"
 
 void readColorOfTerrain();
 
@@ -50,6 +52,9 @@ GLuint program;
 GLuint splat1, splat2, splat3, map;
 GLuint tex1, tex2;
 Model *tm;
+Model *bunnyModel;
+
+std::vector<GameObject> gameObjects;
 
 mat4 worldToView, lookAtVectors;
 
@@ -102,12 +107,12 @@ void readColorOfTerrain()
 {
 	TextureData* texas = terrain->getTextureData();
 	// Loop over texas and print out the color of each pixel
-	for(int i = 0; i < texas->width * texas->height; i++)
+	for(GLuint i = 0; i < texas->width * texas->height; i++)
 	{
-		printf("Color of pixel %d: %d\n", i, texas->imageData[i]);
+		printf("Color of pixel %u: %d\n", i, texas->imageData[i]);
 	}
 	printf("Width: %d, Height: %d\n", texas->width, texas->height);
-	printf("Total amount of pixels: %d\n", texas->width * texas->height);
+	printf("Total amount of pixels: %u\n", texas->width * texas->height);
 	printf("Total amount of vertices in tm: %d\n", tm->numVertices);
 	printf("tm->numIndices: %d\n", tm->numIndices);
 }
@@ -183,6 +188,10 @@ void init(void)
 	tm = terrain->setTerrainModel("terrain/fft-terrain.tga");
 	printError("init terrain!");
 
+	// Load bunny model
+	// bunnyModel = LoadModel("objects/groundsphere.obj");
+	bunnyModel = LoadModel("models/bunny.obj");
+
 	// Init GUI
 	gui->initTerrainGUI(terrain);
 }
@@ -199,18 +208,9 @@ void display(void)
 
 	inputController->handleKeyboardInput(deltaTime);
 
-	/* TESTING */
-	Item* hitItem = getHitItem();
-	if(hitItem != NULL)
-	{
-		printf("Hit item position x = %d, y = %d: \n", hitItem->x, hitItem->y);
-	}
-	/* TESTING */
-
 	// Update height of terrain
 	terrain->updateTerrain();
 
-	
 	printError("pre display!");
 
 	glUseProgram(program);
@@ -234,13 +234,34 @@ void display(void)
 
 	/* ------------- GUI ------------------ */
 	gui->drawGUI();
+	if (GUI::PlaceBunny)
+	{
+		printf("Placing bunny in main\n");
+		GUI::PlaceBunny = false;
+		x = 0;
+		y = 0;
+		z = 0;
+
+		// // Load the bunny model
+		// Model* bunnyModel = LoadModel("bunny.obj");  // Replace "bunny.obj" with the path to your model file
+
+		// Create a new GameObject for the bunny
+		GameObject bunny(bunnyModel, x, y, z);  // Replace x, y, z with the desired position
+
+		// Add the bunny to the gameObjects vector
+		gameObjects.push_back(bunny);
+
+		for (const auto& gameObject : gameObjects) {
+    	printf("GameObject at position (%f, %f, %f)\n", gameObject.x, gameObject.y, gameObject.z);
+}
+
+	}
 	/* ------------- GUI ------------------ */
 
 	printError("display 2");
 	
 	glutSwapBuffers();
 }
-
 
 int main(int argc, char **argv)
 {

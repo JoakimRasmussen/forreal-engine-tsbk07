@@ -48,6 +48,9 @@ void InputController::handleKeyboardInput(GLfloat deltaTime) {
 		printf("Creating splat map\n");
 		terrain->createSplatMap();
 	}
+	if (glutKeyIsDown(27)) {
+		exit(0);
+	}
 }
 
 void InputController::handleMouseMotion(int x, int y) {

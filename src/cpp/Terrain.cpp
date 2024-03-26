@@ -194,7 +194,7 @@ void Terrain::createSplatMap()
 		}
     }
 	// Save the texture
-	SaveDataToTGA("splatmap123.tga", width, height, pixelDepth, imageData);
+	SaveDataToTGA(const_cast<char*>("splatmap123.tga"), width, height, pixelDepth, imageData);
 	delete imageData;
 }
 
