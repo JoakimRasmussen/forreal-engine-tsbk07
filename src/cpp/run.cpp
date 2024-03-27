@@ -198,6 +198,17 @@ void init(void)
 	gui->initTerrainGUI(terrain);
 }
 
+#include <random>
+
+// Generates a random float between -magnitude and magnitude
+float randomOffset(float magnitude) {
+    static std::random_device rd; // Obtain a random number from hardware
+    static std::mt19937 eng(rd()); // Seed the generator
+    std::uniform_real_distribution<> distr(-magnitude, magnitude); // Define the range
+
+    return distr(eng); // Generate and return a random number within the range
+}
+
 void display(void)
 {
 	// Update time based frames
@@ -236,48 +247,69 @@ void display(void)
 
 	/* ------------- GUI ------------------ */
 	gui->drawGUI();
-	if (GUI::PlaceBunny)
-	{
-		printf("Placing bunny in main\n");
-		GUI::PlaceBunny = false;
 
+	// Define constants for readability and maintenance
+	const float DistanceInFrontOfCamera = 15.0f;
 
-		// Place bunny in front of camera
+	if (GUI::PlaceBunny) {
+		GUI::PlaceBunny = false; // Acknowledge the GUI action
 
-		
-		x = camera->getPosition().x + 5*camera->getForwardVector().x;
-		z = camera->getPosition().z + 5*camera->getForwardVector().z;
+		auto cameraPos = camera->getPosition();
+		auto forwardVec = camera->getForwardVector();
+		// Normalize the forward vector
+		forwardVec = Normalize(forwardVec);
+		float x = cameraPos.x + DistanceInFrontOfCamera * forwardVec.x;
+		float z = cameraPos.z + DistanceInFrontOfCamera * forwardVec.z;
+		float y = terrain->getHeightAtPoint(x, z) + 0.6f; // Ensure bunny is placed on the terrain
 
-		// Get the height of the terrain at the bunny's position
-		y = terrain->getHeightAtPoint(x, z);
-
-		// // Load the bunny model
-		// Model* bunnyModel = LoadModel("bunny.obj");  // Replace "bunny.obj" with the path to your model file
-
-		// Create a new GameObject for the bunny
-		GameObject bunny(bunnyModel, x, y, z);  // Replace x, y, z with the desired position
-		// Add the bunny to the gameObjects vector
+		GameObject bunny(bunnyModel, x, y, z);
 		gameObjects.push_back(bunny);
+
+		// NOTE: Rotation isnt working at all!
+		// Calculate the angle (in radians) to make the bunny face towards the camera
+		float angleY = atan2(forwardVec.x, forwardVec.z);
+		// Convert to degrees
+		angleY = angleY * 180 / PI;
+
+		// Debugging prints
+		printf("Camera position: (%f, %f, %f)\n", cameraPos.x, cameraPos.y, cameraPos.z);
+		printf("Forward vector: (%f, %f, %f)\n", forwardVec.x, forwardVec.y, forwardVec.z);
+		printf("Placing bunny at: (%f, %f, %f)\n", x, y, z);
+		printf("AngleY: %f\n", angleY);
+
+		// Place the bunny model facing the camera
+		PlaceModel(bunnyModel, program, x, y, z, 0, angleY, 0);
 	}
+
 	/* ------------- END of GUI ------------------ */
+	mat4 modelToWorld;
+	worldToView = lookAtv(camera->getPosition(), camera->getPosition() + camera->getForwardVector(), camera->getUpVector()); // camera position, look at point, up vector
+	for (auto& gameObject : gameObjects) {
+		// Get the model and position of the game object
+		Model* model = gameObject.getModel();
 
-	for (const auto& gameObject : gameObjects) {
-			// printf("GameObject at position (%f, %f, %f)\n", gameObject.x, gameObject.y, gameObject.z);
-
-			// Get the model and position of the game object
-			Model* model = gameObject.getModel();
-			GLfloat x = gameObject.x;
-			GLfloat y = gameObject.y;
-			GLfloat z = gameObject.z;
-
-			// Print
-			// printf("Model: %p, x: %f, y: %f, z: %f\n", model, x, y, z);
-			// printf("Original Bunny model: %p\n", bunnyModel);
-			// printf("Orignial Sphere model: %p\n", sphereModel);
-			// // Place and draw the model
-			PlaceModel(model, program, x, y, z, 0, 0, 0);
-			DrawModel(model, program, "in_Position", "in_Normal", "in_TexCoord");
+		// Identify if gameObject is the bunny
+		if (model == bunnyModel) {
+			// Generate small random offsets for x and z
+			// float offsetX = randomOffset(0.04f);
+			// float offsetZ = randomOffset(0.01f);
+			float offsetX = 0.05f;
+			float offsetZ = 0.01f;
+			// printf("OffsetX: %f, OffsetZ: %f\n", offsetX, offsetZ);
+			
+			// Update gameObject's position with random offsets
+			gameObject.move(offsetX, 0, offsetZ);
 		}
+		GLfloat x = gameObject.x;
+		GLfloat z = gameObject.z;
+		GLfloat y = terrain->getHeightAtPoint(x, z) + 0.6f;
+
+		// Update the model matrix
+		modelToWorld = T(x, y, z);
+		glUniformMatrix4fv(glGetUniformLocation(program, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
+		// Draw the model
+		DrawModel(model, program, "in_Position", "in_Normal", "in_TexCoord");
+	}
 	printError("display 2");
 	
 	glutSwapBuffers();
