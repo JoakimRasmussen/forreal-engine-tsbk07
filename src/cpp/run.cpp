@@ -23,8 +23,6 @@
 #include "../h/GUI.h"
 #include "../h/Picking.h"
 
-void readColorOfTerrain();
-
 // Variables
 // Time based frames
 GLfloat deltaTime = 0.0f;
@@ -69,67 +67,6 @@ GLfloat projectionMatrix[] =
 	0.0f, 0.0f, -1.0f, 0.0f
 };
 
-/* ----------------------- GUI BEGIN ------------------------ */
-
-float testr, testg, testb, testf, testRef = 5;
-int testboolean;
-int testradio;
-char testString[1024] = "Type here";
-
-float myvec3[3];
-
-void HitButton()
-{
-	testr = 0;
-	testg = 0;
-	testb = 0;
-}
-
-void SetToRed()
-{
-	testr = 1;
-	testg = 0;
-	testb = 0;
-}
-
-void SetToGreen()
-{
-	testr = 0;
-	testg = 1;
-	testb = 0;
-}
-
-void SetToBlue()
-{
-	testr = 0;
-	testg = 0;
-	testb = 1;
-}
-
-void readColorOfTerrain()
-{
-	TextureData* texas = terrain->getTextureData();
-	// Loop over texas and print out the color of each pixel
-	for(int i = 0; i < texas->width * texas->height; i++)
-	{
-		printf("Color of pixel %d: %d\n", i, texas->imageData[i]);
-	}
-	printf("Width: %d, Height: %d\n", texas->width, texas->height);
-	printf("Total amount of pixels: %d\n", texas->width * texas->height);
-	printf("Total amount of vertices in tm: %d\n", tm->numVertices);
-	printf("tm->numIndices: %d\n", tm->numIndices);
-}
-
-void updateSplat(void)
-{
-	// Update splat map
-	glActiveTexture(GL_TEXTURE3);
-	LoadTGATextureSimple("splatmap123.tga", &map);
-	glBindTexture(GL_TEXTURE_2D, map);
-	glUniform1i(glGetUniformLocation(program, "map"), 3); // Texture unit 3
-}
-
-
 float tttt = 0.0f;
 vec3 intersectionPoint = vec3(0.0f, 0.0f, 0.0f);
 
@@ -152,7 +89,6 @@ void onMouse(int button, int state, int x, int y) {
 	vec3 ray = picking->calculateMouseRay(x, y, 1980, 1020);
 	vec3 cameraOrigin = camera->getPosition();
 	terrain->rayTriangleIntersection(camera->getPosition(), ray, intersectionPoint);
-
 
 	printf("Intersection point in run.cpp: %f, %f, %f\n", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z);
 	spherePosition = intersectionPoint;
@@ -275,11 +211,11 @@ int main(int argc, char **argv)
 	glutInitWindowSize (1980, 1020);
 	glutCreateWindow ("TSBK07 Project");
 	glutDisplayFunc(display);
-	// glutPassiveMotionFunc(InputController::handleMouseMotionBridge);
+	//glutPassiveMotionFunc(InputController::handleMouseMotionBridge);
 	glutKeyboardFunc(InputController::guiKeyboardBridge);
-	//glutMouseFunc(InputController::guiMouseBridge);
+	glutMouseFunc(InputController::guiMouseBridge);
 	glutMotionFunc(InputController::guiDragBridge);
-	glutMouseFunc(onMouse);
+	//glutMouseFunc(onMouse);
 	init();
 	glutRepeatingTimer(20);
 	glutMainLoop();

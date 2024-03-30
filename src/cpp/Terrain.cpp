@@ -161,9 +161,9 @@ bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& i
 {
 	vec3 ip;
 	// Loop over all triangles in the terrain model
-	for (int z = 0; z < ttex.height; z++)
+	for (int x = 0; x < ttex.width; x++)
 	{
-		for (int x = 0; x < ttex.width; x++)
+		for (int z = 0; z < ttex.height; z++)
 		{
 			// First triangle
 			vec3 vertex1 = terrainModel->vertexArray[x + z * ttex.width];
