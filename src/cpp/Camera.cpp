@@ -31,3 +31,4 @@ GLfloat Camera::getYaw() const {
 GLfloat Camera::getPitch() const {
     return pitch;
 }
+

@@ -30,11 +30,11 @@ Model* Terrain::generateTerrain(TextureData* tex, float currentElevation) {
 			// Triangle 1
 			indexArray[(x + z * (tex->width-1))*6 + 0] = x + z * tex->width;
 			indexArray[(x + z * (tex->width-1))*6 + 1] = x + (z+1) * tex->width;
-			indexArray[(x + z * (tex->width-1))*6 + 2] = x+1 + z * tex->width;
+			indexArray[(x + z * (tex->width-1))*6 + 2] = (x+1) + z * tex->width;
 			// Triangle 2
-			indexArray[(x + z * (tex->width-1))*6 + 3] = x+1 + z * tex->width;
+			indexArray[(x + z * (tex->width-1))*6 + 3] = (x+1) + z * tex->width;
 			indexArray[(x + z * (tex->width-1))*6 + 4] = x + (z+1) * tex->width;
-			indexArray[(x + z * (tex->width-1))*6 + 5] = x+1 + (z+1) * tex->width;
+			indexArray[(x + z * (tex->width-1))*6 + 5] = (x+1) + (z+1) * tex->width;
 		}
 
 	// Calculate normals
@@ -154,6 +154,93 @@ float Terrain::getHeightAtPoint(float x, float z) const {
                    fractionalX * fractionalZ * h11;
 
     return height;
+}
+
+/* Möller-Trumbore intersection algorithm */
+bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint)
+{
+	vec3 ip;
+	// Loop over all triangles in the terrain model
+	for (int z = 0; z < ttex.height; z++)
+	{
+		for (int x = 0; x < ttex.width; x++)
+		{
+			// First triangle
+			vec3 vertex1 = terrainModel->vertexArray[x + z * ttex.width];
+			vec3 vertex2 = terrainModel->vertexArray[x + (z+1) * ttex.width];
+			vec3 vertex3 = terrainModel->vertexArray[(x+1) + z * ttex.width];
+
+			const float eps = 1e-8;
+			vec3 edge1 = vertex2 - vertex1;
+			vec3 edge2 = vertex3 - vertex1;
+			vec3 h = cross(rayDirection, edge2);
+			float det = dot(edge1, h);
+
+			// Check if ray is parallel to the triangle
+			if (det > -eps && det < eps)
+				continue;
+
+			float invDet = 1.0f / det;
+			vec3 s = rayOrigin - vertex1;
+			float u = invDet * dot(s, h);
+
+			// Check if intersection is outside the triangle
+			if (u < 0.0f || u > 1.0f)
+				continue;
+			
+			vec3 q = cross(s, edge1);
+			float v = invDet * dot(rayDirection, q);
+
+			// Check if intersection is outside the triangle
+			if (v < 0.0f || u + v > 1.0f)
+				continue;
+			
+			float t = invDet * dot(edge2, q);
+			if (t > eps)
+			{
+				intersectionPoint = rayOrigin + t * rayDirection;
+				return true;
+			}
+
+			// Second triangle
+			vec3 vertex4 = terrainModel->vertexArray[(x + 1) + z * ttex.width];
+			vec3 vertex5 = terrainModel->vertexArray[(x + 1) + (z + 1) * ttex.width];
+			vec3 vertex6 = terrainModel->vertexArray[x + (z + 1) * ttex.width];
+
+			edge1 = vertex5 - vertex4;
+			edge2 = vertex6 - vertex4;
+			h = cross(rayDirection, edge2);
+			det = dot(edge1, h);
+
+			// Check if ray is parallel to the triangle
+			if (det > -eps && det < eps)
+				continue;
+
+			invDet = 1.0f / det;
+			s = rayOrigin - vertex1;
+			u = invDet * dot(s, h);
+
+			// Check if intersection is outside the triangle
+			if (u < 0.0f || u > 1.0f)
+				continue;
+			
+			q = cross(s, edge1);
+			v = invDet * dot(rayDirection, q);
+
+			// Check if intersection is outside the triangle
+			if (v < 0.0f || u + v > 1.0f)
+				continue;
+			
+			t = invDet * dot(edge2, q);
+			if (t > eps)
+			{
+				intersectionPoint = rayOrigin + t * rayDirection;
+				return true;
+			}
+		}
+	}
+	printf("No intersection found\n");
+	return false;
 }
 
 

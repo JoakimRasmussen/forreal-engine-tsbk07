@@ -21,6 +21,7 @@
 #include "../h/Terrain.h"
 #include "../h/GameMode.h"
 #include "../h/GUI.h"
+#include "../h/Picking.h"
 
 void readColorOfTerrain();
 
@@ -42,17 +43,24 @@ Terrain* terrain = new Terrain();
 InputController* inputController = new InputController(camera, terrain);
 // Gui object
 GUI* gui = new GUI();
+// Picking object
+Picking* picking = new Picking(camera);
 
 // Reference to shader program
-GLuint program;
+GLuint program, sphereProgram;
 
 // Texture data
 GLuint splat1, splat2, splat3, map;
 GLuint tex1, tex2;
-Model *tm;
+Model *tm, *modelSphere;
 
 mat4 worldToView, lookAtVectors;
 
+// Sphere position
+vec3 spherePosition = vec3(0.0f, 0.0f, 0.0f);
+
+
+// TODO: fix this implementation, it is implemented in Camera.cpp as mat4* projectionMatrix[]
 GLfloat projectionMatrix[] = 
 {
 	2.0f*NEAR/(RIGHT-LEFT), 0.0f, (RIGHT+LEFT)/(RIGHT-LEFT), 0.0f,
@@ -122,20 +130,33 @@ void updateSplat(void)
 }
 
 
+float tttt = 0.0f;
+vec3 intersectionPoint = vec3(0.0f, 0.0f, 0.0f);
+
 void onMouse(int button, int state, int x, int y) {
-  if(state != GLUT_DOWN)
-    return;
+	if(state != GLUT_DOWN)
+	return;
 
-  GLbyte color[4];
-  GLfloat depth;
-  GLuint index;
-  
-  glReadPixels(x, 1080 - y - 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
-  glReadPixels(x, 1080 - y - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-  glReadPixels(x, 1080 - y - 1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
+	GLbyte color[4];
+	GLfloat depth;
+	GLuint index;
 
-  printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx, depth %f, stencil index %u\n",
-         x, y, color[0], color[1], color[2], color[3], depth, index);
+	glReadPixels(x, 1080 - y - 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
+	glReadPixels(x, 1080 - y - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+	glReadPixels(x, 1080 - y - 1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
+
+	printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx, depth %f, stencil index %u\n",
+			x, y, color[0], color[1], color[2], color[3], depth, index);
+
+	// Check ray
+	vec3 ray = picking->calculateMouseRay(x, y, 1980, 1020);
+	vec3 cameraOrigin = camera->getPosition();
+	terrain->rayTriangleIntersection(camera->getPosition(), ray, intersectionPoint);
+
+
+	printf("Intersection point in run.cpp: %f, %f, %f\n", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z);
+	spherePosition = intersectionPoint;
+
 }
 
 void init(void)
@@ -148,6 +169,8 @@ void init(void)
 
 	// Load and compile shader
 	program = loadShaders("shaders/terrain.vert", "shaders/terrain.frag");
+	sphereProgram = loadShaders("shaders/sphere.vert", "shaders/sphere.frag");
+
 	glUseProgram(program);
 	printError("init shader");
 
@@ -167,8 +190,14 @@ void init(void)
 	glUniform1i(glGetUniformLocation(program, "rockTexture"), 1); // Texture unit 1
 	
 	// Load terrain model
-	tm = terrain->setTerrainModel("terrain/fft-terrain.tga");
+	tm = terrain->setTerrainModel("terrain/44-terrain.tga");
 	printError("init terrain!");
+
+	// Init Sphere
+	glUseProgram(sphereProgram);
+	glUniformMatrix4fv(glGetUniformLocation(sphereProgram, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
+	glUniform1i(glGetUniformLocation(sphereProgram, "tex"), 0); // Texture unit 0
+	modelSphere = LoadModelPlus("objects/groundsphere.obj");
 
 	// Init GUI
 	gui->initTerrainGUI(terrain);
@@ -221,6 +250,13 @@ void display(void)
 	PlaceModel(tm, program, 0, 0, 0, 0, 0, 0);
 	DrawModel(tm, program, "in_Position", "in_Normal", "in_TexCoord");
 
+	// Draw sphere
+	glUseProgram(sphereProgram);
+	glUniformMatrix4fv(glGetUniformLocation(sphereProgram, "worldToView"), 1, GL_TRUE, worldToView.m);
+	glBindTexture(GL_TEXTURE_2D, tex2);
+	PlaceModel(modelSphere, sphereProgram, spherePosition.x, spherePosition.y, spherePosition.z, 0, 0, 0);
+	DrawModel(modelSphere, sphereProgram, "in_Position", "in_Normal", "in_TexCoord");
+
 	/* ------------- GUI ------------------ */
 	gui->drawGUI();
 	/* ------------- GUI ------------------ */
@@ -241,9 +277,9 @@ int main(int argc, char **argv)
 	glutDisplayFunc(display);
 	// glutPassiveMotionFunc(InputController::handleMouseMotionBridge);
 	glutKeyboardFunc(InputController::guiKeyboardBridge);
-	glutMouseFunc(InputController::guiMouseBridge);
+	//glutMouseFunc(InputController::guiMouseBridge);
 	glutMotionFunc(InputController::guiDragBridge);
-	//glutMouseFunc(onMouse);
+	glutMouseFunc(onMouse);
 	init();
 	glutRepeatingTimer(20);
 	glutMainLoop();

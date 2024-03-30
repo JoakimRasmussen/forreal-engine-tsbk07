@@ -17,11 +17,12 @@ public:
     TextureData* getTextureData();
     void updateTerrain();
     Model* getTerrainModel();
+    bool rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint);
 
     // Could be (should be...?) private with a getter
     float currentElevation = 5.0;
     float previousElevation = 5.0;
-    float quadSize = 1.0;
+    float quadSize = 10.0;
     float currentMountainHeight = 15.0;
 
 private:
