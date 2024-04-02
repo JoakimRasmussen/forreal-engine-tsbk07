@@ -1,12 +1,13 @@
 #ifndef GAME_MODE_H
 #define GAME_MODE_H
 
-
+#include <vector>
 #include "Camera.h"
 #include "InputController.h"
 #include "Terrain.h"
 #include "GUI.h"
 #include "Utils.h"
+#include "GameObject.h"
 
 class GameMode {
 public:
@@ -14,6 +15,9 @@ public:
     void init();
     void display();
     void run(int argc, char** argv);
+    void updateCameraVariables();
+    void bunnyButtonLogic();
+    void drawGameObjects();
 
 private:
 
@@ -28,17 +32,24 @@ private:
     GUI* gui;
     Utils* utils;
 
+    // Place to store game objects
+    std::vector<GameObject> gameObjects;
+
+    // Object variables
+    const float placementDistance = 10.0f;
+
     // Reference to shader program
     GLuint program;
 
     // Texture data
     GLuint splat1, splat2, splat3, map;
     GLuint tex1, tex2;
-    Model *tm;
+    Model *tm, *bunnyModel;
 
-    mat4 worldToView, lookAtVectors;
+    mat4 worldToView, modelToWorld, lookAtVectors;
+    vec3 cameraPos, forwardVec, upVec;
 
-    GLfloat* projectionMatrix;
+    const GLfloat* projectionMatrix;
 
 };
 

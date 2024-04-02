@@ -2,6 +2,6 @@
 
 Utils::Utils() {}
 
-GLfloat Utils::degToRad(GLfloat degrees) {
-    return degrees * M_PI / 180.0f;
-}
+// GLfloat Utils::degToRad(GLfloat degrees) {
+//     return degrees * M_PI / 180.0f;
+// }
