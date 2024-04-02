@@ -11,6 +11,7 @@ public:
 
     GUI();
     void initTerrainGUI(Terrain* terrain);
+    void initObjectGUI();
     void drawGUI();
 
     static void PlaceBunnyButton();

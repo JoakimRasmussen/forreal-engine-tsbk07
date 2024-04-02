@@ -7,8 +7,10 @@ in vec2 ex_TexCoord;
 // Output frag data
 out vec4 out_Color;
 
-uniform sampler2D maskrosTexture;
+// Uniforms
+uniform sampler2D maskrosTexture, rockTexture;
 uniform vec3 lightPosition;
+uniform float mountainHeight;
 
 void main(void)
 {
@@ -19,11 +21,11 @@ void main(void)
 	vec3 lightDirection = normalize(lightPosition - surface);
 	
 	// Diffuse
-	diffuse = dot(normalize(ex_Normal), lightDirection);
+	diffuse = dot(normalize(ex_Normal), light);
 	diffuse = max(0.001, diffuse); // No negative light
 	
 	// Specular
-	vec3 r = reflect(-lightDirection, normalize(ex_Normal));
+	vec3 r = reflect(-light, normalize(ex_Normal));
 	vec3 v = normalize(-surface); // View direction
 	specular = dot(r, v);
 	if (specular > 0.0)
@@ -34,5 +36,16 @@ void main(void)
 
 	// Texture
 	vec4 maskrosColor = texture(maskrosTexture, ex_TexCoord);
-	out_Color = maskrosColor * vec4(shade, shade, shade, 1.0);
+	vec4 rockColor = texture(rockTexture, ex_TexCoord);
+
+	if (surface.y < mountainHeight)	
+    {
+        float t = clamp((mountainHeight - surface.y) / mountainHeight, 0.0, 1.0); // Calculate the interpolation factor based on surface.y
+        out_Color = mix(rockColor, maskrosColor, t) * vec4(shade, shade, shade, 1.0);
+    }
+    else
+    {
+        // Use maskrosColor directly if surface.y >= 15
+        out_Color = rockColor * vec4(shade, shade, shade, 1.0);
+    }
 }

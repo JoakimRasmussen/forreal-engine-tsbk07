@@ -22,6 +22,7 @@ public:
     float currentElevation = 5.0;
     float previousElevation = 5.0;
     float quadSize = 1.0;
+    float currentMountainHeight = 15.0;
 
 private:
     TextureData ttex;

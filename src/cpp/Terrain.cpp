@@ -207,8 +207,6 @@ void Terrain::updateTerrain()
 	}
 }
 
-
-
 Model* Terrain::setTerrainModel(const char* heightmap) {
 	LoadTGATextureData(heightmap, &ttex);
 	terrainModel = generateTerrain(&ttex, currentElevation);
