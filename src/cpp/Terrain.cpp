@@ -122,7 +122,6 @@ Model* Terrain::generateTerrain(TextureData* tex, float currentElevation) {
 	return terrainModel;
 }
 
-
 float Terrain::getHeightAtPoint(float x, float z) const {
     // Height map starts at (0,0) and spans positively (normalized to 1.0 for the width and height of the terrain)
     float normalizedX = x / quadSize;
@@ -156,14 +155,15 @@ float Terrain::getHeightAtPoint(float x, float z) const {
     return height;
 }
 
-/* Möller-Trumbore intersection algorithm */
+/* Möller-Trumbore intersection algorithm, temporary solution with the two triangles.... */
 bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint)
 {
-	vec3 ip;
+	GLint i = 0;
+	vec3* ipVector = (vec3 *)malloc(sizeof(GLfloat) * 50);
 	// Loop over all triangles in the terrain model
-	for (int x = 0; x < ttex.width; x++)
+	for (unsigned int x = 0; x < ttex.width; x++)
 	{
-		for (int z = 0; z < ttex.height; z++)
+		for (unsigned int z = 0; z < ttex.height; z++)
 		{
 			// First triangle
 			vec3 vertex1 = terrainModel->vertexArray[x + z * ttex.width];
@@ -182,33 +182,29 @@ bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& i
 
 			float invDet = 1.0f / det;
 			vec3 s = rayOrigin - vertex1;
-			float u = invDet * dot(s, h);
+			float u = invDet * dot(s, h); // first barycentric coordinate
 
-			// Check if intersection is outside the triangle
-			if (u < 0.0f || u > 1.0f)
-				continue;
-			
 			vec3 q = cross(s, edge1);
-			float v = invDet * dot(rayDirection, q);
+			float v = invDet * dot(rayDirection, q); // second barycentric coordinate
 
-			// Check if intersection is outside the triangle
-			if (v < 0.0f || u + v > 1.0f)
-				continue;
-			
-			float t = invDet * dot(edge2, q);
-			if (t > eps)
+			// Check if the intersection point is inside the triangle
+			if (u >= 0 && v >= 0 && u + v <= 1)
 			{
+				// Calculate the intersection point
+				float t = invDet * dot(edge2, q);
 				intersectionPoint = rayOrigin + t * rayDirection;
+				ipVector[i] = intersectionPoint;
+				i++;
 				return true;
 			}
 
 			// Second triangle
-			vec3 vertex4 = terrainModel->vertexArray[(x + 1) + z * ttex.width];
-			vec3 vertex5 = terrainModel->vertexArray[(x + 1) + (z + 1) * ttex.width];
-			vec3 vertex6 = terrainModel->vertexArray[x + (z + 1) * ttex.width];
+			vertex1 = terrainModel->vertexArray[(x+1) + (z+1) * ttex.width];
+			vertex2 = terrainModel->vertexArray[x + (z+1) * ttex.width];
+			vertex3 = terrainModel->vertexArray[(x+1) + z * ttex.width];
 
-			edge1 = vertex5 - vertex4;
-			edge2 = vertex6 - vertex4;
+			edge1 = vertex2 - vertex1;
+			edge2 = vertex3 - vertex1;
 			h = cross(rayDirection, edge2);
 			det = dot(edge1, h);
 
@@ -218,27 +214,35 @@ bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& i
 
 			invDet = 1.0f / det;
 			s = rayOrigin - vertex1;
-			u = invDet * dot(s, h);
+			u = invDet * dot(s, h); // first barycentric coordinate
 
-			// Check if intersection is outside the triangle
-			if (u < 0.0f || u > 1.0f)
-				continue;
-			
 			q = cross(s, edge1);
-			v = invDet * dot(rayDirection, q);
+			v = invDet * dot(rayDirection, q); // second barycentric coordinate
 
-			// Check if intersection is outside the triangle
-			if (v < 0.0f || u + v > 1.0f)
-				continue;
-			
-			t = invDet * dot(edge2, q);
-			if (t > eps)
+			// Check if the intersection point is inside the triangle
+			if (u >= 0 && v >= 0 && u + v <= 1)
 			{
+				// Calculate the intersection point
+				float t = invDet * dot(edge2, q);
 				intersectionPoint = rayOrigin + t * rayDirection;
-				return true;
+				ipVector[i] = intersectionPoint;
+				i++;
+				continue;
 			}
 		}
 	}
+	if (i > 0)
+	{
+		// Loop over all intersection points
+		for (int j = 0; j < i; j++)
+		{
+			printf("Intersection point: %f, %f, %f\n", ipVector[j].x, ipVector[j].y, ipVector[j].z);
+			// Clear ipVector
+			ipVector[j] = vec3(0.0f, 0.0f, 0.0f);
+		}
+		return true;
+	}
+	// No intersection found
 	printf("No intersection found\n");
 	return false;
 }
@@ -291,6 +295,11 @@ void Terrain::updateTerrain()
 	{
 		terrainModel = generateTerrain(&ttex, currentElevation);
 		previousElevation = currentElevation;
+	}
+	if (quadSize - previousQuadSize != 0.0)
+	{
+		terrainModel = generateTerrain(&ttex, currentElevation);
+		previousQuadSize = quadSize;
 	}
 }
 

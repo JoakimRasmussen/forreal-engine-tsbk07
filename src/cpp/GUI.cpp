@@ -28,8 +28,14 @@ void GUI::initTerrainGUI(Terrain* terrain)
 	sgCreateStaticString(40, 80, "--------------------------");
 
 	sgCreateStaticString(40, 100, "Mountain slider");
-	sgCreateSlider(40, 120, 200, &terrain->currentMountainHeight, 1, 100);
+	sgCreateSlider(40, 120, 200, &terrain->currentMountainHeight, 1, 500);
 	sgCreateDisplayFloat(40, 140, "Mountain value: ", &terrain->currentMountainHeight);
+
+	sgCreateStaticString(40, 160, "--------------------------");
+
+	sgCreateStaticString(40, 180, "Smooth slider");
+	sgCreateSlider(40, 200, 200, &terrain->quadSize, 1, 20);
+	sgCreateDisplayFloat(40, 220, "Smooth value: ", &terrain->quadSize);
 }
 
 void GUI::drawGUI()

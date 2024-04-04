@@ -5,6 +5,7 @@
 #include "GL_utilities.h"
 #include "VectorUtils4.h"
 #include "LittleOBJLoader.h"
+#include "vector"
 
 class Terrain {
 public:
@@ -22,8 +23,9 @@ public:
     // Could be (should be...?) private with a getter
     float currentElevation = 5.0;
     float previousElevation = 5.0;
-    float quadSize = 10.0;
     float currentMountainHeight = 15.0;
+    float quadSize = 10.0;
+    float previousQuadSize = 10.0;
 
 private:
     TextureData ttex;

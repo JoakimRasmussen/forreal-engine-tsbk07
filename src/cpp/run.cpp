@@ -213,9 +213,9 @@ int main(int argc, char **argv)
 	glutDisplayFunc(display);
 	//glutPassiveMotionFunc(InputController::handleMouseMotionBridge);
 	glutKeyboardFunc(InputController::guiKeyboardBridge);
-	glutMouseFunc(InputController::guiMouseBridge);
+	//glutMouseFunc(InputController::guiMouseBridge);
 	glutMotionFunc(InputController::guiDragBridge);
-	//glutMouseFunc(onMouse);
+	glutMouseFunc(onMouse);
 	init();
 	glutRepeatingTimer(20);
 	glutMainLoop();
