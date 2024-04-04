@@ -1309,6 +1309,27 @@ void PlaceModel(
 	mat4 total = trans * rot; 
 	glUniformMatrix4fv(glGetUniformLocation(program, "modelToWorld"), 1, GL_TRUE, total.m);
 }
+
+void PlaceModelScale(
+	Model *m, 
+	GLuint program, 
+	GLfloat positionX,
+	GLfloat positionY,
+	GLfloat positionZ, 
+	GLfloat angleX,
+	GLfloat angleY,
+	GLfloat angleZ,
+	GLfloat scaleX,
+	GLfloat scaleY,
+	GLfloat scaleZ
+	)
+{
+	mat4 scale = S(scaleX, scaleY, scaleZ);
+	mat4 trans = T(positionX, positionY, positionZ);
+	mat4 rot = Rx(angleX)*Ry(angleY)*Rz(angleZ);
+	mat4 total = trans * rot * scale; 
+	glUniformMatrix4fv(glGetUniformLocation(program, "modelToWorld"), 1, GL_TRUE, total.m);
+}
 	
 // Called from LoadModel, LoadModelSet and LoadDataToModel
 // VAO and VBOs must already exist!

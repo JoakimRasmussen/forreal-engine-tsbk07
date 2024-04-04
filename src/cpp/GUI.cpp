@@ -9,7 +9,7 @@ void GUI::initTerrainGUI(Terrain* terrain)
 {
 
 	sgCreateStaticString(400, 160, "This is the terrain GUI");
-	sgSetScale(2);
+	sgSetScale(1);
 
 	/* sgCreateStaticString(40, 220, "Slider color group");
 	sgCreateSliderColorGroup(20, 240, 150, &testr, &testg, &testb); */

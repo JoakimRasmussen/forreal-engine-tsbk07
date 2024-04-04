@@ -158,30 +158,54 @@ float Terrain::getHeightAtPoint(float x, float z) const {
     return height;
 }
 
+bool Terrain::rayPlaneIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint)
+{
+	vec3 O = rayOrigin;
+	vec3 D = rayDirection;
+
+	for (unsigned int x = 0; x < ttex.width; x++)
+	{
+		for (unsigned int z = 0; z < ttex.height; z++){
+			// Height map starts at (0,0) and spans positively (normalized to 1.0 for the width and height of the terrain)
+			vec3 v1 = terrainModel->vertexArray[x + z * ttex.width];
+			vec3 v2 = terrainModel->vertexArray[x + (z+1) * ttex.width];
+			vec3 v3 = terrainModel->vertexArray[(x+1) + z * ttex.width];
+
+			// Calculate the normal of the plane
+			vec3 normal = normalize(cross(v2 - v1, v3 - v1));
+			float eps = 1e-8;
+
+			// Check if the ray is parallel to the plane
+			float denom = dot(normal, D);
+			if (abs(denom) < eps)
+				continue;
+
+			// Calculate the intersection point
+			float t = -(dot(O, normal) + eps) / denom;
+			if (std::isnan(t) || t < 0 || t > 100.0f)
+				continue;
+			
+			intersectionPoint = O + t * D;
+			printf("t: %f\n", t);
+			printf("intersectionPoint: %f, %f, %f\n", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z);
+		}
+	}
+}
+
 /* Möller-Trumbore intersection algorithm, temporary solution with the two triangles.... */
-bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint)
+bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint, std::vector<vec3>& intersectionVector)
 {
 
 	GLint i = 0;
+	vec3 closestIntersectionPoint = vec3(0.0f, 0.0f, 0.0f);
+	vec3 newIntersectionPoint = vec3(0.0f, 0.0f, 0.0f);
 	vec3* ipVector = (vec3 *)malloc(sizeof(GLfloat) * 50);
+	
 	// Loop over all triangles in the terrain model
 	for (unsigned int x = 0; x < ttex.width; x++)
 	{
 		for (unsigned int z = 0; z < ttex.height; z++)
 		{
-
-			/* // Height map starts at (0,0) and spans positively (normalized to 1.0 for the width and height of the terrain)
-			float normalizedX = x / quadSize;
-			float normalizedZ = z / quadSize;
-
-			// Get the integer part of the coordinates (bottom-left corner of the cell)
-			GLuint ix = floor(normalizedX);
-			GLuint iz = floor(normalizedZ);
-			Detta gör att vi kan identifiera EN kvadrat i terr
-			 */
-
-
-
 			// First triangle
 			vec3 vertex1 = terrainModel->vertexArray[x + z * ttex.width];
 			vec3 vertex2 = terrainModel->vertexArray[x + (z+1) * ttex.width];
@@ -210,9 +234,16 @@ bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& i
 				// Calculate the intersection point
 				float t = invDet * dot(edge2, q);
 				intersectionPoint = rayOrigin + t * rayDirection;
+
 				ipVector[i] = intersectionPoint;
+
+				// Check if the intersection point is closer than the previous one
+				if (i == 0 || abs(Norm(intersectionPoint - rayOrigin)) < abs(Norm(closestIntersectionPoint - rayOrigin)))
+				{
+					closestIntersectionPoint = intersectionPoint;
+				}
 				i++;
-				return true;
+				continue;
 			}
 
 			// Second triangle
@@ -242,7 +273,14 @@ bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& i
 				// Calculate the intersection point
 				float t = invDet * dot(edge2, q);
 				intersectionPoint = rayOrigin + t * rayDirection;
+
 				ipVector[i] = intersectionPoint;
+
+				// Check if the intersection point is closer than the previous one
+				if (i == 0 || abs(Norm(intersectionPoint - rayOrigin)) < abs(Norm(closestIntersectionPoint - rayOrigin)))
+				{
+					closestIntersectionPoint = intersectionPoint;
+				}
 				i++;
 				continue;
 			}
@@ -250,13 +288,13 @@ bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& i
 	}
 	if (i > 0)
 	{
-		// Loop over all intersection points
+		// Loop over all intersection points and print them out
 		for (int j = 0; j < i; j++)
 		{
-			printf("Intersection point: %f, %f, %f\n", ipVector[j].x, ipVector[j].y, ipVector[j].z);
-			// Clear ipVector
-			ipVector[j] = vec3(0.0f, 0.0f, 0.0f);
+			printf("Intersection point in Terrain.cpp: %f, %f, %f\n", ipVector[j].x, ipVector[j].y, ipVector[j].z);
+			intersectionVector.push_back(ipVector[j]);
 		}
+		intersectionPoint = closestIntersectionPoint;
 		return true;
 	}
 	// No intersection found

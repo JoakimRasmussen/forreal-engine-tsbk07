@@ -69,6 +69,10 @@ GLfloat projectionMatrix[] =
 
 float tttt = 0.0f;
 vec3 intersectionPoint = vec3(0.0f, 0.0f, 0.0f);
+vec3 ray;
+bool drawRayDebug = false;
+std::vector<vec3> vec3Vector;
+std::vector<vec3> intersectionVector;
 
 void onMouse(int button, int state, int x, int y) {
 	if(state != GLUT_DOWN)
@@ -86,12 +90,15 @@ void onMouse(int button, int state, int x, int y) {
 			x, y, color[0], color[1], color[2], color[3], depth, index);
 
 	// Check ray
-	vec3 ray = picking->calculateMouseRay(x, y, 1980, 1020);
-	vec3 cameraOrigin = camera->getPosition();
-	terrain->rayTriangleIntersection(camera->getPosition(), ray, intersectionPoint);
+	ray = picking->calculateMouseRay(x, y, 1980, 1020);
+	terrain->rayTriangleIntersection(camera->getPosition(), ray, intersectionPoint, intersectionVector);
+	
+	for (int i = 0; i < 100; i++)
+	{
+			vec3 pos = camera->getPosition() + i*ray;
+			vec3Vector.push_back(pos);
+	}
 
-	printf("Intersection point in run.cpp: %f, %f, %f\n", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z);
-	printf("\n");
 	spherePosition = intersectionPoint;
 
 }
@@ -101,7 +108,7 @@ void init(void)
 	// GL inits
 	glClearColor(0.2,0.2,0.5,0);
 	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 	printError("GL inits");
 
 	// Load and compile shader
@@ -127,7 +134,7 @@ void init(void)
 	glUniform1i(glGetUniformLocation(program, "rockTexture"), 1); // Texture unit 1
 	
 	// Load terrain model
-	tm = terrain->setTerrainModel("terrain/44-terrain.tga");
+	tm = terrain->setTerrainModel("terrain/fft-terrain.tga");
 	printError("init terrain!");
 
 	// Init Sphere
@@ -192,8 +199,23 @@ void display(void)
 	glUseProgram(sphereProgram);
 	glUniformMatrix4fv(glGetUniformLocation(sphereProgram, "worldToView"), 1, GL_TRUE, worldToView.m);
 	glBindTexture(GL_TEXTURE_2D, tex2);
-	PlaceModel(modelSphere, sphereProgram, spherePosition.x, spherePosition.y, spherePosition.z, 0, 0, 0);
-	DrawModel(modelSphere, sphereProgram, "in_Position", "in_Normal", "in_TexCoord");
+
+	// Place sphere at intersection points
+	for (int i = 0; i < intersectionVector.size(); i++)
+	{
+		PlaceModel(modelSphere, sphereProgram, intersectionVector[i].x, intersectionVector[i].y, intersectionVector[i].z, 0, 0, 0);
+		DrawModel(modelSphere, sphereProgram, "in_Position", "in_Normal", "in_TexCoord");
+	}
+ 	PlaceModelScale(modelSphere, sphereProgram, spherePosition.x, spherePosition.y, spherePosition.z, 0, 0, 0, 2, 2, 2);
+	DrawModel(modelSphere, sphereProgram, "in_Position", "in_Normal", "in_TexCoord"); 
+
+	// Draw ray
+	for (int i = 0; i < vec3Vector.size(); i++)
+	{
+		PlaceModelScale(modelSphere, program, vec3Vector[i].x, vec3Vector[i].y, vec3Vector[i].z, 0, 0, 0, 0.2, 0.2, 0.2);
+		DrawModel(modelSphere, program, "in_Position", "in_Normal", "in_TexCoord");
+	}
+
 
 	/* ------------- GUI ------------------ */
 	gui->drawGUI();

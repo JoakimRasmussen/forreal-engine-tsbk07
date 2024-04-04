@@ -19,14 +19,15 @@ public:
     TextureData* getTextureData();
     void updateTerrain();
     Model* getTerrainModel();
-    bool rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint);
+    bool rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint, std::vector<vec3>& intersectionVector);
+    bool rayPlaneIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint);
 
     // Could be (should be...?) private with a getter
-    float currentElevation = 5.0;
+    float currentElevation = 1.0;
     float previousElevation = 5.0;
     float currentMountainHeight = 1100.0;
     float quadSize = 10.0;
-    float previousQuadSize = 10.0;
+    float previousQuadSize = 1.0;
 
 private:
     TextureData ttex;
