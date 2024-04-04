@@ -21,6 +21,7 @@ GameMode::GameMode() {
     // utils = new Utils();
     // Projection matrix
     projectionMatrix = Utils::getProjectionMatrix();
+
 }
 
 void GameMode::init() { 
@@ -176,7 +177,7 @@ void GameMode::bunnyButtonLogic() {
 		gameObjects.push_back(bunny);
 
 		// Place bunny on terrain
-		PlaceModel(bunnyModel, program, x, y, z, 0, 0, 0);
+		PlaceModel(bunnyModel, objectShader, x, y, z, 0, 0, 0);
 	}
 }
 
@@ -207,6 +208,6 @@ void GameMode::drawGameObjects() {
 		glUniformMatrix4fv(glGetUniformLocation(objectShader, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
 		printError("draw game objects!");
 		// Draw the model
-		DrawModel(model, program, "in_Position", "in_Normal", "in_TexCoord");
+		DrawModel(model, objectShader, "in_Position", "in_Normal", "in_TexCoord");
 	}
 }
