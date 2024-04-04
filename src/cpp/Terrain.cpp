@@ -20,9 +20,11 @@ Model* Terrain::generateTerrain(TextureData* tex, float currentElevation) {
 			vertexArray[(x + z * tex->width)].x = x * quadSize / 1.0;
 			vertexArray[(x + z * tex->width)].y = tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / currentElevation; 
 			vertexArray[(x + z * tex->width)].z = z * quadSize / 1.0;
+			// Normal vectors. You need to calculate these.
+			normalArray[(x + z * tex->width)] = vec3(0.0, 1.0, 0.0); // Default to up vector, lazy solution
 			// Texture coordinates. You may want to scale them.
-			texCoordArray[(x + z * tex->width)].x = ((float)x * 1) / tex->width; // repeat the texture 1 time
-			texCoordArray[(x + z * tex->width)].y = ((float)z * 1) / tex->height; // repeat the texture 1 time
+			texCoordArray[(x + z * tex->width)].x = ((float)x * 1) / tex->width * quadSize; // repeat the texture 1 time
+			texCoordArray[(x + z * tex->width)].y = ((float)z * 1) / tex->height * quadSize; // repeat the texture 1 time
 		}
 	for (x = 0; x < tex->width-1; x++)
 		for (z = 0; z < tex->height-1; z++)
@@ -36,7 +38,7 @@ Model* Terrain::generateTerrain(TextureData* tex, float currentElevation) {
 			indexArray[(x + z * (tex->width-1))*6 + 4] = x + (z+1) * tex->width;
 			indexArray[(x + z * (tex->width-1))*6 + 5] = (x+1) + (z+1) * tex->width;
 		}
-
+	/*
 	// Calculate normals
 	for (x = 0; x < tex->width; x++)
 		for (z = 0; z < tex->height; z++)
@@ -109,6 +111,7 @@ Model* Terrain::generateTerrain(TextureData* tex, float currentElevation) {
 				normalArray[(x + z * tex->width)] = upVector; // Default to up vector if no valid normals found
 			}
 		}
+		*/
 
 	terrainModel = LoadDataToModel(
 			vertexArray,
@@ -158,6 +161,7 @@ float Terrain::getHeightAtPoint(float x, float z) const {
 /* Möller-Trumbore intersection algorithm, temporary solution with the two triangles.... */
 bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint)
 {
+
 	GLint i = 0;
 	vec3* ipVector = (vec3 *)malloc(sizeof(GLfloat) * 50);
 	// Loop over all triangles in the terrain model
@@ -165,6 +169,19 @@ bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& i
 	{
 		for (unsigned int z = 0; z < ttex.height; z++)
 		{
+
+			/* // Height map starts at (0,0) and spans positively (normalized to 1.0 for the width and height of the terrain)
+			float normalizedX = x / quadSize;
+			float normalizedZ = z / quadSize;
+
+			// Get the integer part of the coordinates (bottom-left corner of the cell)
+			GLuint ix = floor(normalizedX);
+			GLuint iz = floor(normalizedZ);
+			Detta gör att vi kan identifiera EN kvadrat i terr
+			 */
+
+
+
 			// First triangle
 			vec3 vertex1 = terrainModel->vertexArray[x + z * ttex.width];
 			vec3 vertex2 = terrainModel->vertexArray[x + (z+1) * ttex.width];
@@ -177,7 +194,7 @@ bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& i
 			float det = dot(edge1, h);
 
 			// Check if ray is parallel to the triangle
-			if (det > -eps && det < eps)
+			if (det > -eps && det < eps) 
 				continue;
 
 			float invDet = 1.0f / det;
@@ -199,9 +216,9 @@ bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& i
 			}
 
 			// Second triangle
-			vertex1 = terrainModel->vertexArray[(x+1) + (z+1) * ttex.width];
+			vertex1 = terrainModel->vertexArray[(x+1) + z * ttex.width];
 			vertex2 = terrainModel->vertexArray[x + (z+1) * ttex.width];
-			vertex3 = terrainModel->vertexArray[(x+1) + z * ttex.width];
+			vertex3 = terrainModel->vertexArray[(x+1) + (z+1) * ttex.width];
 
 			edge1 = vertex2 - vertex1;
 			edge2 = vertex3 - vertex1;

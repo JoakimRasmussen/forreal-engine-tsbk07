@@ -91,6 +91,7 @@ void onMouse(int button, int state, int x, int y) {
 	terrain->rayTriangleIntersection(camera->getPosition(), ray, intersectionPoint);
 
 	printf("Intersection point in run.cpp: %f, %f, %f\n", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z);
+	printf("\n");
 	spherePosition = intersectionPoint;
 
 }
@@ -141,6 +142,7 @@ void init(void)
 
 void display(void)
 {
+	glEnable(GL_DEPTH_TEST);
 	// Update time based frames
 	GLfloat currentFrame = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
 	deltaTime = currentFrame - lastFrame;
