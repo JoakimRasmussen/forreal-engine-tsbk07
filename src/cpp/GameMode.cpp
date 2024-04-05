@@ -110,11 +110,6 @@ void GameMode::run(int argc, char** argv) {
 	PlaceModel(tm, program, 0, 0, 0, 0, 0, 0);
 	DrawModel(tm, program, "in_Position", "in_Normal", "in_TexCoord");
 
-	// Place object using ray casting (EXAMPLE, not the final implementation)
-	vec3 position = picker->getIntersectionPoint();
-	PlaceModel(bunnyModel, program, position.x, position.y, position.z, 0, 0, 0);
-	DrawModel(bunnyModel, program, "in_Position", "in_Normal", "in_TexCoord");
-
 	/* ------------- GUI ------------- */
 	// Draw GUI
 	gui->drawGUI();
@@ -129,6 +124,14 @@ void GameMode::run(int argc, char** argv) {
 	glutSwapBuffers();
 
 	printError("new display!");
+}
+
+void GameMode::manualElevationButton() {
+	// Test manual elevation button
+	if (GUI::manualElevation) {
+		// Set manual elevation
+		terrain->editTerrainAtIntersectionPoint(picker->getIntersectionPoint());
+	}
 }
 
 void GameMode::updateCameraVariables() {

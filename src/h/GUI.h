@@ -16,6 +16,8 @@ public:
 
     static void PlaceBunnyButton();
     static bool PlaceBunny;
+    static void ElevationButton();
+    static bool manualElevation;
 
 private:
 

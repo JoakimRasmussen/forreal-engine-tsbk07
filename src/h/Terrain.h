@@ -20,6 +20,7 @@ public:
     void updateTerrain();
     Model* getTerrainModel();
     bool rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint, std::vector<vec3>& intersectionVector);
+    void editTerrainAtIntersectionPoint(vec3 intersectionPoint);
 
     // Could be (should be...?) private with a getter
     float currentElevation = 1.0;
@@ -27,6 +28,8 @@ public:
     float currentMountainHeight = 1100.0;
     float quadSize = 10.0;
     float previousQuadSize = 1.0;
+    float tenIncrement = 10;
+    bool test = false;
 
 private:
     TextureData ttex;

@@ -20,6 +20,7 @@ public:
     void updateCameraVariables();
     void bunnyButtonLogic();
     void drawGameObjects();
+    void manualElevationButton();
 
 private:
 

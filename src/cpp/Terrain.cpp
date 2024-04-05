@@ -18,7 +18,7 @@ Model* Terrain::generateTerrain(TextureData* tex, float currentElevation) {
 		{
 			// Vertex array. You need to scale this properly
 			vertexArray[(x + z * tex->width)].x = x * quadSize / 1.0;
-			vertexArray[(x + z * tex->width)].y = tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / currentElevation; 
+			vertexArray[(x + z * tex->width)].y = (tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / currentElevation); 
 			vertexArray[(x + z * tex->width)].z = z * quadSize / 1.0;
 			// Normal vectors. You need to calculate these.
 			normalArray[(x + z * tex->width)] = vec3(0.0, 1.0, 0.0); // Default to up vector, lazy solution
@@ -156,6 +156,14 @@ float Terrain::getHeightAtPoint(float x, float z) const {
                    fractionalX * fractionalZ * h11;
 
     return height;
+}
+
+void Terrain::editTerrainAtIntersectionPoint(vec3 intersectionPoint)
+{
+	unsigned int x = intersectionPoint.x/quadSize;
+	unsigned int z = intersectionPoint.z/quadSize;
+	ttex.imageData[(x + z * ttex.width) * (ttex.bpp/8)] += tenIncrement;
+	terrainModel = generateTerrain(&ttex, currentElevation);
 }
 
 /* Möller-Trumbore intersection algorithm, temporary solution with the two triangles.... */
@@ -319,7 +327,7 @@ void Terrain::updateTerrain()
 	{
 		terrainModel = generateTerrain(&ttex, currentElevation);
 		previousQuadSize = quadSize;
-	}
+	}	
 }
 
 Model* Terrain::setTerrainModel(const char* heightmap) {
