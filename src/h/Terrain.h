@@ -20,7 +20,6 @@ public:
     void updateTerrain();
     Model* getTerrainModel();
     bool rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint, std::vector<vec3>& intersectionVector);
-    bool rayPlaneIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint);
 
     // Could be (should be...?) private with a getter
     float currentElevation = 1.0;

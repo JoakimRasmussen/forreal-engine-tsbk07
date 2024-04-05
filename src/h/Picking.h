@@ -2,7 +2,10 @@
 #define PICKING_H
 
 #include "VectorUtils4.h"
-#include "../h/Camera.h"
+#include "Camera.h"
+#include <vector>
+
+class Camera;
 
 class Picking {
 
@@ -12,7 +15,6 @@ class Picking {
         Picking(Camera* camera);
         // Destructor
         ~Picking();
-
         // Methods
         void update();
         // Ray casting
@@ -20,6 +22,11 @@ class Picking {
         vec3 normalizeScreenCoordinates(float mouseX, float mouseY, int screenWidth, int screenHeight);
         vec4 toViewCoordinates(vec4 clipCoordinates, mat4 projectionMatrix);
         vec3 toWorldCoordinates(vec4 viewCoordinates, mat4 viewMatrix);
+        vec3 getIntersectionPoint();
+        // TODO: make this private
+        vec3 intersectionPoint = vec3(0, 0, 0);
+        std::vector<vec3> debugRayVector;
+        std::vector<vec3> debugIntersectionVector;
 
     private:
 

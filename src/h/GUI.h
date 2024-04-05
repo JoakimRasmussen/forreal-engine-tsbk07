@@ -14,6 +14,8 @@ public:
     void initObjectGUI();
     void drawGUI();
 
+    static void PlaceBunnyButton();
+    static bool PlaceBunny;
 
 private:
 

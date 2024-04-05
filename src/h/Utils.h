@@ -17,13 +17,15 @@ class Utils {
 
 public:
 
+    Utils(){}
+
     GLfloat degToRad(GLfloat degrees) {
         return degrees * M_PI / 180.0f;
     }
 
-    GLfloat* getProjectionMatrix()
-    {
-        GLfloat projectionMatrix[] ={
+    static const GLfloat* getProjectionMatrix() {
+        static GLfloat projectionMatrix[] = 
+        {
             2.0f*NEAR/(RIGHT-LEFT), 0.0f, (RIGHT+LEFT)/(RIGHT-LEFT), 0.0f,
             0.0f, 2.0f*NEAR/(TOP-BOTTOM), (TOP+BOTTOM)/(TOP-BOTTOM), 0.0f,
             0.0f, 0.0f, -(FAR+NEAR)/(FAR-NEAR), -2*FAR*NEAR/(FAR-NEAR),
@@ -31,6 +33,12 @@ public:
         };
         return projectionMatrix;
     }
+
+    static const int windowWidth = 1080;
+    static const int windowHeight = 720;
+
+private:
+
          
 
 };

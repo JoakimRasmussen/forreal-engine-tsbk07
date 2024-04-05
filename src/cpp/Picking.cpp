@@ -50,3 +50,7 @@ vec3 Picking::toWorldCoordinates(vec4 viewCoordinates, mat4 viewMatrix) {
     return worldCoordinates;
 }
 
+vec3 Picking::getIntersectionPoint() {
+    return intersectionPoint;
+}
+
