@@ -49,7 +49,7 @@ int main(int argc, char **argv)
 	// glutDisplayFunc(display);
 	printf("GL_VERSION: %s\n", glGetString(GL_VERSION));
 	glutDisplayFunc(display2);
-	// glutPassiveMotionFunc(InputController::handleMouseMotionBridge);
+	//glutPassiveMotionFunc(InputController::handleMouseMotionBridge);
 	glutKeyboardFunc(InputController::guiKeyboardBridge);
 	glutMouseFunc(InputController::guiMouseBridge);
 	glutMotionFunc(InputController::guiDragBridge);
