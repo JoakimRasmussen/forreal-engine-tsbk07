@@ -42,11 +42,11 @@ private:
     const float placementDistance = 10.0f;
 
     // Reference to shader program
-    GLuint program;
+    GLuint program, objectShader;
 
     // Texture data
     GLuint splat1, splat2, splat3, map;
-    GLuint tex1, tex2;
+    GLuint tex1, tex2, furTex;
     Model *tm, *bunnyModel;
 
     mat4 worldToView, modelToWorld, lookAtVectors;

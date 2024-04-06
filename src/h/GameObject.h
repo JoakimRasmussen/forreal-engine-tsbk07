@@ -16,6 +16,8 @@ public:
     GameObject(Model* model, float x, float y, float z)
         : model(model), x(x), y(y), z(z) {}
 
+    
+
     Model* getModel() const {
         return model;
     }

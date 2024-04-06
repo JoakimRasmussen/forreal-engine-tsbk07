@@ -23,6 +23,7 @@ GameMode::GameMode() {
     // utils = new Utils();
     // Projection matrix
     projectionMatrix = Utils::getProjectionMatrix();
+
 }
 
 void GameMode::init() { 
@@ -34,11 +35,12 @@ void GameMode::init() {
 	glDisable(GL_CULL_FACE);
 	printError("GL inits");
 
-	printf("Loading shaders...\n");
-	// Load and compile shader
+	printf("Loading normal shader...\n");
+	// Load shader
 	program = loadShaders("shaders/terrain.vert", "shaders/terrain.frag");
 	glUseProgram(program);
-	printError("init shader");
+	glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
+	printError("init normal shader");
 
 	printf("Loading textures...\n");
 	// Load textures
@@ -47,31 +49,48 @@ void GameMode::init() {
 	printError("init textures");
 
 	printf("Binding textures...\n");
-	// Bind and activate textures
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, tex2);
 
-	printf("Uploading texture units on GPU...\n");
-	// Upload texture units on GPU
-	glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 	glUniform1i(glGetUniformLocation(program, "maskrosTexture"), 0); // Texture unit 0
 	glUniform1i(glGetUniformLocation(program, "rockTexture"), 1); // Texture unit 1
+	printError("bind textures");
+
+	printf("Loading object shader...\n");
+	// Load object shader
+	objectShader = loadShaders("shaders/object.vert", "shaders/object.frag");
+	glUseProgram(objectShader);
+	glUniformMatrix4fv(glGetUniformLocation(objectShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
+	printError("init shader");
+
+	printf("Loading textures...\n");
+	// Load textures
+	LoadTGATextureSimple("textures/fur.tga", &furTex);
+	printError("init textures");
+
+	printf("Binding textures...\n");
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, furTex);
+
+	// Upload the texture unit for fur texture in object shader
+	glUniform1i(glGetUniformLocation(objectShader, "furTex"), 2); // Texture unit 2
+	printError("bind textures");
+
+	glUseProgram(program); // Switch back to the terrain shader program
 	
 	printf("Loading terrain model...\n");
-	// Load terrain model
 	tm = terrain->setTerrainModel("terrain/fft-terrain.tga");
 	printError("init terrain!");
 
 	printf("Loading bunny model...\n");
-	// Load bunny model
 	bunnyModel = LoadModel("models/bunny.obj");
 	printError("init bunny!");
 
 	printf("Initializing TerrainGUI...\n");
-	// Init GUI
 	gui->initTerrainGUI(terrain);
+	printError("init GUI!");
 }
 
 void GameMode::run(int argc, char** argv) {
@@ -104,6 +123,7 @@ void GameMode::run(int argc, char** argv) {
 	glUniform3f(glGetUniformLocation(program, "lightPosition"), 5, 5, 5);
 	// Send mountain height
 	glUniform1f(glGetUniformLocation(program, "mountainHeight"), terrain->currentMountainHeight);
+	printError("pre display 1");
 
 	// Draw terrain
 	tm = terrain->getTerrainModel();
@@ -124,6 +144,14 @@ void GameMode::run(int argc, char** argv) {
 	/* ------------- End of GUI -------------*/
 
 	// Draw game objects
+	glUseProgram(objectShader);
+	glUniformMatrix4fv(glGetUniformLocation(objectShader, "worldToView"), 1, GL_TRUE, worldToView.m);
+	glUniform3f(glGetUniformLocation(objectShader, "cameraPosition"), cameraPos.x, cameraPos.y, cameraPos.z);
+	glUniform3f(glGetUniformLocation(objectShader, "lightPosition"), 5, 5, 5);
+	printError("pre display 2");
+	// Rebind and activate the fur texture
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, furTex);
 	drawGameObjects();
 
 	glutSwapBuffers();
@@ -156,7 +184,7 @@ void GameMode::bunnyButtonLogic() {
 		gameObjects.push_back(bunny);
 
 		// Place bunny on terrain
-		PlaceModel(bunnyModel, program, x, y, z, 0, 0, 0);
+		PlaceModel(bunnyModel, objectShader, x, y, z, 0, 0, 0);
 	}
 }
 
@@ -178,9 +206,15 @@ void GameMode::drawGameObjects() {
 
 		// Update the model-to-world matrix
 		modelToWorld = T(x, y, z);
-		glUniformMatrix4fv(glGetUniformLocation(program, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
-
+		// NOTE: The bunnys position is reseted to the same point for all bunnies if we use
+		//       the objectShader. Why is that?
+		// glUseProgram(objectShader);
+		// glActiveTexture(GL_TEXTURE2);
+		// glBindTexture(GL_TEXTURE_2D, furTex);
+		// Can optimize to not upload the matrix every time if the objects share textures
+		glUniformMatrix4fv(glGetUniformLocation(objectShader, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
+		printError("draw game objects!");
 		// Draw the model
-		DrawModel(model, program, "in_Position", "in_Normal", "in_TexCoord");
+		DrawModel(model, objectShader, "in_Position", "in_Normal", "in_TexCoord");
 	}
 }
