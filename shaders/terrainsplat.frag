@@ -19,6 +19,8 @@ void main(void)
 	shade = dot(normalize(ex_Normal), light) + 0.3;
 
 	vec4 m = texture(map, ex_TexCoord);
+
+	
 	out_Color = shade *
 			(texture(grass, ex_TexCoord) * m.r +
 			texture(conc, ex_TexCoord) * m.g +

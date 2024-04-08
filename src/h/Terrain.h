@@ -5,8 +5,10 @@
 #include "GL_utilities.h"
 #include "VectorUtils4.h"
 #include "LittleOBJLoader.h"
-#include "vector"
-#include "cmath"
+#include <vector>
+#include <cmath>
+#include <string>
+#include <fstream>
 
 class Terrain {
 public:
@@ -21,6 +23,7 @@ public:
     Model* getTerrainModel();
     bool rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint, std::vector<vec3>& intersectionVector);
     void editTerrainAtIntersectionPoint(vec3 intersectionPoint);
+    bool editSplatmap(const std::string& filePath, const std::vector<unsigned char>& newColor, vec3 intersectionPoint);
 
     // Could be (should be...?) private with a getter
     float currentElevation = 1.0;
@@ -30,6 +33,7 @@ public:
     float previousQuadSize = 1.0;
     float tenIncrement = 10;
     bool test = false;
+    bool edit = false;
 
 private:
     TextureData ttex;

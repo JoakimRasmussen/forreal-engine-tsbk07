@@ -107,6 +107,11 @@ void GameMode::run(int argc, char** argv) {
 
 	// Update height of terrain
 	terrain->updateTerrain();
+	if (terrain->edit)
+	{
+		glUniform1i(glGetUniformLocation(program, "map"), 3); // Texture unit 3
+		terrain->edit = false;
+	}
 
 	glUseProgram(program);
 

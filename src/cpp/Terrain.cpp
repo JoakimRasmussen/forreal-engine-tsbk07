@@ -273,6 +273,75 @@ bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& i
 	return false;
 }
 
+void Terrain::updateTerrain()
+{
+	if (currentElevation - previousElevation != 0.0)
+	{
+		terrainModel = generateTerrain(&ttex, currentElevation);
+		previousElevation = currentElevation;
+	}
+	if (quadSize - previousQuadSize != 0.0)
+	{
+		terrainModel = generateTerrain(&ttex, currentElevation);
+		previousQuadSize = quadSize;
+	}
+}
+
+Model* Terrain::setTerrainModel(const char* heightmap) {
+	LoadTGATextureData(heightmap, &ttex);
+	terrainModel = generateTerrain(&ttex, currentElevation);
+	return terrainModel;
+}
+
+TextureData* Terrain::getTextureData() {
+	return &ttex;
+}
+
+Model* Terrain::getTerrainModel() {
+	return terrainModel;
+}
+
+
+/*
+Call example:
+	std::string filePath = "path_to_your_file.tga";
+    std::vector<unsigned char> newColor = {255, 0, 0}; // Example: Change to blue, its bgr
+    editTgaPixel(filePath, 10, 20, newColor);
+
+
+	This works, just trust me bro...
+*/
+bool Terrain::editSplatmap(const std::string& filePath, const std::vector<unsigned char>& newColor, vec3 intersectionPoint)
+{
+	std::fstream file(filePath, std::ios::in | std::ios::out | std::ios::binary);
+	if (!file.is_open())
+	{
+		printf("Failed to open the file...");
+		edit = false;
+		return edit;
+	}
+	// Read the header, first 18 bytes of a .tga file contains, dim, color depth, and image descriptor
+	unsigned char header[18];
+	file.read(reinterpret_cast<char*>(&header), 18);
+
+	int imageWidth = header[12] | (header[13] << 8);
+	int imageHeight = header[14] | (header[15] << 8);
+	unsigned char pixelDepth = header[16]; // bits per pixel
+
+	// Calculate the bytes per pixel and the pixel offset
+	int bytesPerPixel = pixelDepth / 8; // convert bits to bytes
+	long pixelOffset = 18 + (intersectionPoint.z * imageWidth + intersectionPoint.x) * bytesPerPixel;
+
+	// Seek to the pixel position and write the new color
+	file.seekg(pixelOffset, std::ios::beg);
+	file.write(reinterpret_cast<const char*>(newColor.data()), newColor.size());
+
+    file.close();
+
+	edit = true;
+	
+	return edit;
+}
 
 #include "vector"
 void Terrain::createSplatMap()
@@ -312,32 +381,4 @@ void Terrain::createSplatMap()
     }
 	// Save the texture
 	SaveDataToTGA(const_cast<char*>("splatmap123.tga"), width, height, pixelDepth, imageData);
-}
-
-void Terrain::updateTerrain()
-{
-	if (currentElevation - previousElevation != 0.0)
-	{
-		terrainModel = generateTerrain(&ttex, currentElevation);
-		previousElevation = currentElevation;
-	}
-	if (quadSize - previousQuadSize != 0.0)
-	{
-		terrainModel = generateTerrain(&ttex, currentElevation);
-		previousQuadSize = quadSize;
-	}	
-}
-
-Model* Terrain::setTerrainModel(const char* heightmap) {
-	LoadTGATextureData(heightmap, &ttex);
-	terrainModel = generateTerrain(&ttex, currentElevation);
-	return terrainModel;
-}
-
-TextureData* Terrain::getTextureData() {
-	return &ttex;
-}
-
-Model* Terrain::getTerrainModel() {
-	return terrainModel;
 }

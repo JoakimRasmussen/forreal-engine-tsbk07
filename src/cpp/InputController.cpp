@@ -128,7 +128,8 @@ void InputController::onMouse(int button, int state, int x, int y)
 	// Check ray
 	vec3 ray = picker->calculateMouseRay(x, y, Utils::windowWidth, Utils::windowHeight);
 	terrain->rayTriangleIntersection(camera->getPosition(), ray, picker->intersectionPoint, picker->debugIntersectionVector);
-	terrain->editTerrainAtIntersectionPoint(picker->intersectionPoint);
+	//terrain->editTerrainAtIntersectionPoint(picker->intersectionPoint);
+	terrain->editSplatmap("splatmap123.tga", {255, 0, 0}, picker->intersectionPoint);
 	
 	// TODO: fix
 	bool debug = true;
