@@ -36,28 +36,47 @@ void GameMode::init() {
 
 	printf("Loading shaders...\n");
 	// Load and compile shader
-	program = loadShaders("shaders/terrain.vert", "shaders/terrain.frag");
+	program = loadShaders("shaders/terrainsplat.vert", "shaders/terrainsplat.frag");
 	glUseProgram(program);
 	printError("init shader");
 
 	printf("Loading textures...\n");
 	// Load textures
-	LoadTGATextureSimple("textures/maskros512.tga", &tex1);
-	LoadTGATextureSimple("textures/rock.tga", &tex2);
+	/* LoadTGATextureSimple("textures/maskros512.tga", &tex1);
+	LoadTGATextureSimple("textures/rock.tga", &tex2); */
+	LoadTGATextureSimple("textures/grass.tga", &splat1);
+	LoadTGATextureSimple("textures/dirt.tga", &splat2);
+	LoadTGATextureSimple("textures/conc.tga", &splat3);
+	LoadTGATextureSimple("splatmap123.tga", &map);
+
 	printError("init textures");
 
 	printf("Binding textures...\n");
 	// Bind and activate textures
-	glActiveTexture(GL_TEXTURE0);
+	/* glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex1);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, tex2);
+	glBindTexture(GL_TEXTURE_2D, tex2); */
+	// Bind and activate textures (splat map)
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, splat1);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, splat2);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, splat3);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, map);
 
 	printf("Uploading texture units on GPU...\n");
 	// Upload texture units on GPU
 	glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
-	glUniform1i(glGetUniformLocation(program, "maskrosTexture"), 0); // Texture unit 0
-	glUniform1i(glGetUniformLocation(program, "rockTexture"), 1); // Texture unit 1
+	glUniform1i(glGetUniformLocation(program, "opt"), 1);
+	/* glUniform1i(glGetUniformLocation(program, "maskrosTexture"), 0); // Texture unit 0
+	glUniform1i(glGetUniformLocation(program, "rockTexture"), 1); // Texture unit 1 */
+	glUniform1i(glGetUniformLocation(program, "grass"), 0); // Texture unit 0
+	glUniform1i(glGetUniformLocation(program, "dirt"), 1); // Texture unit 1
+	glUniform1i(glGetUniformLocation(program, "conc"), 2); // Texture unit 2
+	glUniform1i(glGetUniformLocation(program, "map"), 3); // Texture unit 3
 	
 	printf("Loading terrain model...\n");
 	// Load terrain model

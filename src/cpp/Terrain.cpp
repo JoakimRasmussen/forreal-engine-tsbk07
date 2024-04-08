@@ -21,7 +21,7 @@ Model* Terrain::generateTerrain(TextureData* tex, float currentElevation) {
 			vertexArray[(x + z * tex->width)].y = (tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / currentElevation); 
 			vertexArray[(x + z * tex->width)].z = z * quadSize / 1.0;
 			// Normal vectors. You need to calculate these.
-			normalArray[(x + z * tex->width)] = vec3(0.0, 1.0, 0.0); // Default to up vector, lazy solution
+			// normalArray[(x + z * tex->width)] = vec3(0.0, 1.0, 0.0); // Default to up vector, lazy solution
 			// Texture coordinates. You may want to scale them.
 			texCoordArray[(x + z * tex->width)].x = ((float)x * 1) / tex->width * quadSize; // repeat the texture 1 time
 			texCoordArray[(x + z * tex->width)].y = ((float)z * 1) / tex->height * quadSize; // repeat the texture 1 time
@@ -38,7 +38,6 @@ Model* Terrain::generateTerrain(TextureData* tex, float currentElevation) {
 			indexArray[(x + z * (tex->width-1))*6 + 4] = x + (z+1) * tex->width;
 			indexArray[(x + z * (tex->width-1))*6 + 5] = (x+1) + (z+1) * tex->width;
 		}
-	/*
 	// Calculate normals
 	for (x = 0; x < tex->width; x++)
 		for (z = 0; z < tex->height; z++)
@@ -111,7 +110,6 @@ Model* Terrain::generateTerrain(TextureData* tex, float currentElevation) {
 				normalArray[(x + z * tex->width)] = upVector; // Default to up vector if no valid normals found
 			}
 		}
-		*/
 
 	terrainModel = LoadDataToModel(
 			vertexArray,
