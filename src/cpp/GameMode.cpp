@@ -35,27 +35,34 @@ void GameMode::init() {
 	glDisable(GL_CULL_FACE);
 	printError("GL inits");
 
-	printf("Loading normal shader...\n");
-	// Load shader
-	program = loadShaders("shaders/terrain.vert", "shaders/terrain.frag");
+	printf("Loading shaders...\n");
+	// Load and compile shader
+	program = loadShaders("shaders/terrainsplat.vert", "shaders/terrainsplat.frag");
 	glUseProgram(program);
 	glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 	printError("init normal shader");
 
 	printf("Loading textures...\n");
-	// Load textures
-	LoadTGATextureSimple("textures/maskros512.tga", &tex1);
-	LoadTGATextureSimple("textures/rock.tga", &tex2);
+	LoadTGATextureSimple("textures/grass.tga", &splat1);
+	LoadTGATextureSimple("textures/dirt.tga", &splat2);
+	LoadTGATextureSimple("textures/conc.tga", &splat3);
+	LoadTGATextureSimple("splatmap123.tga", &map);
+	LoadTGATextureSimple("textures/fur.tga", &furTex);
+
 	printError("init textures");
 
 	printf("Binding textures...\n");
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex1);
+	glBindTexture(GL_TEXTURE_2D, splat1);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, tex2);
+	glBindTexture(GL_TEXTURE_2D, splat2);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, splat3);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, map);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, furTex);
 
-	glUniform1i(glGetUniformLocation(program, "maskrosTexture"), 0); // Texture unit 0
-	glUniform1i(glGetUniformLocation(program, "rockTexture"), 1); // Texture unit 1
 	printError("bind textures");
 
 	printf("Loading object shader...\n");
@@ -65,20 +72,19 @@ void GameMode::init() {
 	glUniformMatrix4fv(glGetUniformLocation(objectShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 	printError("init shader");
 
-	printf("Loading textures...\n");
-	// Load textures
-	LoadTGATextureSimple("textures/fur.tga", &furTex);
-	printError("init textures");
-
-	printf("Binding textures...\n");
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, furTex);
-
 	// Upload the texture unit for fur texture in object shader
-	glUniform1i(glGetUniformLocation(objectShader, "furTex"), 2); // Texture unit 2
+	glUniform1i(glGetUniformLocation(objectShader, "furTex"), 4); // Texture unit 4
 	printError("bind textures");
 
 	glUseProgram(program); // Switch back to the terrain shader program
+	printf("Uploading texture units on GPU...\n");
+	// Upload texture units on GPU
+	glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
+	// glUniform1i(glGetUniformLocation(program, "opt"), 1);
+	glUniform1i(glGetUniformLocation(program, "grass"), 0); // Texture unit 0
+	glUniform1i(glGetUniformLocation(program, "dirt"), 1); // Texture unit 1
+	glUniform1i(glGetUniformLocation(program, "conc"), 2); // Texture unit 2
+	glUniform1i(glGetUniformLocation(program, "map"), 3); // Texture unit 3
 	
 	printf("Loading terrain model...\n");
 	tm = terrain->setTerrainModel("terrain/fft-terrain.tga");
@@ -174,6 +180,14 @@ void GameMode::run(int argc, char** argv) {
 	glutSwapBuffers();
 
 	printError("new display!");
+}
+
+void GameMode::manualElevationButton() {
+	// Test manual elevation button
+	if (GUI::manualElevation) {
+		// Set manual elevation
+		terrain->editTerrainAtIntersectionPoint(picker->getIntersectionPoint());
+	}
 }
 
 void GameMode::updateCameraVariables() {

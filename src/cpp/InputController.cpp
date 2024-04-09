@@ -132,9 +132,10 @@ void InputController::onMouse(int button, int state, int x, int y)
 	// Check ray
 	vec3 ray = picker->calculateMouseRay(x, y, Utils::windowWidth, Utils::windowHeight);
 	terrain->rayTriangleIntersection(camera->getPosition(), ray, picker->intersectionPoint, picker->debugIntersectionVector);
+	terrain->editTerrainAtIntersectionPoint(picker->intersectionPoint);
 	
 	// TODO: fix
-	bool debug = false;
+	bool debug = true;
 	if (debug)
 	{
 		for (int i = 0; i < 100; i++)
