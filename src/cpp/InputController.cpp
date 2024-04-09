@@ -48,6 +48,10 @@ void InputController::handleKeyboardInput(GLfloat deltaTime) {
 		printf("Creating splat map\n");
 		terrain->createSplatMap();
 	}
+
+	if (glutKeyIsDown('p')){
+		picker->updateIsPicking(true);
+	}
 	if (glutKeyIsDown(27)) {
 		exit(0);
 	}
@@ -122,8 +126,8 @@ void InputController::onMouse(int button, int state, int x, int y)
 	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
 
-	printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx, depth %f, stencil index %u\n",
-			x, y, color[0], color[1], color[2], color[3], depth, index);
+	// printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx, depth %f, stencil index %u\n",
+			// x, y, color[0], color[1], color[2], color[3], depth, index);
 
 	// Check ray
 	vec3 ray = picker->calculateMouseRay(x, y, Utils::windowWidth, Utils::windowHeight);

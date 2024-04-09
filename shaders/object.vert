@@ -16,10 +16,10 @@ uniform mat4 worldToView;
 void main()
 {
     FragPos = vec3(modelToWorld * vec4(in_Position, 1.0)); // Transform vertex position to world space
-    Normal = mat3(transpose(inverse(modelToWorld))) * in_Normal; // Adjust normals for lighting calculations
+    mat3 NormalMatrix = transpose(inverse(mat3(modelToWorld)));
+    Normal = NormalMatrix * in_Normal; // Transform normal to world space
 
     TexCoord = in_TexCoord; // Pass texture coordinates through
 
-    // Final transformation to clip space
-    gl_Position = projectionMatrix * worldToView * vec4(FragPos, 1.0);
+    gl_Position = projectionMatrix * worldToView * modelToWorld * vec4(in_Position, 1.0);
 }

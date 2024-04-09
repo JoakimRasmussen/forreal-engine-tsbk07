@@ -91,11 +91,15 @@ void GameMode::init() {
 	printf("Initializing TerrainGUI...\n");
 	gui->initTerrainGUI(terrain);
 	printError("init GUI!");
+
+	printf("Done initializing game mode\n");
+	printf("--------------------------------\n");
 }
 
 void GameMode::run(int argc, char** argv) {
     // Main game loop
 	// Update time based frames
+	printError("pre run");
 	GLfloat currentFrame = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
@@ -119,6 +123,7 @@ void GameMode::run(int argc, char** argv) {
 
 	// Upload camera position
 	glUniform3f(glGetUniformLocation(program, "cameraPosition"), cameraPos.x, cameraPos.y, cameraPos.z);
+
 	// Upload light sources
 	glUniform3f(glGetUniformLocation(program, "lightPosition"), 5, 5, 5);
 	// Send mountain height
@@ -130,10 +135,22 @@ void GameMode::run(int argc, char** argv) {
 	PlaceModel(tm, program, 0, 0, 0, 0, 0, 0);
 	DrawModel(tm, program, "in_Position", "in_Normal", "in_TexCoord");
 
-	// Place object using ray casting (EXAMPLE, not the final implementation)
-	vec3 position = picker->getIntersectionPoint();
-	PlaceModel(bunnyModel, program, position.x, position.y, position.z, 0, 0, 0);
-	DrawModel(bunnyModel, program, "in_Position", "in_Normal", "in_TexCoord");
+	// Find coordinates of the clicked position
+	if (waitingForPlacement) {
+		waitingForPlacement = false;
+		clickedPosition = picker->getIntersectionPoint();
+
+		float x = clickedPosition.x;
+		float z = clickedPosition.z;
+		float y = terrain->getHeightAtPoint(x, z) + 0.6f;
+
+		// Create bunny object and add to game objects
+		GameObject bunny(bunnyModel, x, y, z);
+		gameObjects.push_back(bunny);
+
+		// Place bunny on terrain
+		PlaceModel(bunnyModel, objectShader, x, y, z, 0, 0, 0);
+	}
 
 	/* ------------- GUI ------------- */
 	// Draw GUI
@@ -172,19 +189,20 @@ void GameMode::bunnyButtonLogic() {
 	// Test bunny button
 	if (GUI::PlaceBunny) {
 		GUI::PlaceBunny = false; // Acknowledge the GUI action
+		waitingForPlacement = true;
 
 		// Place bunny in front of camera
 		// Calculate position
-		float x = cameraPos.x + placementDistance * forwardVec.x;
-		float z = cameraPos.z + placementDistance * forwardVec.z;
-		float y = terrain->getHeightAtPoint(x, z) + 0.6f;
+		// float x = cameraPos.x + placementDistance * forwardVec.x;
+		// float z = cameraPos.z + placementDistance * forwardVec.z;
+		// float y = terrain->getHeightAtPoint(x, z) + 0.6f;
 
-		// Create bunny object and add to game objects
-		GameObject bunny(bunnyModel, x, y, z);
-		gameObjects.push_back(bunny);
+		// // Create bunny object and add to game objects
+		// GameObject bunny(bunnyModel, x, y, z);
+		// gameObjects.push_back(bunny);
 
-		// Place bunny on terrain
-		PlaceModel(bunnyModel, objectShader, x, y, z, 0, 0, 0);
+		// // Place bunny on terrain
+		// PlaceModel(bunnyModel, objectShader, x, y, z, 0, 0, 0);
 	}
 }
 

@@ -7,12 +7,14 @@ GameMode* gameMode = new GameMode();
 
 void init(void)
 {
+	printError("pre init");
 	gameMode->init();
 	printError("init");
 }
 
 void display(void)
 {
+	printError("pre display");
 	gameMode->run(0, NULL);
 	printError("display");
 }
@@ -32,6 +34,7 @@ int main(int argc, char **argv)
 	glutMouseFunc(InputController::guiMouseBridge);
 	glutMotionFunc(InputController::guiDragBridge);
 	glutMouseFunc(InputController::onMouseBridge);
+
 	init();
 	glutRepeatingTimer(20);
 	glutMainLoop();

@@ -23,6 +23,8 @@ class Picking {
         vec4 toViewCoordinates(vec4 clipCoordinates, mat4 projectionMatrix);
         vec3 toWorldCoordinates(vec4 viewCoordinates, mat4 viewMatrix);
         vec3 getIntersectionPoint();
+
+        void updateIsPicking(bool isPicking);
         // TODO: make this private
         vec3 intersectionPoint = vec3(0, 0, 0);
         std::vector<vec3> debugRayVector;
