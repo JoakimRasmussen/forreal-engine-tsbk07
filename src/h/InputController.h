@@ -7,6 +7,7 @@
 #include "Terrain.h"
 #include "Utils.h"
 #include "Picking.h"
+#include "GUI.h"
 
 class Camera;
 class Terrain;
@@ -22,15 +23,17 @@ public:
     void handleKeyboardInput(GLfloat deltaTime);
     void handleMouseMotion(int x, int y);
     void guiKeyboard(unsigned char key, int x, int y);
-    void guiMouse(int button, int state, int x, int y);
     void guiDrag(int x, int y);
     void onMouse(int button, int state, int x, int y);
+    void collectedMouseController(int button, int state, int x, int y);
+
+    void cameraControls(GLfloat deltaTime, Camera* camera);
+
     // Callabacks/bridge functions
     static void handleMouseMotionBridge(int x, int y);
     static void guiKeyboardBridge(unsigned char key, int x, int y);
-    static void guiMouseBridge(int button, int state, int x, int y);
     static void guiDragBridge(int x, int y);
-    static void onMouseBridge(int button, int state, int x, int y);
+    static void collectedMouseControllerBridge(int button, int state, int x, int y);
     Utils utils;
 
 private:

@@ -12,9 +12,10 @@ InputController::InputController(Camera* camera, Terrain* terrain, Picking* pick
 }
 
 /* CHANGE TO GETTERS AND SETTERS */
-void InputController::handleKeyboardInput(GLfloat deltaTime) {
-    // Implementation of keyboard input handling
-    GLfloat speed = camera->speed * deltaTime;
+
+void InputController::cameraControls(GLfloat deltaTime, Camera* camera) {
+	// Specific controlls for camera
+	GLfloat speed = camera->speed * deltaTime;
 	
 	if (glutKeyIsDown('w')) {
 		camera->position += speed * camera->forwardVector;
@@ -44,18 +45,82 @@ void InputController::handleKeyboardInput(GLfloat deltaTime) {
 		vec3 direction = Ry(-speed*0.1) * camera->forwardVector;
 		camera->forwardVector = normalize(direction);
 	}
+}
+
+void InputController::collectedMouseController(int button, int state, int x, int y)
+{
+
+	// guiMouse
+	if (button == 0) sgMouse(state, x, y);
+	glutPostRedisplay();
+
+	// onMouse
+	if(state != GLUT_DOWN) 	return;
+
+	GLbyte color[4];
+	GLfloat depth;
+	GLuint index;
+
+	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
+	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
+
+	// printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx, depth %f, stencil index %u\n",
+			// x, y, color[0], color[1], color[2], color[3], depth, index);
+
+	// Check ray
+	vec3 ray = picker->calculateMouseRay(x, y, Utils::windowWidth, Utils::windowHeight);
+	terrain->rayTriangleIntersection(camera->getPosition(), ray, picker->intersectionPoint, picker->debugIntersectionVector);
+
+	// printf("manualElevation button %d\n", GUI::manualElevation);
+	// printf("bunnybutton %d\n", GUI::PlaceBunny);
+
+	if (GUI::manualElevation && !GUI::PlaceBunny)
+	{
+		terrain->editTerrainAtIntersectionPoint(picker->intersectionPoint);
+	}
+	
+	if (GUI::PlaceBunny && !GUI::manualElevation) {
+		picker->updateIsPicking(true);
+	}
+	else {
+		picker->updateIsPicking(false);
+	}
+	
+	// TODO: fix
+	bool debug = true;
+	if (debug)
+	{
+		for (int i = 0; i < 100; i++)
+		{
+				// Create a vector of points along the ray
+				vec3 pos = camera->getPosition() + i*ray;
+				picker->debugRayVector.push_back(pos);
+		}
+	}
+}
+
+void InputController::handleKeyboardInput(GLfloat deltaTime) {
+    // Implementation of keyboard input handling
+	// General controlls
+    cameraControls(deltaTime, camera);
+
 	if (glutKeyIsDown('m')){
 		printf("Creating splat map\n");
 		terrain->createSplatMap();
+	}
+
+	if (glutKeyIsDown('p')){
+		picker->updateIsPicking(true);
 	}
 	if (glutKeyIsDown(27)) {
 		exit(0);
 	}
 }
 
+/* NOTE: CURRENTLY NOT USED */
 void InputController::handleMouseMotion(int x, int y) {
-    // Implementation of mouse motion handling
-    // First mouse movement
+    // Implementation of mouse motion handli
 	if (firstMouse)
 	{
 		lastX = x;
@@ -90,7 +155,7 @@ void InputController::handleMouseMotion(int x, int y) {
 	camera->forwardVector = normalize(direction);
 }
 
-
+/* NOTE: CURRENTLY NOT USED */
 void InputController::guiKeyboard(unsigned char key, int x, int y)
 {
 	// The "single line editor", edit the string
@@ -109,57 +174,10 @@ void InputController::guiKeyboard(unsigned char key, int x, int y)
 	glutPostRedisplay();
 }
 
-void InputController::onMouse(int button, int state, int x, int y)
-{
-		if(state != GLUT_DOWN)
-	return;
-
-	GLbyte color[4];
-	GLfloat depth;
-	GLuint index;
-
-	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
-	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
-
-	printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx, depth %f, stencil index %u\n",
-			x, y, color[0], color[1], color[2], color[3], depth, index);
-
-	// Check ray
-	vec3 ray = picker->calculateMouseRay(x, y, Utils::windowWidth, Utils::windowHeight);
-	terrain->rayTriangleIntersection(camera->getPosition(), ray, picker->intersectionPoint, picker->debugIntersectionVector);
-	//terrain->editTerrainAtIntersectionPoint(picker->intersectionPoint);
-	terrain->editSplatmap("splatmap123.tga", {255, 0, 0}, picker->intersectionPoint);
-	
-	// TODO: fix
-	bool debug = true;
-	if (debug)
-	{
-		for (int i = 0; i < 100; i++)
-		{
-				// Create a vector of points along the ray
-				vec3 pos = camera->getPosition() + i*ray;
-				picker->debugRayVector.push_back(pos);
-		}
-	}
-}
-
-void InputController::guiMouse(int button, int state, int x, int y)
-{
-	if (button == 0) sgMouse(state, x, y);
-	glutPostRedisplay();
-}
-
 void InputController::guiDrag(int x, int y)
 {
 	sgMouseDrag(x, y);
 	glutPostRedisplay();
-}
-
-void InputController::guiMouseBridge(int button, int state, int x, int y) {
-	if (instance != nullptr) {
-		instance->guiMouse(button, state, x, y);
-	}
 }
 
 void InputController::guiDragBridge(int x, int y) {
@@ -168,20 +186,22 @@ void InputController::guiDragBridge(int x, int y) {
 	}
 }
 
+/* NOTE: CURRENTLY NOT USED */
 void InputController::handleMouseMotionBridge(int x, int y) {
     if (instance != nullptr) {
         instance->handleMouseMotion(x, y);
     }
 }
 
+/* NOTE: CURRENTLY NOT USED */
 void InputController::guiKeyboardBridge(unsigned char key, int x, int y) {
 	if (instance != nullptr) {
 		instance->guiKeyboard(key, x, y);
 	}
 }
 
-void InputController::onMouseBridge(int button, int state, int x, int y) {
+void InputController::collectedMouseControllerBridge(int button, int state, int x, int y) {
 	if (instance != nullptr) {
-		instance->onMouse(button, state, x, y);
+		instance->collectedMouseController(button, state, x, y);
 	}
 }

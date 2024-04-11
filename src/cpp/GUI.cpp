@@ -53,8 +53,14 @@ void GUI::drawGUI()
 
 void GUI::PlaceBunnyButton()
 {
-	PlaceBunny = true;
-	// printf("Placing bunny\n");
+	if (PlaceBunny)
+	{
+		PlaceBunny = false;
+	}
+	else
+	{	
+		PlaceBunny = true;
+	}
 }
 
 void GUI::ElevationButton()

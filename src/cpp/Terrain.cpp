@@ -262,7 +262,7 @@ bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& i
 		// Loop over all intersection points and print them out
 		for (int j = 0; j < i; j++)
 		{
-			printf("Intersection point in Terrain.cpp: %f, %f, %f\n", ipVector[j].x, ipVector[j].y, ipVector[j].z);
+			// printf("Intersection point in Terrain.cpp: %f, %f, %f\n", ipVector[j].x, ipVector[j].y, ipVector[j].z);
 			intersectionVector.push_back(ipVector[j]);
 		}
 		intersectionPoint = closestIntersectionPoint;
