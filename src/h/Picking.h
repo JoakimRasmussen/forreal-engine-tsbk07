@@ -30,10 +30,10 @@ class Picking {
         std::vector<vec3> debugRayVector;
         std::vector<vec3> debugIntersectionVector;
 
+        bool isPicking = false;
     private:
 
         // Variables
-        bool isPicking = false;
         int mouseX = 0;
         int mouseY = 0;
         Camera* camera;

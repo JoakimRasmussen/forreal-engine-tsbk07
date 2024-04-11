@@ -29,11 +29,11 @@ int main(int argc, char **argv)
 	printf("GL_VERSION: %s\n", glGetString(GL_VERSION));
 	glutDisplayFunc(display);
 
-	//glutPassiveMotionFunc(InputController::handleMouseMotionBridge);
-	glutKeyboardFunc(InputController::guiKeyboardBridge);
+	// glutPassiveMotionFunc(InputController::handleMouseMotionBridge);
+	// glutKeyboardFunc(InputController::guiKeyboardBridge);
 	glutMouseFunc(InputController::guiMouseBridge);
 	glutMotionFunc(InputController::guiDragBridge);
-	glutMouseFunc(InputController::onMouseBridge);
+	// glutMouseFunc(InputController::onMouseBridge);
 
 	init();
 	glutRepeatingTimer(20);

@@ -14,7 +14,25 @@ InputController::InputController(Camera* camera, Terrain* terrain, Picking* pick
 /* CHANGE TO GETTERS AND SETTERS */
 void InputController::handleKeyboardInput(GLfloat deltaTime) {
     // Implementation of keyboard input handling
-    GLfloat speed = camera->speed * deltaTime;
+	// General controlls
+    cameraControls(deltaTime, camera);
+
+	if (glutKeyIsDown('m')){
+		printf("Creating splat map\n");
+		terrain->createSplatMap();
+	}
+
+	if (glutKeyIsDown('p')){
+		picker->updateIsPicking(true);
+	}
+	if (glutKeyIsDown(27)) {
+		exit(0);
+	}
+}
+
+void InputController::cameraControls(GLfloat deltaTime, Camera* camera) {
+	// Specific controlls for camera
+	GLfloat speed = camera->speed * deltaTime;
 	
 	if (glutKeyIsDown('w')) {
 		camera->position += speed * camera->forwardVector;
@@ -44,17 +62,21 @@ void InputController::handleKeyboardInput(GLfloat deltaTime) {
 		vec3 direction = Ry(-speed*0.1) * camera->forwardVector;
 		camera->forwardVector = normalize(direction);
 	}
-	if (glutKeyIsDown('m')){
-		printf("Creating splat map\n");
-		terrain->createSplatMap();
+}
+
+void InputController::placeObjectMode(Picking* picker) {
+	// Specific controlls for placing objects
+	if (picker->isPicking) {
+		// Place object
+	}
+}
+
+void InputController::terrainEditMode(Picking* picker, Terrain* terrain) {
+	// Specific controlls for terrain editing
+	if (picker->isPicking) {
+		// Edit terrain
 	}
 
-	if (glutKeyIsDown('p')){
-		picker->updateIsPicking(true);
-	}
-	if (glutKeyIsDown(27)) {
-		exit(0);
-	}
 }
 
 void InputController::handleMouseMotion(int x, int y) {

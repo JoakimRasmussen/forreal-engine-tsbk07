@@ -25,6 +25,11 @@ public:
     void guiMouse(int button, int state, int x, int y);
     void guiDrag(int x, int y);
     void onMouse(int button, int state, int x, int y);
+
+    void cameraControls(GLfloat deltaTime, Camera* camera);
+    void placeObjectMode(Picking* picker);
+    void terrainEditMode(Picking* picker, Terrain* terrain);
+
     // Callabacks/bridge functions
     static void handleMouseMotionBridge(int x, int y);
     static void guiKeyboardBridge(unsigned char key, int x, int y);
