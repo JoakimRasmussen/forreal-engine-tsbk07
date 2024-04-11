@@ -58,7 +58,7 @@ void GUI::PlaceBunnyButton()
 		PlaceBunny = false;
 	}
 	else
-	{
+	{	
 		PlaceBunny = true;
 	}
 }

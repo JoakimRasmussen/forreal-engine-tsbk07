@@ -12,23 +12,6 @@ InputController::InputController(Camera* camera, Terrain* terrain, Picking* pick
 }
 
 /* CHANGE TO GETTERS AND SETTERS */
-void InputController::handleKeyboardInput(GLfloat deltaTime) {
-    // Implementation of keyboard input handling
-	// General controlls
-    cameraControls(deltaTime, camera);
-
-	if (glutKeyIsDown('m')){
-		printf("Creating splat map\n");
-		terrain->createSplatMap();
-	}
-
-	if (glutKeyIsDown('p')){
-		picker->updateIsPicking(true);
-	}
-	if (glutKeyIsDown(27)) {
-		exit(0);
-	}
-}
 
 void InputController::cameraControls(GLfloat deltaTime, Camera* camera) {
 	// Specific controlls for camera
@@ -63,6 +46,123 @@ void InputController::cameraControls(GLfloat deltaTime, Camera* camera) {
 		camera->forwardVector = normalize(direction);
 	}
 }
+
+
+void InputController::onMouse(int button, int state, int x, int y)
+{
+		if(state != GLUT_DOWN)
+	return;
+
+	GLbyte color[4];
+	GLfloat depth;
+	GLuint index;
+
+	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
+	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
+
+	// printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx, depth %f, stencil index %u\n",
+			// x, y, color[0], color[1], color[2], color[3], depth, index);
+
+	// Check ray
+	vec3 ray = picker->calculateMouseRay(x, y, Utils::windowWidth, Utils::windowHeight);
+	terrain->rayTriangleIntersection(camera->getPosition(), ray, picker->intersectionPoint, picker->debugIntersectionVector);
+
+	printf("manualElevation button %d\n", GUI::manualElevation);
+
+	if (GUI::manualElevation)
+	{
+		terrain->editTerrainAtIntersectionPoint(picker->intersectionPoint);
+
+	}
+	if (GUI::PlaceBunny)
+	{
+	}
+	
+	// TODO: fix
+	bool debug = true;
+	if (debug)
+	{
+		for (int i = 0; i < 100; i++)
+		{
+				// Create a vector of points along the ray
+				vec3 pos = camera->getPosition() + i*ray;
+				picker->debugRayVector.push_back(pos);
+		}
+	}
+}
+
+void InputController::collectedMouseController(int button, int state, int x, int y)
+{
+
+	// guiMouse
+	if (button == 0) sgMouse(state, x, y);
+	glutPostRedisplay();
+
+	// onMouse
+	if(state != GLUT_DOWN) 	return;
+
+	GLbyte color[4];
+	GLfloat depth;
+	GLuint index;
+
+	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
+	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
+
+	// printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx, depth %f, stencil index %u\n",
+			// x, y, color[0], color[1], color[2], color[3], depth, index);
+
+	// Check ray
+	vec3 ray = picker->calculateMouseRay(x, y, Utils::windowWidth, Utils::windowHeight);
+	terrain->rayTriangleIntersection(camera->getPosition(), ray, picker->intersectionPoint, picker->debugIntersectionVector);
+
+	// printf("manualElevation button %d\n", GUI::manualElevation);
+	// printf("bunnybutton %d\n", GUI::PlaceBunny);
+
+	if (GUI::manualElevation && !GUI::PlaceBunny)
+	{
+		terrain->editTerrainAtIntersectionPoint(picker->intersectionPoint);
+	}
+	
+	if (GUI::PlaceBunny && !GUI::manualElevation) {
+		picker->updateIsPicking(true);
+	}
+	else {
+		picker->updateIsPicking(false);
+	}
+	
+	// TODO: fix
+	bool debug = true;
+	if (debug)
+	{
+		for (int i = 0; i < 100; i++)
+		{
+				// Create a vector of points along the ray
+				vec3 pos = camera->getPosition() + i*ray;
+				picker->debugRayVector.push_back(pos);
+		}
+	}
+}
+
+void InputController::handleKeyboardInput(GLfloat deltaTime) {
+    // Implementation of keyboard input handling
+	// General controlls
+    cameraControls(deltaTime, camera);
+
+	if (glutKeyIsDown('m')){
+		printf("Creating splat map\n");
+		terrain->createSplatMap();
+	}
+
+	if (glutKeyIsDown('p')){
+		picker->updateIsPicking(true);
+	}
+	if (glutKeyIsDown(27)) {
+		exit(0);
+	}
+}
+
 
 void InputController::handleMouseMotion(int x, int y) {
     // Implementation of mouse motion handling
@@ -120,51 +220,6 @@ void InputController::guiKeyboard(unsigned char key, int x, int y)
 	glutPostRedisplay();
 }
 
-void InputController::onMouse(int button, int state, int x, int y)
-{
-		if(state != GLUT_DOWN)
-	return;
-
-	GLbyte color[4];
-	GLfloat depth;
-	GLuint index;
-
-	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
-	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
-
-	// printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx, depth %f, stencil index %u\n",
-			// x, y, color[0], color[1], color[2], color[3], depth, index);
-
-	// Check ray
-	vec3 ray = picker->calculateMouseRay(x, y, Utils::windowWidth, Utils::windowHeight);
-	terrain->rayTriangleIntersection(camera->getPosition(), ray, picker->intersectionPoint, picker->debugIntersectionVector);
-	
-	// Edit terrain
-	if (GUI::manualElevation) {
-		terrain->editTerrainAtIntersectionPoint(picker->intersectionPoint);
-	}
-
-	if (GUI::PlaceBunny) {
-		picker->updateIsPicking(true);
-	}
-	else {
-		picker->updateIsPicking(false);
-	}
-
-	// TODO: fix
-	bool debug = true;
-	if (debug)
-	{
-		for (int i = 0; i < 100; i++)
-		{
-				// Create a vector of points along the ray
-				vec3 pos = camera->getPosition() + i*ray;
-				picker->debugRayVector.push_back(pos);
-		}
-	}
-}
-
 void InputController::guiMouse(int button, int state, int x, int y)
 {
 	if (button == 0) sgMouse(state, x, y);
@@ -204,5 +259,11 @@ void InputController::guiKeyboardBridge(unsigned char key, int x, int y) {
 void InputController::onMouseBridge(int button, int state, int x, int y) {
 	if (instance != nullptr) {
 		instance->onMouse(button, state, x, y);
+	}
+}
+
+void InputController::collectedMouseControllerBridge(int button, int state, int x, int y) {
+	if (instance != nullptr) {
+		instance->collectedMouseController(button, state, x, y);
 	}
 }

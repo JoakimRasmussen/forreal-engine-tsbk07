@@ -162,7 +162,7 @@ void GameMode::run(int argc, char** argv) {
 	gui->drawGUI();
 
 	// Check if the bunny button is pressed
-	bunnyButtonLogic();
+	// bunnyButtonLogic();
 	/* ------------- End of GUI -------------*/
 
 	// Draw game objects
@@ -172,7 +172,7 @@ void GameMode::run(int argc, char** argv) {
 	glUniform3f(glGetUniformLocation(objectShader, "lightPosition"), 5, 5, 5);
 	printError("pre display 2");
 	// Rebind and activate the fur texture
-	glActiveTexture(GL_TEXTURE2);
+	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, furTex);
 	drawGameObjects();
 
