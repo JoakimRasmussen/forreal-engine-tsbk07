@@ -47,51 +47,6 @@ void InputController::cameraControls(GLfloat deltaTime, Camera* camera) {
 	}
 }
 
-
-void InputController::onMouse(int button, int state, int x, int y)
-{
-		if(state != GLUT_DOWN)
-	return;
-
-	GLbyte color[4];
-	GLfloat depth;
-	GLuint index;
-
-	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
-	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
-
-	// printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx, depth %f, stencil index %u\n",
-			// x, y, color[0], color[1], color[2], color[3], depth, index);
-
-	// Check ray
-	vec3 ray = picker->calculateMouseRay(x, y, Utils::windowWidth, Utils::windowHeight);
-	terrain->rayTriangleIntersection(camera->getPosition(), ray, picker->intersectionPoint, picker->debugIntersectionVector);
-
-	printf("manualElevation button %d\n", GUI::manualElevation);
-
-	if (GUI::manualElevation)
-	{
-		terrain->editTerrainAtIntersectionPoint(picker->intersectionPoint);
-
-	}
-	if (GUI::PlaceBunny)
-	{
-	}
-	
-	// TODO: fix
-	bool debug = true;
-	if (debug)
-	{
-		for (int i = 0; i < 100; i++)
-		{
-				// Create a vector of points along the ray
-				vec3 pos = camera->getPosition() + i*ray;
-				picker->debugRayVector.push_back(pos);
-		}
-	}
-}
-
 void InputController::collectedMouseController(int button, int state, int x, int y)
 {
 
@@ -163,10 +118,9 @@ void InputController::handleKeyboardInput(GLfloat deltaTime) {
 	}
 }
 
-
+/* NOTE: CURRENTLY NOT USED */
 void InputController::handleMouseMotion(int x, int y) {
-    // Implementation of mouse motion handling
-    // First mouse movement
+    // Implementation of mouse motion handli
 	if (firstMouse)
 	{
 		lastX = x;
@@ -201,7 +155,7 @@ void InputController::handleMouseMotion(int x, int y) {
 	camera->forwardVector = normalize(direction);
 }
 
-
+/* NOTE: CURRENTLY NOT USED */
 void InputController::guiKeyboard(unsigned char key, int x, int y)
 {
 	// The "single line editor", edit the string
@@ -220,22 +174,10 @@ void InputController::guiKeyboard(unsigned char key, int x, int y)
 	glutPostRedisplay();
 }
 
-void InputController::guiMouse(int button, int state, int x, int y)
-{
-	if (button == 0) sgMouse(state, x, y);
-	glutPostRedisplay();
-}
-
 void InputController::guiDrag(int x, int y)
 {
 	sgMouseDrag(x, y);
 	glutPostRedisplay();
-}
-
-void InputController::guiMouseBridge(int button, int state, int x, int y) {
-	if (instance != nullptr) {
-		instance->guiMouse(button, state, x, y);
-	}
 }
 
 void InputController::guiDragBridge(int x, int y) {
@@ -244,21 +186,17 @@ void InputController::guiDragBridge(int x, int y) {
 	}
 }
 
+/* NOTE: CURRENTLY NOT USED */
 void InputController::handleMouseMotionBridge(int x, int y) {
     if (instance != nullptr) {
         instance->handleMouseMotion(x, y);
     }
 }
 
+/* NOTE: CURRENTLY NOT USED */
 void InputController::guiKeyboardBridge(unsigned char key, int x, int y) {
 	if (instance != nullptr) {
 		instance->guiKeyboard(key, x, y);
-	}
-}
-
-void InputController::onMouseBridge(int button, int state, int x, int y) {
-	if (instance != nullptr) {
-		instance->onMouse(button, state, x, y);
 	}
 }
 

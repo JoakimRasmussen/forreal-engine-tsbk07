@@ -19,8 +19,6 @@ GameMode::GameMode() {
     // Gui object
     gui = new GUI();
 
-    // Utils object
-    // utils = new Utils();
     // Projection matrix
     projectionMatrix = Utils::getProjectionMatrix();
 
@@ -157,13 +155,8 @@ void GameMode::run(int argc, char** argv) {
 		PlaceModel(bunnyModel, objectShader, x, y, z, 0, 0, 0);
 	}
 
-	/* ------------- GUI ------------- */
 	// Draw GUI
 	gui->drawGUI();
-
-	// Check if the bunny button is pressed
-	// bunnyButtonLogic();
-	/* ------------- End of GUI -------------*/
 
 	// Draw game objects
 	glUseProgram(objectShader);
@@ -198,13 +191,6 @@ void GameMode::updateCameraVariables() {
 	upVec = camera->getUpVector();
 }
 
-void GameMode::bunnyButtonLogic() {
-	// Test bunny button
-	if (GUI::PlaceBunny) {
-		GUI::PlaceBunny = false; // Acknowledge the GUI action
-	}
-}
-
 void GameMode::drawGameObjects() {
 	// Draw all game objects
 	for (auto& gameObject : gameObjects) {
@@ -223,11 +209,6 @@ void GameMode::drawGameObjects() {
 
 		// Update the model-to-world matrix
 		modelToWorld = T(x, y, z);
-		// NOTE: The bunnys position is reseted to the same point for all bunnies if we use
-		//       the objectShader. Why is that?
-		// glUseProgram(objectShader);
-		// glActiveTexture(GL_TEXTURE2);
-		// glBindTexture(GL_TEXTURE_2D, furTex);
 		// Can optimize to not upload the matrix every time if the objects share textures
 		glUniformMatrix4fv(glGetUniformLocation(objectShader, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
 		printError("draw game objects!");
