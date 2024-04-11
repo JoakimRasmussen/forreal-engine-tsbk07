@@ -64,21 +64,6 @@ void InputController::cameraControls(GLfloat deltaTime, Camera* camera) {
 	}
 }
 
-void InputController::placeObjectMode(Picking* picker) {
-	// Specific controlls for placing objects
-	if (picker->isPicking) {
-		// Place object
-	}
-}
-
-void InputController::terrainEditMode(Picking* picker, Terrain* terrain) {
-	// Specific controlls for terrain editing
-	if (picker->isPicking) {
-		// Edit terrain
-	}
-
-}
-
 void InputController::handleMouseMotion(int x, int y) {
     // Implementation of mouse motion handling
     // First mouse movement
@@ -154,8 +139,19 @@ void InputController::onMouse(int button, int state, int x, int y)
 	// Check ray
 	vec3 ray = picker->calculateMouseRay(x, y, Utils::windowWidth, Utils::windowHeight);
 	terrain->rayTriangleIntersection(camera->getPosition(), ray, picker->intersectionPoint, picker->debugIntersectionVector);
-	terrain->editTerrainAtIntersectionPoint(picker->intersectionPoint);
 	
+	// Edit terrain
+	if (GUI::manualElevation) {
+		terrain->editTerrainAtIntersectionPoint(picker->intersectionPoint);
+	}
+
+	if (GUI::PlaceBunny) {
+		picker->updateIsPicking(true);
+	}
+	else {
+		picker->updateIsPicking(false);
+	}
+
 	// TODO: fix
 	bool debug = true;
 	if (debug)

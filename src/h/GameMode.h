@@ -15,7 +15,7 @@ class GameMode {
 public:
     GameMode();
     void init();
-    void display();
+    // void display();
     void run(int argc, char** argv);
     void updateCameraVariables();
     void bunnyButtonLogic();
@@ -42,7 +42,6 @@ private:
     // Object variables
     const float placementDistance = 10.0f;
     vec3 clickedPosition = vec3(0.0f, 0.0f, 0.0f);
-    bool waitingForPlacement = false;
 
     // Reference to shader program
     GLuint program, objectShader;

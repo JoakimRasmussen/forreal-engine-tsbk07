@@ -31,6 +31,8 @@ class Picking {
         std::vector<vec3> debugIntersectionVector;
 
         bool isPicking = false;
+        
+
     private:
 
         // Variables

@@ -7,6 +7,7 @@
 #include "Terrain.h"
 #include "Utils.h"
 #include "Picking.h"
+#include "GUI.h"
 
 class Camera;
 class Terrain;

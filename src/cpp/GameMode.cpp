@@ -142,8 +142,7 @@ void GameMode::run(int argc, char** argv) {
 	DrawModel(tm, program, "in_Position", "in_Normal", "in_TexCoord");
 
 	// Find coordinates of the clicked position
-	if (waitingForPlacement) {
-		waitingForPlacement = false;
+	if (picker->isPicking) {
 		clickedPosition = picker->getIntersectionPoint();
 
 		float x = clickedPosition.x;
@@ -203,20 +202,6 @@ void GameMode::bunnyButtonLogic() {
 	// Test bunny button
 	if (GUI::PlaceBunny) {
 		GUI::PlaceBunny = false; // Acknowledge the GUI action
-		waitingForPlacement = true;
-
-		// Place bunny in front of camera
-		// Calculate position
-		// float x = cameraPos.x + placementDistance * forwardVec.x;
-		// float z = cameraPos.z + placementDistance * forwardVec.z;
-		// float y = terrain->getHeightAtPoint(x, z) + 0.6f;
-
-		// // Create bunny object and add to game objects
-		// GameObject bunny(bunnyModel, x, y, z);
-		// gameObjects.push_back(bunny);
-
-		// // Place bunny on terrain
-		// PlaceModel(bunnyModel, objectShader, x, y, z, 0, 0, 0);
 	}
 }
 
