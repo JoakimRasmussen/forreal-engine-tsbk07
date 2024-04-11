@@ -60,11 +60,7 @@ void GUI::PlaceBunnyButton()
 void GUI::ElevationButton()
 {
 	if (manualElevation)
-	{
 		manualElevation = false;
-	}
 	else
-	{
 		manualElevation = true;
-	}
 }
