@@ -23,8 +23,8 @@ Model* Terrain::generateTerrain(TextureData* tex, float currentElevation) {
 			// Normal vectors. You need to calculate these.
 			// normalArray[(x + z * tex->width)] = vec3(0.0, 1.0, 0.0); // Default to up vector, lazy solution
 			// Texture coordinates. You may want to scale them.
-			texCoordArray[(x + z * tex->width)].x = ((float)x * 1) / tex->width * quadSize; // repeat the texture 1 time
-			texCoordArray[(x + z * tex->width)].y = ((float)z * 1) / tex->height * quadSize; // repeat the texture 1 time
+			texCoordArray[(x + z * tex->width)].x = ((float)x * 1) / tex->width * 1; // repeat the texture 1 time
+			texCoordArray[(x + z * tex->width)].y = ((float)z * 1) / tex->height * 1; // repeat the texture 1 time
 		}
 	for (x = 0; x < tex->width-1; x++)
 		for (z = 0; z < tex->height-1; z++)
@@ -49,66 +49,13 @@ Model* Terrain::generateTerrain(TextureData* tex, float currentElevation) {
 				continue;
 			}
 
-			//			1 --- 2 --- 3
-			//			|    /|    /|
-			//			|  	/ |   / |
-			//			|  /  |  /  |
-			//			| /   | /   |
-			//			|/    |/    |
-			//			4 --- c --- 6
-			//			|    /|    /|
-			//			|  	/ |   / |
-			//			|  /  |  /  |
-			//			| /   | /   |
-			//			|/    |/    |
-			//			7 --- 8 --- 9
+			// Calculate the normal for one triangle, low poly style
+			vec3 v1 = vertexArray[(x + z * tex->width)];
+			vec3 v2 = vertexArray[(x + (z+1) * tex->width)];
+			vec3 v3 = vertexArray[(x+1) + z * tex->width];
+			vec3 normal = normalize(cross(v2 - v1, v3 - v1));
+			normalArray[(x + z * tex->width)] = normal;
 
-			// n1 = vertexArray[((x-1) + (z-1) * tex->width)];
-			vec3 n2 = vertexArray[(x + (z-1) * tex->width)];
-			vec3 n3 = vertexArray[((x+1) + (z-1) * tex->width)];
-			vec3 n4 = vertexArray[((x-1) + z * tex->width)];
-			vec3 c = vertexArray[(x + z * tex->width)];
-			vec3 n6 = vertexArray[((x+1) + (z+1) * tex->width)];
-			vec3 n7 = vertexArray[((x-1) + (z+1) * tex->width)];
-			vec3 n8 = vertexArray[(x + (z+1) * tex->width)];
-			// n9 = vertexArray[((x+1) + (z+1) * tex->width)];
-
-			vec3 upVector = vec3(0.0, 1.0, 0.0);
-			vec3 normalSum = vec3(0.0);
-			float weightSum = 0.0;
-
-			// Calculate normals for surrounding triangles
-			vec3 normals[] = 
-			{
-				cross(n2 - c, n4 - c),
-				cross(n3 - c, n2 - c),
-				cross(n6 - c, n3 - c),
-				cross(n8 - c, n6 - c),
-				cross(n7 - c, n8 - c),
-				cross(n4 - c, n7 - c)
-			};
-
-			// Calculate the weighted average of the normals
-			for (int i = 0; i < 6; i++) 
-			{
-				vec3 normal = normalize(normals[i]);
-				if (sqrt(dot(normal, normal)) > 0) 
-				{
-					float angleCosine = dot(normal, upVector);
-					float weight = abs(angleCosine); // calculate the "steepness" of the triangle, and weight the normal.
-					normalSum += normal * weight;
-					weightSum += weight;
-				}
-			}
-
-			if (weightSum > 0) 
-			{
-				normalArray[(x + z * tex->width)] = normalize(normalSum / weightSum);
-			} 
-			else 
-			{
-				normalArray[(x + z * tex->width)] = upVector; // Default to up vector if no valid normals found
-			}
 		}
 
 	terrainModel = LoadDataToModel(
@@ -141,7 +88,7 @@ float Terrain::getHeightAtPoint(float x, float z) const {
     float fractionalX = normalizedX - ix;
     float fractionalZ = normalizedZ - iz; 
 
-    // Retrieve heights for bilinear interpolation
+    // Retrieve heights for bilinear interpolationv
     float h00 = terrainModel->vertexArray[ix + iz *ttex.width].y; // Bottom-left corner
     float h10 = terrainModel->vertexArray[(ix + 1) + iz *ttex.width].y; // Bottom-right corner
     float h01 = terrainModel->vertexArray[ix + (iz + 1) *ttex.width].y; // Top-left corner
@@ -287,98 +234,40 @@ void Terrain::updateTerrain()
 	}
 }
 
-Model* Terrain::setTerrainModel(const char* heightmap) {
+Model* Terrain::setTerrainModel(const char* heightmap) 
+{
 	LoadTGATextureData(heightmap, &ttex);
 	terrainModel = generateTerrain(&ttex, currentElevation);
 	return terrainModel;
 }
 
-TextureData* Terrain::getTextureData() {
+TextureData* Terrain::getTextureData() 
+{
 	return &ttex;
 }
 
-Model* Terrain::getTerrainModel() {
+Model* Terrain::getTerrainModel() 
+{
+
 	return terrainModel;
 }
 
-
-/*
-Call example:
-	std::string filePath = "path_to_your_file.tga";
-    std::vector<unsigned char> newColor = {255, 0, 0}; // Example: Change to blue, its bgr
-    editTgaPixel(filePath, 10, 20, newColor);
-
-
-	This works, just trust me bro...
-*/
-bool Terrain::editSplatmap(const std::string& filePath, const std::vector<unsigned char>& newColor, vec3 intersectionPoint)
+void Terrain::editTerrainTextureAtIntersectionPoint(vec3 intersectionPoint, GLubyte colorPixel[4], int radius)
 {
-	std::fstream file(filePath, std::ios::in | std::ios::out | std::ios::binary);
-	if (!file.is_open())
-	{
-		printf("Failed to open the file...");
-		edit = false;
-		return edit;
-	}
-	// Read the header, first 18 bytes of a .tga file contains, dim, color depth, and image descriptor
-	unsigned char header[18];
-	file.read(reinterpret_cast<char*>(&header), 18);
+	// I do not think pixelX and pixelZ is the correct labeling...
+	GLfloat pixelX = intersectionPoint.x;
+	GLfloat pixelZ = intersectionPoint.z;
 
-	int imageWidth = header[12] | (header[13] << 8);
-	int imageHeight = header[14] | (header[15] << 8);
-	unsigned char pixelDepth = header[16]; // bits per pixel
+	// Make sure to bind the correct texture (map texture found in GameMode)
+	glActiveTexture(GL_TEXTURE3);
 
-	// Calculate the bytes per pixel and the pixel offset
-	int bytesPerPixel = pixelDepth / 8; // convert bits to bytes
-	long pixelOffset = 18 + (intersectionPoint.z * imageWidth + intersectionPoint.x) * bytesPerPixel;
-
-	// Seek to the pixel position and write the new color
-	file.seekg(pixelOffset, std::ios::beg);
-	file.write(reinterpret_cast<const char*>(newColor.data()), newColor.size());
-
-    file.close();
-
-	edit = true;
-	
-	return edit;
-}
-
-#include "vector"
-void Terrain::createSplatMap()
-{
-	int width = 256; // Example width
-	int height = 256; // Example height
-	unsigned char pixelDepth = 24; // 24 for RGB, 32 for RGBA
-	// Create a vector to hold the image data
-
-	unsigned char* imageData = reinterpret_cast<unsigned char*>(malloc(sizeof(GLuint) * 3 * (width * height * (pixelDepth / 8))));
-
-	for (int y = 0; y < height; ++y) {
-		for (int x = 0; x < width; ++x) {
-			int index = (y * width + x) * (pixelDepth / 8);
-			if (x < width / 3) 
-			{
-				// First third: Red section
-				imageData[index] = 255; // Red channel at max
-				imageData[index + 1] = 0; // Green channel at min
-				imageData[index + 2] = 0; // Blue channel at min
-			} 
-			else if (x < 2 * width / 3) 
-			{
-				// Second third: Green section
-				imageData[index] = 0; // Red channel at min
-				imageData[index + 1] = 255; // Green channel at max
-				imageData[index + 2] = 0; // Blue channel at min
-			} 
-			else 
-			{
-				// Last third: Blue section
-				imageData[index] = 0; // Red channel at min
-				imageData[index + 1] = 0; // Green channel at min
-				imageData[index + 2] = 255; // Blue channel at max
+	// Update the texture with the new pixel data in a circle around the intersection point
+	for (int i = -radius; i <= radius; i++) {
+		for (int j = -radius; j <= radius; j++) {
+			if (i * i + j * j <= radius * radius) {
+				glTexSubImage2D(GL_TEXTURE_2D, 0, pixelX + i, pixelZ + j, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, colorPixel);
 			}
 		}
-    }
-	// Save the texture
-	SaveDataToTGA(const_cast<char*>("splatmap123.tga"), width, height, pixelDepth, imageData);
+	}
 }
+

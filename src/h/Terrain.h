@@ -16,24 +16,24 @@ public:
     Terrain();
     Model* generateTerrain(TextureData* tex, float currentElevation);
     Model* setTerrainModel(const char* heightmap);
-    float getHeightAtPoint(float x, float z) const;
-    void createSplatMap();
-    TextureData* getTextureData();
-    void updateTerrain();
     Model* getTerrainModel();
+    TextureData* getTextureData();
+    float getHeightAtPoint(float x, float z) const;
     bool rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint, std::vector<vec3>& intersectionVector);
     void editTerrainAtIntersectionPoint(vec3 intersectionPoint);
-    bool editSplatmap(const std::string& filePath, const std::vector<unsigned char>& newColor, vec3 intersectionPoint);
+    void updateTerrain();
+    void editTerrainTextureAtIntersectionPoint(vec3 intersectionPoint, GLubyte colorPixel[4], int radius);
 
     // Could be (should be...?) private with a getter
-    float currentElevation = 1.0;
+    float currentElevation = 20.0;
     float previousElevation = 5.0;
     float currentMountainHeight = 1100.0;
-    float quadSize = 10.0;
+    float quadSize = 1.0;
     float previousQuadSize = 1.0;
     float tenIncrement = 10;
     bool test = false;
     bool edit = false;
+    GLubyte colorPixel[4];
 
 private:
     TextureData ttex;

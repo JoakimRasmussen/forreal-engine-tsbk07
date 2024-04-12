@@ -18,7 +18,6 @@ GameMode::GameMode() {
     inputController = new InputController(camera, terrain, picker);
     // Gui object
     gui = new GUI();
-
     // Projection matrix
     projectionMatrix = Utils::getProjectionMatrix();
 
@@ -100,6 +99,7 @@ void GameMode::init() {
 	printf("--------------------------------\n");
 }
 
+/* Should perhaps be named display to be consitent with "course" standard. */
 void GameMode::run(int argc, char** argv) {
     // Main game loop
 	// Update time based frames
@@ -115,11 +115,6 @@ void GameMode::run(int argc, char** argv) {
 
 	// Update height of terrain
 	terrain->updateTerrain();
-	if (terrain->edit)
-	{
-		glUniform1i(glGetUniformLocation(program, "map"), 3); // Texture unit 3
-		terrain->edit = false;
-	}
 
 	glUseProgram(program);
 

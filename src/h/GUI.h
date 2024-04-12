@@ -15,9 +15,17 @@ public:
     void drawGUI();
 
     static void PlaceBunnyButton();
-    static bool PlaceBunny;
     static void ElevationButton();
+    static void TextureButton();
+    static void RockButton();
+    static void GrassButton();
+    static void ConcreteButton();
+
+
+    static bool PlaceBunny;
     static bool manualElevation;
+    static bool editTerrainTexture;
+    static GLubyte textureColor[4];
 
 private:
 
