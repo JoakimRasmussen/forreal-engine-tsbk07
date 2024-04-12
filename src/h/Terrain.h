@@ -15,6 +15,7 @@ public:
     Model* generateTerrain(TextureData* tex, float currentElevation);
     Model* setTerrainModel(const char* heightmap);
     float getHeightAtPoint(float x, float z) const;
+    vec3 getNormalAtPoint(float x, float z) const;
     void createSplatMap();
     TextureData* getTextureData();
     void updateTerrain();

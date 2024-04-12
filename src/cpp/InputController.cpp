@@ -83,9 +83,6 @@ void InputController::collectedMouseController(int button, int state, int x, int
 	if (GUI::PlaceBunny && !GUI::manualElevation) {
 		picker->updateIsPicking(true);
 	}
-	else {
-		picker->updateIsPicking(false);
-	}
 	
 	// TODO: fix
 	bool debug = true;
@@ -109,10 +106,8 @@ void InputController::handleKeyboardInput(GLfloat deltaTime) {
 		printf("Creating splat map\n");
 		terrain->createSplatMap();
 	}
-
-	if (glutKeyIsDown('p')){
-		picker->updateIsPicking(true);
-	}
+	
+	// Escape key
 	if (glutKeyIsDown(27)) {
 		exit(0);
 	}

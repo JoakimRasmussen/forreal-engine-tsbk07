@@ -28,7 +28,6 @@ void GUI::initTerrainGUI(Terrain* terrain)
 	sgCreateStaticString(40, 20, "Elevation slider"); sgCreateButton(500, 20, "Manual Elevation", ElevationButton);	
 	sgCreateSlider(40, 40, 200, &terrain->currentElevation, 1, 20);
 	sgCreateDisplayFloat(40, 60, "Elevation value: ", &terrain->currentElevation);
-	// sgCreateButton(40, 80, "Place Bunny", PlaceBunnyButton);
 
 	sgCreateStaticString(40, 80, "--------------------------");
 
@@ -43,7 +42,7 @@ void GUI::initTerrainGUI(Terrain* terrain)
 	sgCreateDisplayFloat(40, 220, "Smooth value: ", &terrain->quadSize);
 
 	sgCreateStaticString(40, 240, "--------------------------");
-	sgCreateButton(40, 260, "Place Bunny", PlaceBunnyButton);
+	sgCreateButton(40, 260, "Place a Bunny", PlaceBunnyButton);
 }
 
 void GUI::drawGUI()
@@ -53,12 +52,8 @@ void GUI::drawGUI()
 
 void GUI::PlaceBunnyButton()
 {
-	if (PlaceBunny)
+	if (!PlaceBunny)
 	{
-		PlaceBunny = false;
-	}
-	else
-	{	
 		PlaceBunny = true;
 	}
 }

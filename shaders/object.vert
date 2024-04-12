@@ -15,11 +15,11 @@ uniform mat4 worldToView;
 
 void main()
 {
-    FragPos = vec3(modelToWorld * vec4(in_Position, 1.0)); // Transform vertex position to world space
-    mat3 NormalMatrix = transpose(inverse(mat3(modelToWorld)));
-    Normal = NormalMatrix * in_Normal; // Transform normal to world space
-
     TexCoord = in_TexCoord; // Pass texture coordinates through
+    
+    Normal = mat3(worldToView) * mat3(modelToWorld) * in_Normal; // Transform normal to world space
+
+    FragPos = in_Position * 0.001; // Scale up the position to make it more visible in the fragment shader
 
     gl_Position = projectionMatrix * worldToView * modelToWorld * vec4(in_Position, 1.0);
 }

@@ -72,6 +72,7 @@ void GameMode::init() {
 
 	// Upload the texture unit for fur texture in object shader
 	glUniform1i(glGetUniformLocation(objectShader, "furTex"), 4); // Texture unit 4
+	glUniform1i(glGetUniformLocation(program, "dirt"), 1); // Texture unit 1
 	printError("bind textures");
 
 	glUseProgram(program); // Switch back to the terrain shader program
@@ -139,24 +140,10 @@ void GameMode::run(int argc, char** argv) {
 	PlaceModel(tm, program, 0, 0, 0, 0, 0, 0);
 	DrawModel(tm, program, "in_Position", "in_Normal", "in_TexCoord");
 
-	// Find coordinates of the clicked position
-	if (picker->isPicking) {
-		clickedPosition = picker->getIntersectionPoint();
-
-		float x = clickedPosition.x;
-		float z = clickedPosition.z;
-		float y = terrain->getHeightAtPoint(x, z) + 0.6f;
-
-		// Create bunny object and add to game objects
-		GameObject bunny(bunnyModel, x, y, z);
-		gameObjects.push_back(bunny);
-
-		// Place bunny on terrain
-		PlaceModel(bunnyModel, objectShader, x, y, z, 0, 0, 0);
-	}
-
 	// Draw GUI
 	gui->drawGUI();
+
+	placeGameObjects();
 
 	// Draw game objects
 	glUseProgram(objectShader);
@@ -191,6 +178,52 @@ void GameMode::updateCameraVariables() {
 	upVec = camera->getUpVector();
 }
 
+void GameMode::placeGameObjects() {
+
+if (picker->isPicking) {
+    // Disable bunny placement mode
+    GUI::PlaceBunny = false;
+
+    // Update picker state
+    picker->updateIsPicking(false);
+
+    // Retrieve the position where the user clicked
+    clickedPosition = picker->getIntersectionPoint();
+
+    // Coordinates of the clicked position
+    float x = clickedPosition.x;
+    float z = clickedPosition.z;
+
+    // Determine y position on terrain, adding a small offset to position the bunny slightly above the terrain
+    float y = terrain->getHeightAtPoint(x, z) + 0.6f;
+
+    // Retrieve the normal vector from the terrain at the clicked position
+    vec3 normal = terrain->getNormalAtPoint(x, z);
+
+    // Calculate the vector from the bunny position to the camera
+    vec3 cameraPos = camera->getPosition();
+    vec3 toCamera = Normalize(cameraPos - clickedPosition);
+
+	// Calculate rotation to align with terrain and face camera
+	float rx = atan2(normal.z, normal.y);
+	float ry = atan2(toCamera.x, toCamera.z);
+	float rz = 0.0f;
+
+    // Create a new bunny object with the calculated position and rotations
+    GameObject bunny(bunnyModel, x, y, z, rx, ry, rz);
+    
+    // Add the new bunny to the game objects list
+    gameObjects.push_back(bunny);
+
+    // Place the bunny model into the scene with the specified shader
+    PlaceModel(bunnyModel, objectShader, x, y, z, rx, ry, rz);
+    
+    // Check for any errors during the placement operation
+    printError("place game objects!");
+}
+
+
+}
 void GameMode::drawGameObjects() {
 	// Draw all game objects
 	for (auto& gameObject : gameObjects) {
@@ -207,8 +240,23 @@ void GameMode::drawGameObjects() {
 		GLfloat z = gameObject.z;
 		GLfloat y = terrain->getHeightAtPoint(x, z) + 0.6f;
 
+		// Update rotations
+		vec3 normal = terrain->getNormalAtPoint(x, z);
+		vec3 cameraPos = camera->getPosition();
+		vec3 toCamera = Normalize(cameraPos - vec3(x, y, z));
+
+		// Calculate rotation to align with terrain and face camera
+		float rx = atan2(normal.z, normal.y);
+		float ry = atan2(toCamera.x, toCamera.z);
+		float rz = 0.0f;
+
+		// Print
+		// printf("x: %f, y: %f, z: %f\n", x, y, z);
+		// printf("rx: %f, ry: %f, rz: %f\n", rx, ry, rz);
+
 		// Update the model-to-world matrix
-		modelToWorld = T(x, y, z);
+		modelToWorld = T(x, y, z) * Rx(rx) * Ry(ry) * Rz(rz);
+
 		// Can optimize to not upload the matrix every time if the objects share textures
 		glUniformMatrix4fv(glGetUniformLocation(objectShader, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
 		printError("draw game objects!");

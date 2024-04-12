@@ -19,6 +19,7 @@ public:
     void run(int argc, char** argv);
     void updateCameraVariables();
     void bunnyButtonLogic();
+    void placeGameObjects();
     void drawGameObjects();
     void manualElevationButton();
 

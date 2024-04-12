@@ -156,6 +156,41 @@ float Terrain::getHeightAtPoint(float x, float z) const {
     return height;
 }
 
+vec3 Terrain::getNormalAtPoint(float x, float z) const
+{
+	// Height map starts at (0,0) and spans positively (normalized to 1.0 for the width and height of the terrain)
+	float normalizedX = x / quadSize;
+	float normalizedZ = z / quadSize;
+
+	// Get the integer part of the coordinates (bottom-left corner of the cell)
+	GLuint ix = floor(normalizedX);
+	GLuint iz = floor(normalizedZ);
+
+	// Ensure we're within bounds of the heightmap
+	if (ix < 0 || ix >= ttex.width - 1 || iz < 0 || iz >= ttex.height - 1) {
+		return vec3(0.0, 1.0, 0.0); // Out of bounds, return a default normal (e.g., up vector)
+	}
+
+	// Calculate the fractional part for interpolation (how far (x, z) is from the bottom-left corner of the cell)
+	float fractionalX = normalizedX - ix;
+	float fractionalZ = normalizedZ - iz;
+
+	// Retrieve normals for bilinear interpolation
+	vec3 n00 = terrainModel->normalArray[ix + iz * ttex.width]; // Bottom-left corner
+	vec3 n10 = terrainModel->normalArray[(ix + 1) + iz * ttex.width]; // Bottom-right corner
+	vec3 n01 = terrainModel->normalArray[ix + (iz + 1) * ttex.width]; // Top-left corner
+	vec3 n11 = terrainModel->normalArray[(ix + 1) + (iz + 1) * ttex.width]; // Top-right corner
+
+	// Bilinear interpolation (Bilinear texture mapping)
+	vec3 normal = (1 - fractionalX) * (1 - fractionalZ) * n00 +
+		fractionalX * (1 - fractionalZ) * n10 +
+		(1 - fractionalX) * fractionalZ * n01 +
+		fractionalX * fractionalZ * n11;
+
+	return normal;
+}
+
+
 void Terrain::editTerrainAtIntersectionPoint(vec3 intersectionPoint)
 {
 	unsigned int x = intersectionPoint.x/quadSize;
