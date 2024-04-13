@@ -18,6 +18,8 @@ GameMode::GameMode() {
     inputController = new InputController(camera, terrain, picker);
     // Gui object
     gui = new GUI();
+	terrainGUI = new GUI();
+	textureGUI = new GUI();
     // Projection matrix
     projectionMatrix = Utils::getProjectionMatrix();
 
@@ -29,7 +31,7 @@ void GameMode::init() {
     // GL inits
 	glClearColor(0.2,0.2,0.5,0);
 	glEnable(GL_DEPTH_TEST);
-	//glDisable(GL_CULL_FACE);
+	glDisable(GL_CULL_FACE);
 	printError("GL inits");
 
 	printf("Loading shaders...\n");
@@ -92,7 +94,9 @@ void GameMode::init() {
 	printError("init bunny!");
 
 	printf("Initializing TerrainGUI...\n");
-	gui->initTerrainGUI(terrain);
+	gui->initGUI();
+	terrainGUI->initTerrainGUI(terrain);
+	textureGUI->initTextureGUI();
 	printError("init GUI!");
 
 	printf("Done initializing game mode\n");
@@ -156,7 +160,21 @@ void GameMode::run(int argc, char** argv) {
 	}
 
 	// Draw GUI
-	gui->drawGUI();
+	if (textureGUI->editTerrainTexture) 
+	{
+		printf("Texture GUI\n");
+		textureGUI->drawGUI();
+	}
+	if (terrainGUI->manualElevation) 
+	{
+		printf("Terrain GUI\n");
+		terrainGUI->drawGUI();
+	}
+	else 
+	{
+		printf("Normal GUI\n");
+		gui->drawGUI();
+	}
 
 	// Draw game objects
 	glUseProgram(objectShader);

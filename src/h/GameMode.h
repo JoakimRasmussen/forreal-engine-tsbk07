@@ -33,6 +33,8 @@ private:
     Terrain* terrain;
     InputController* inputController;
     GUI* gui;
+    GUI* terrainGUI;
+    GUI* textureGUI;
     Utils* utils;
     Picking* picker;
 
