@@ -72,16 +72,17 @@ void InputController::collectedMouseController(int button, int state, int x, int
 	vec3 ray = picker->calculateMouseRay(x, y, Utils::windowWidth, Utils::windowHeight);
 	terrain->rayTriangleIntersection(camera->getPosition(), ray, picker->intersectionPoint, picker->debugIntersectionVector);
 
-	// printf("manualElevation button %d\n", GUI::manualElevation);
-	// printf("bunnybutton %d\n", GUI::PlaceBunny);
-
-	if (GUI::manualElevation && !GUI::PlaceBunny)
+	if (GUI::manualElevation)
 	{
+		GUI::PlaceBunny = false;
 		terrain->editTerrainAtIntersectionPoint(picker->intersectionPoint);
 	}
 	
-	if (GUI::PlaceBunny && !GUI::manualElevation) {
+	if (GUI::PlaceBunny)
+	{
+		GUI::manualElevation = false;
 		picker->updateIsPicking(true);
+		GUI::PlaceBunny = false;
 	}
 	
 	// TODO: fix
