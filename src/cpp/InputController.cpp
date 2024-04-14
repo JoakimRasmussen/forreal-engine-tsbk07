@@ -72,19 +72,23 @@ void InputController::collectedMouseController(int button, int state, int x, int
 	vec3 ray = picker->calculateMouseRay(x, y, Utils::windowWidth, Utils::windowHeight);
 	terrain->rayTriangleIntersection(camera->getPosition(), ray, picker->intersectionPoint, picker->debugIntersectionVector);
 
-	if (GUI::manualElevation)
+	if (GUI::manualElevation && !GUI::PlaceBunny && !GUI::editTerrainTexture)
 	{
 		GUI::PlaceBunny = false;
 		terrain->editTerrainAtIntersectionPoint(picker->intersectionPoint);
+	}
+	if (GUI::editTerrainTexture && !GUI::manualElevation && !GUI::PlaceBunny)
+	{
+		terrain->editTerrainTextureAtIntersectionPoint(picker->intersectionPoint, GUI::textureColor, 5);
 	}
 	
 	if (GUI::PlaceBunny)
 	{
 		GUI::manualElevation = false;
+		GUI::editTerrainTexture = false;
 		picker->updateIsPicking(true);
 		GUI::PlaceBunny = false;
 	}
-	
 	// TODO: fix
 	bool debug = true;
 	if (debug)
@@ -103,11 +107,6 @@ void InputController::handleKeyboardInput(GLfloat deltaTime) {
 	// General controlls
     cameraControls(deltaTime, camera);
 
-	if (glutKeyIsDown('m')){
-		printf("Creating splat map\n");
-		terrain->createSplatMap();
-	}
-	
 	// Escape key
 	if (glutKeyIsDown(27)) {
 		exit(0);

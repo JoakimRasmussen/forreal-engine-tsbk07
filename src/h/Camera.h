@@ -19,7 +19,7 @@ public:
     vec3 position;
     vec3 forwardVector;
     vec3 upVector;
-    GLfloat speed = 0.01f;
+    GLfloat speed = 0.1f;
     GLfloat yaw = -90.0f;
     GLfloat pitch = 0.0f;
 
