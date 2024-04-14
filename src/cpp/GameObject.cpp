@@ -2,9 +2,7 @@
 
 // Constructor definition
 GameObject::GameObject(Model* model, float x, float y, float z, float rx, float ry, float rz)
-    : model(model), x(x), y(y), z(z), rx(rx), ry(ry), rz(rz),
-      vy(0), gravity(-0.98f), isJumping(false) {
-    // Constructor body can remain empty unless further initialization is required
+    : model(model), x(x), y(y), z(z), rx(rx), ry(ry), rz(rz) {
 }
 
 void GameObject::move(float dx, float dy, float dz) {
@@ -23,7 +21,6 @@ void GameObject::newDestination() {
 void GameObject::moveTowardsDestination() {
     if (destinationReached) {
         newDestination();
-        return;
     }
 
     float dx = targetX - x;
@@ -35,21 +32,24 @@ void GameObject::moveTowardsDestination() {
         return;
     }
 
-    // Calculate the desired new rotation to face the destination
+    // Update rotation
     float desiredRy = atan2(dx, dz);
+    ry = lerpAngle(ry, desiredRy, 0.05f);
 
-    // Smooth rotation transition
-    float rotationSpeed = 0.05f; // Control how fast the rotation should change
-    ry = lerpAngle(ry, desiredRy, rotationSpeed);
-
-    // Check if rotation is close enough to desired rotation to start moving
-    if (fabs(ry - desiredRy) < 0.01) {  // Use a small threshold to determine "close enough"
-        // Calculate the new position
+    // Move forward if aligned with the destination
+    if (fabs(ry - desiredRy) < 0.2) {  // Increased tolerance to 0.2 radians
         float speed = 0.05f;
         x += speed * dx / distance;
         z += speed * dz / distance;
+        // printf("Moving: x = %f, z = %f, ry = %f, desiredRy = %f\n", x, z, ry, desiredRy);
     }
+    // else {
+    //     printf("Not moving, rotation not aligned: ry = %f, desiredRy = %f\n", ry, desiredRy);
+    // }
+
 }
+
+
 
 void GameObject::setPosition(float x, float y, float z) {
     this->x = x;
@@ -84,7 +84,22 @@ void GameObject::updateAlignment(vec3 normal, vec3 toCamera, bool forceRotation)
 }
 
 float GameObject::lerpAngle(float from, float to, float t) {
-    // Normalize the numbers
-    float difference = fmod(to - from + M_PI, 2.0 * M_PI) - M_PI;
-    return from + difference * t;
+    float difference = to - from;
+    if (difference > M_PI) {
+        difference -= 2 * M_PI;  // Adjust for wrap-around
+    } else if (difference < -M_PI) {
+        difference += 2 * M_PI;  // Adjust for wrap-around
+    }
+
+    float adjusted = from + difference * t;
+    
+    // Normalize the result to keep within -PI to PI
+    if (adjusted > M_PI) {
+        adjusted -= 2 * M_PI;
+    } else if (adjusted < -M_PI) {
+        adjusted += 2 * M_PI;
+    }
+    return adjusted;
 }
+
+
