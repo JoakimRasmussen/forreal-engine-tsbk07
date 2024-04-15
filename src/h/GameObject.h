@@ -15,7 +15,7 @@ public:
     void move(float dx, float dy, float dz);
     void newDestination();
     void moveTowardsDestination();
-    void updateAlignment(vec3 normal, vec3 toCamera, bool forceRotation = false);
+    void updateAlignmentToTerrain(vec3 normal);
     void setPosition(float x, float y, float z);
     vec3 getPosition() const;
     void setRotation(float rx, float ry, float rz);

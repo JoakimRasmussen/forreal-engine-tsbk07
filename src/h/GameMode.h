@@ -11,25 +11,48 @@
 #include "Picking.h"
 #include "GL_utilities.h"
 
+/**
+ * Class GameMode handles the main operations for the game including initialization,
+ * running game loops, and managing user interactions.
+ */
 class GameMode {
 public:
+    // Constructor
     GameMode();
+
+    // Initialize game components
     void init();
+
+    // Main game loop execution
     void run(int argc, char** argv);
-    void updateCameraVariables();
-    void spawnBunnyOnTerrainClick();
-    void drawGameObjects();
+
+    // Elevation button controlled manually
     void manualElevationButton();
 
-    void updatePositions();
-
 private:
+    // Helper functions for setting up and managing game frames
+    void setupFrameTiming();
+    void clearScreen();
+    void setupShaders(GLuint& shaderProgram);
+    void uploadUniforms(GLuint& shaderProgram, const std::string& mode);
 
-    // Time based frames
+    // Render functions for different game components
+    void renderTerrain(GLuint& shaderProgram, Model* tm);
+    void renderGUI();
+    void renderGameObjects(GLuint& shaderProgram);
+    void finalizeFrame();
+
+    // Object interaction functions
+    void spawnBunnyOnTerrainClick();
+    void updateCameraVariables();
+    void updatePositions();
+    void uploadPositionData(GLuint& shaderProgram);
+
+    // State variables for time management
     GLfloat deltaTime = 0.0f;
     GLfloat lastFrame = 0.0f;
 
-    // Initial classes
+    // Essential game components
     Camera* camera;
     Terrain* terrain;
     InputController* inputController;
@@ -37,36 +60,28 @@ private:
     Utils* utils;
     Picking* picker;
 
-    // Place to store game objects
+    // Collections for game objects
     std::vector<GameObject> gameObjects;
     std::vector<vec3> objectPositions;
 
-    // Object variables
+    // Object placement specifics
     const float placementDistance = 10.0f;
     vec3 clickedPosition = vec3(0.0f, 0.0f, 0.0f);
 
-    // Reference to shader program
+    // Shader programs
     GLuint program, objectShader;
 
-    // Texture data
+    // Texture data and models
     GLuint splat1, splat2, splat3, map;
     GLuint tex1, tex2, furTex;
-    Model *tm, *bunnyModel;
+    Model* tm, *bunnyModel;
 
+    // Matrix transformations and vectors for camera and objects
     mat4 worldToView, modelToWorld, lookAtVectors;
     vec3 cameraPos, forwardVec, upVec;
 
+    // Projection matrix reference
     const GLfloat* projectionMatrix;
-
-    void setupFrameTiming();
-    void clearScreen();
-    void setupShaders(GLuint& shaderProgram);
-    void uploadUniforms(GLuint& shaderProgram, std::string mode);
-    void uploadPositionData(GLuint& shaderProgram);
-    void renderTerrain(GLuint& shaderProgram, Model* tm);
-    void renderGUI();
-    void renderGameObjects(GLuint& shaderProgram);
-    void finalizeFrame();
 };
 
-#endif
+#endif // GAME_MODE_H

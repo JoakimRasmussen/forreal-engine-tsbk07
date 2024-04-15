@@ -75,10 +75,8 @@ vec3 GameObject::getRotation() const {
     return vec3(rx, ry, rz);
 }
 
-void GameObject::updateAlignment(vec3 normal, vec3 toCamera, bool forceRotation) {
+void GameObject::updateAlignmentToTerrain(vec3 normal) {
     rx = atan2(normal.z, normal.y);
-    if (forceRotation) ry = atan2(toCamera.x, toCamera.z);
-    rz = 0.0f;
 }
 
 float GameObject::lerpAngle(float from, float to, float t) {

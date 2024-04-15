@@ -116,7 +116,7 @@ void GameMode::run(int argc, char** argv) {
 	updatePositions();
 
 	renderGUI();
-	
+
 	setupShaders(program);
 	uploadUniforms(program, "terrain");
 	renderTerrain(program, tm);
@@ -170,7 +170,6 @@ void GameMode::spawnBunnyOnTerrainClick() {
     }
 }
 
-
 void GameMode::updatePositions() {
     // Clear the previous position data
     objectPositions.clear();
@@ -223,7 +222,7 @@ void GameMode::setupShaders(GLuint& shaderProgram) {
 	glUseProgram(shaderProgram);
 }
 
-void GameMode::uploadUniforms(GLuint& shaderProgram, std::string mode) {
+void GameMode::uploadUniforms(GLuint& shaderProgram, const std::string& mode) {
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "worldToView"), 1, GL_TRUE, worldToView.m);
 	glUniform3f(glGetUniformLocation(shaderProgram, "cameraPosition"), cameraPos.x, cameraPos.y, cameraPos.z);
 	glUniform3f(glGetUniformLocation(shaderProgram, "lightPosition"), 5, 5, 5);
@@ -253,9 +252,9 @@ void GameMode::renderGUI() {
 }
 
 void GameMode::renderGameObjects(GLuint& shaderProgram) {
+	// Bind fur texture
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, furTex);
-	vec3 cameraPos = camera->getPosition();
 
 	for (auto& gameObject : gameObjects) {
 		// Identify the model
@@ -267,10 +266,9 @@ void GameMode::renderGameObjects(GLuint& shaderProgram) {
 
 		// Update rotations
 		vec3 normal = terrain->getNormalAtPoint(objPos.x, objPos.z);
-		vec3 toCamera = Normalize(cameraPos - objPos);
 
 		// Calculate rotation to align with terrain and face camera
-		gameObject.updateAlignment(normal, toCamera);
+		gameObject.updateAlignmentToTerrain(normal);
 
 		// Retrieve the rotations
 		vec3 objRot = gameObject.getRotation();
