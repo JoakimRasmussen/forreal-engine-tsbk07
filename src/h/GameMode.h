@@ -23,6 +23,8 @@ public:
     void drawGameObjects();
     void manualElevationButton();
 
+    void updatePositions();
+
 private:
 
     // Time based frames
@@ -39,10 +41,12 @@ private:
 
     // Place to store game objects
     std::vector<GameObject> gameObjects;
+    std::vector<vec3> objectPositions;
 
     // Object variables
     const float placementDistance = 10.0f;
     vec3 clickedPosition = vec3(0.0f, 0.0f, 0.0f);
+    float yOffset = 0.0f;
 
     // Reference to shader program
     GLuint program, objectShader;

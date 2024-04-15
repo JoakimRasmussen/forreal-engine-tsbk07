@@ -8,6 +8,9 @@ GameMode::GameMode() {
     vec3 forwardVector = vec3(2.0f, 0.0f, 2.0f);
     vec3 cameraUpVector = vec3(0, 1, 0);
     GLfloat cameraSpeed = 0.01f;
+
+    objectPositions.reserve(100);
+
     // Camera object
     camera = new Camera(cameraPosition, forwardVector, cameraUpVector, cameraSpeed);
     // Terrain object
@@ -137,6 +140,15 @@ void GameMode::run(int argc, char** argv) {
 	// Draw terrain
 	tm = terrain->getTerrainModel();
 	PlaceModel(tm, program, 0, 0, 0, 0, 0, 0);
+
+	// --- Shadow ---
+	// Update positions of game objects
+	updatePositions();
+	// Upload object positions to shader
+	glUniform3fv(glGetUniformLocation(program, "objectPositions"), objectPositions.size(), &objectPositions[0].x);
+	glUniform1i(glGetUniformLocation(program, "numObjects"), objectPositions.size());
+	// glUniform3fv(glGetUniformLocation(program, "objectPositions"), objectPositions.size(), &objectPositions[0].x);
+
 	DrawModel(tm, program, "in_Position", "in_Normal", "in_TexCoord");
 
 	// Draw GUI
@@ -156,6 +168,8 @@ void GameMode::run(int argc, char** argv) {
 	drawGameObjects();
 
 	glutSwapBuffers();
+
+	yOffset += 0.05f;
 
 	printError("new display!");
 }
@@ -206,7 +220,7 @@ void GameMode::placeGameObjects() {
 		float rz = 0.0f;
 
 		// Create a new bunny object with the calculated position and rotations
-		GameObject bunny(bunnyModel, x, y, z, rx, ry, rz);
+		GameObject bunny(bunnyModel, x, y, z, rx, ry, rz, true);
 		
 		// Add the new bunny to the game objects list
 		gameObjects.push_back(bunny);
@@ -234,7 +248,7 @@ void GameMode::drawGameObjects() {
 		}
 		vec3 objPos = gameObject.getPosition();
 		float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
-		objPos.y = y;
+		objPos.y = y + abs(sin(yOffset)) * 2.0f;
 
 		// Update rotations
 		vec3 normal = terrain->getNormalAtPoint(objPos.x, objPos.z);
@@ -254,4 +268,23 @@ void GameMode::drawGameObjects() {
 		// Draw the model
 		DrawModel(model, objectShader, "in_Position", "in_Normal", "in_TexCoord");
 	}
+}
+
+void GameMode::updatePositions() {
+    // Clear the previous position data
+    objectPositions.clear();
+
+    // Update positions of game objects
+    for (auto& gameObject : gameObjects) {
+        // Update the position of the game object
+        vec3 objPos = gameObject.getPosition();
+        float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
+        // objPos.y = y;
+		objPos.y = y + abs(sin(yOffset)) * 2.0f;
+
+        // Store the updated position
+        objectPositions.push_back(objPos);
+
+		if (objectPositions.size() >= 100) break;
+    }
 }

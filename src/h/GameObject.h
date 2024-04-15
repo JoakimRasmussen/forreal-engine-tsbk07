@@ -10,7 +10,7 @@ class GameObject {
 public:
     Model* model; // The model of the object
 
-    GameObject(Model* model, float x, float y, float z, float rx, float ry, float rz);
+    GameObject(Model* model, float x, float y, float z, float rx, float ry, float rz, bool sleeping = false);
 
     void move(float dx, float dy, float dz);
     void newDestination();
@@ -35,6 +35,7 @@ private:
     int turnIterations = 0;
     int max_iterations = 100;
     bool destinationReached = true;
+    bool sleeping = false;
     
     float lerpAngle(float from, float to, float t);
     float normalizeAngle(float angle);
