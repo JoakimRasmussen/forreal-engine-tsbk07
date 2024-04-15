@@ -20,7 +20,6 @@ public:
     vec3 getPosition() const;
     void setRotation(float rx, float ry, float rz);
     vec3 getRotation() const;
-    float lerpAngle(float from, float to, float t);
 
     Model* getModel() const {
         return model;
@@ -31,8 +30,14 @@ private:
     float x, y, z;
     float targetX, targetZ;
     float rx, ry, rz;
-    float speed = 0.1f;
+    float speed = 0.05f;
+    float turnSpeed = 0.05f;
+    int turnIterations = 0;
+    int max_iterations = 100;
     bool destinationReached = true;
+    
+    float lerpAngle(float from, float to, float t);
+    float normalizeAngle(float angle);
 };
 
 #endif // GAMEOBJECT_H

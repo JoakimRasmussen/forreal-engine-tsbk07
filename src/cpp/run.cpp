@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 	glutMotionFunc(InputController::guiDragBridge);
 
 	init();
-	glutRepeatingTimer(20);
+	glutRepeatingTimer(10);
 	glutMainLoop();
 	exit(0);
 }

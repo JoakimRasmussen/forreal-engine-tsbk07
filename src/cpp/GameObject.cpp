@@ -34,22 +34,19 @@ void GameObject::moveTowardsDestination() {
 
     // Update rotation
     float desiredRy = atan2(dx, dz);
-    ry = lerpAngle(ry, desiredRy, 0.05f);
+    desiredRy = normalizeAngle(desiredRy);
+    ry = lerpAngle(ry, desiredRy, turnSpeed);
+    ry = normalizeAngle(ry);
 
-    // Move forward if aligned with the destination
-    if (fabs(ry - desiredRy) < 0.2) {  // Increased tolerance to 0.2 radians
-        float speed = 0.05f;
+    if (fabs(ry - desiredRy) < 0.2 || turnIterations > max_iterations) {
+        // Move the bunny
         x += speed * dx / distance;
         z += speed * dz / distance;
-        // printf("Moving: x = %f, z = %f, ry = %f, desiredRy = %f\n", x, z, ry, desiredRy);
+        turnIterations = 0;
+    } else {
+        turnIterations++;
     }
-    // else {
-    //     printf("Not moving, rotation not aligned: ry = %f, desiredRy = %f\n", ry, desiredRy);
-    // }
-
 }
-
-
 
 void GameObject::setPosition(float x, float y, float z) {
     this->x = x;
@@ -100,6 +97,23 @@ float GameObject::lerpAngle(float from, float to, float t) {
         adjusted += 2 * M_PI;
     }
     return adjusted;
+}
+
+float GameObject::normalizeAngle(float angle) {
+    // Normalize angle to range [-PI, PI]
+    angle = fmod(angle + M_PI, 2 * M_PI);
+    if (angle < 0) angle += 2 * M_PI;
+    angle -= M_PI;
+
+    // Snap values close to -PI or PI to -PI or PI to handle precision issues at boundaries
+    const float epsilon = 1e-5;  // A small threshold to handle precision
+    if (fabs(angle - M_PI) < epsilon) {
+        angle = M_PI;
+    } else if (fabs(angle + M_PI) < epsilon) {
+        angle = -M_PI;
+    }
+
+    return angle;
 }
 
 
