@@ -33,7 +33,7 @@ void GameMode::init() {
     // GL inits
 	glClearColor(0.2,0.2,0.5,0);
 	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 	printError("GL inits");
 
 	printf("Loading shaders...\n");
@@ -115,8 +115,6 @@ void GameMode::run(int argc, char** argv) {
 	updateCameraVariables();
 	updatePositions();
 
-	renderGUI();
-
 	setupShaders(program);
 	uploadUniforms(program, "terrain");
 	renderTerrain(program, tm);
@@ -126,6 +124,8 @@ void GameMode::run(int argc, char** argv) {
 	setupShaders(objectShader);
 	uploadUniforms(objectShader, "object");
 	renderGameObjects(objectShader);
+
+	renderGUI();
 
 	finalizeFrame();
 	printError("Post-run checks");
