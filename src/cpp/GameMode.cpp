@@ -174,22 +174,6 @@ void GameMode::run(int argc, char** argv) {
 	printError("new display!");
 }
 
-void GameMode::manualElevationButton() {
-	// Test manual elevation button
-	if (GUI::manualElevation) {
-		// Set manual elevation
-		terrain->editTerrainAtIntersectionPoint(picker->getIntersectionPoint());
-	}
-}
-
-void GameMode::updateCameraVariables() {
-	// Update camera position
-	cameraPos = camera->getPosition();
-	// Update forward vector (normalized)
-	forwardVec = Normalize(camera->getForwardVector());
-	// Update up vector
-	upVec = camera->getUpVector();
-}
 
 void GameMode::placeGameObjects() {
 
@@ -220,7 +204,7 @@ void GameMode::placeGameObjects() {
 		float rz = 0.0f;
 
 		// Create a new bunny object with the calculated position and rotations
-		GameObject bunny(bunnyModel, x, y, z, rx, ry, rz, true);
+		GameObject bunny(bunnyModel, x, y, z, rx, ry, rz);
 		
 		// Add the new bunny to the game objects list
 		gameObjects.push_back(bunny);
@@ -248,7 +232,7 @@ void GameMode::drawGameObjects() {
 		}
 		vec3 objPos = gameObject.getPosition();
 		float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
-		objPos.y = y + abs(sin(yOffset)) * 2.0f;
+		objPos.y = y;
 
 		// Update rotations
 		vec3 normal = terrain->getNormalAtPoint(objPos.x, objPos.z);
@@ -279,12 +263,28 @@ void GameMode::updatePositions() {
         // Update the position of the game object
         vec3 objPos = gameObject.getPosition();
         float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
-        // objPos.y = y;
-		objPos.y = y + abs(sin(yOffset)) * 2.0f;
+		objPos.y = y;
 
         // Store the updated position
         objectPositions.push_back(objPos);
 
 		if (objectPositions.size() >= 100) break;
     }
+}
+
+void GameMode::manualElevationButton() {
+	// Test manual elevation button
+	if (GUI::manualElevation) {
+		// Set manual elevation
+		terrain->editTerrainAtIntersectionPoint(picker->getIntersectionPoint());
+	}
+}
+
+void GameMode::updateCameraVariables() {
+	// Update camera position
+	cameraPos = camera->getPosition();
+	// Update forward vector (normalized)
+	forwardVec = Normalize(camera->getForwardVector());
+	// Update up vector
+	upVec = camera->getUpVector();
 }
