@@ -15,11 +15,9 @@ class GameMode {
 public:
     GameMode();
     void init();
-    // void display();
     void run(int argc, char** argv);
     void updateCameraVariables();
-    void bunnyButtonLogic();
-    void placeGameObjects();
+    void spawnBunnyOnTerrainClick();
     void drawGameObjects();
     void manualElevationButton();
 
@@ -46,7 +44,6 @@ private:
     // Object variables
     const float placementDistance = 10.0f;
     vec3 clickedPosition = vec3(0.0f, 0.0f, 0.0f);
-    float yOffset = 0.0f;
 
     // Reference to shader program
     GLuint program, objectShader;
@@ -61,6 +58,15 @@ private:
 
     const GLfloat* projectionMatrix;
 
+    void setupFrameTiming();
+    void clearScreen();
+    void setupShaders(GLuint& shaderProgram);
+    void uploadUniforms(GLuint& shaderProgram, std::string mode);
+    void uploadPositionData(GLuint& shaderProgram);
+    void renderTerrain(GLuint& shaderProgram, Model* tm);
+    void renderGUI();
+    void renderGameObjects(GLuint& shaderProgram);
+    void finalizeFrame();
 };
 
 #endif

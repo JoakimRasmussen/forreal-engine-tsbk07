@@ -251,7 +251,7 @@ bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& i
 		return true;
 	}
 	// No intersection found
-	printf("No intersection found\n");
+	// printf("No intersection found\n");
 	return false;
 }
 
