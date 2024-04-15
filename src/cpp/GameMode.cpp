@@ -8,6 +8,9 @@ GameMode::GameMode() {
     vec3 forwardVector = vec3(2.0f, 0.0f, 2.0f);
     vec3 cameraUpVector = vec3(0, 1, 0);
     GLfloat cameraSpeed = 0.01f;
+
+    objectPositions.reserve(100);
+
     // Camera object
     camera = new Camera(cameraPosition, forwardVector, cameraUpVector, cameraSpeed);
     // Terrain object
@@ -137,6 +140,15 @@ void GameMode::run(int argc, char** argv) {
 	// Draw terrain
 	tm = terrain->getTerrainModel();
 	PlaceModel(tm, program, 0, 0, 0, 0, 0, 0);
+
+	// --- Shadow ---
+	// Update positions of game objects
+	updatePositions();
+	// Upload object positions to shader
+	glUniform3fv(glGetUniformLocation(program, "objectPositions"), objectPositions.size(), &objectPositions[0].x);
+	glUniform1i(glGetUniformLocation(program, "numObjects"), objectPositions.size());
+	// glUniform3fv(glGetUniformLocation(program, "objectPositions"), objectPositions.size(), &objectPositions[0].x);
+
 	DrawModel(tm, program, "in_Position", "in_Normal", "in_TexCoord");
 
 	// Draw GUI
@@ -157,25 +169,11 @@ void GameMode::run(int argc, char** argv) {
 
 	glutSwapBuffers();
 
+	yOffset += 0.05f;
+
 	printError("new display!");
 }
 
-void GameMode::manualElevationButton() {
-	// Test manual elevation button
-	if (GUI::manualElevation) {
-		// Set manual elevation
-		terrain->editTerrainAtIntersectionPoint(picker->getIntersectionPoint());
-	}
-}
-
-void GameMode::updateCameraVariables() {
-	// Update camera position
-	cameraPos = camera->getPosition();
-	// Update forward vector (normalized)
-	forwardVec = Normalize(camera->getForwardVector());
-	// Update up vector
-	upVec = camera->getUpVector();
-}
 
 void GameMode::placeGameObjects() {
 
@@ -254,4 +252,39 @@ void GameMode::drawGameObjects() {
 		// Draw the model
 		DrawModel(model, objectShader, "in_Position", "in_Normal", "in_TexCoord");
 	}
+}
+
+void GameMode::updatePositions() {
+    // Clear the previous position data
+    objectPositions.clear();
+
+    // Update positions of game objects
+    for (auto& gameObject : gameObjects) {
+        // Update the position of the game object
+        vec3 objPos = gameObject.getPosition();
+        float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
+		objPos.y = y;
+
+        // Store the updated position
+        objectPositions.push_back(objPos);
+
+		if (objectPositions.size() >= 100) break;
+    }
+}
+
+void GameMode::manualElevationButton() {
+	// Test manual elevation button
+	if (GUI::manualElevation) {
+		// Set manual elevation
+		terrain->editTerrainAtIntersectionPoint(picker->getIntersectionPoint());
+	}
+}
+
+void GameMode::updateCameraVariables() {
+	// Update camera position
+	cameraPos = camera->getPosition();
+	// Update forward vector (normalized)
+	forwardVec = Normalize(camera->getForwardVector());
+	// Update up vector
+	upVec = camera->getUpVector();
 }

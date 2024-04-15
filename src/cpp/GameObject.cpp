@@ -1,8 +1,8 @@
 #include "../h/GameObject.h"
 
 // Constructor definition
-GameObject::GameObject(Model* model, float x, float y, float z, float rx, float ry, float rz)
-    : model(model), x(x), y(y), z(z), rx(rx), ry(ry), rz(rz) {
+GameObject::GameObject(Model* model, float x, float y, float z, float rx, float ry, float rz, bool sleeping)
+    : model(model), x(x), y(y), z(z), rx(rx), ry(ry), rz(rz), sleeping(sleeping) {
 }
 
 void GameObject::move(float dx, float dy, float dz) {
@@ -19,6 +19,7 @@ void GameObject::newDestination() {
 }
 
 void GameObject::moveTowardsDestination() {
+    if (sleeping) return;
     if (destinationReached) {
         newDestination();
     }
