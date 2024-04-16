@@ -27,79 +27,20 @@ GameMode::GameMode() {
 
 }
 
-void GameMode::init() { 
-	// Initialization logic
+void GameMode::init() {
+	printError("Pre-init checks");
 	printf("Initializing game mode...\n");
-    // GL inits
-	glClearColor(0.2,0.2,0.5,0);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	printError("GL inits");
 
-	printf("Loading shaders...\n");
-	// Load and compile shader
-	program = loadShaders("shaders/terrainsplat.vert", "shaders/terrainsplat.frag");
-	glUseProgram(program);
-	glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
-	printError("init normal shader");
-
-	printf("Loading textures...\n");
-	LoadTGATextureSimple("textures/grass.tga", &splat1);
-	LoadTGATextureSimple("textures/dirt.tga", &splat2);
-	LoadTGATextureSimple("textures/conc.tga", &splat3);
-	LoadTGATextureSimple("splatmap123.tga", &map);
-	LoadTGATextureSimple("textures/fur.tga", &furTex);
-
-	printError("init textures");
-
-	printf("Binding textures...\n");
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, splat1);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, splat2);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, splat3);
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, map);
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, furTex);
-
-	printError("bind textures");
-
-	printf("Loading object shader...\n");
-	// Load object shader
-	objectShader = loadShaders("shaders/object.vert", "shaders/object.frag");
-	glUseProgram(objectShader);
-	glUniformMatrix4fv(glGetUniformLocation(objectShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
-	printError("init shader");
-
-	// Upload the texture unit for fur texture in object shader
-	glUniform1i(glGetUniformLocation(objectShader, "furTex"), 4); // Texture unit 4
-	printError("bind textures");
-
-	glUseProgram(program); // Switch back to the terrain shader program
-	printf("Uploading texture units on GPU...\n");
-	// Upload texture units on GPU
-	glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
-	// glUniform1i(glGetUniformLocation(program, "opt"), 1);
-	glUniform1i(glGetUniformLocation(program, "grass"), 0); // Texture unit 0
-	glUniform1i(glGetUniformLocation(program, "dirt"), 1); // Texture unit 1
-	glUniform1i(glGetUniformLocation(program, "conc"), 2); // Texture unit 2
-	glUniform1i(glGetUniformLocation(program, "map"), 3); // Texture unit 3
-	
-	printf("Loading terrain model...\n");
-	tm = terrain->setTerrainModel("terrain/fft-terrain.tga");
-	printError("init terrain!");
-
-	printf("Loading bunny model...\n");
-	bunnyModel = LoadModel("models/bunny.obj");
-	printError("init bunny!");
-
-	printf("Initializing TerrainGUI...\n");
-	gui->initTerrainGUI(terrain);
-	printError("init GUI!");
+	initGL();
+	loadNecessaryShaders();
+	loadAndBindTextures();
+	loadModels();
+	uploadTextureData(program, "terrain");
+	uploadTextureData(objectShader, "object");
+	setupGUI();
 
 	printf("Done initializing game mode\n");
+	printError("Post-init checks");
 	printf("--------------------------------\n");
 }
 
@@ -115,13 +56,13 @@ void GameMode::run(int argc, char** argv) {
 	updateCameraVariables();
 	updatePositions();
 
-	setupShaders(program);
+	activateShader(program);
 	uploadUniforms(program, "terrain");
 	renderTerrain(program, tm);
 
 	spawnBunnyOnTerrainClick();
 
-	setupShaders(objectShader);
+	activateShader(objectShader);
 	uploadUniforms(objectShader, "object");
 	renderGameObjects(objectShader);
 
@@ -218,7 +159,7 @@ void GameMode::clearScreen() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void GameMode::setupShaders(GLuint& shaderProgram) {
+void GameMode::activateShader(GLuint& shaderProgram) {
 	glUseProgram(shaderProgram);
 }
 
@@ -252,9 +193,7 @@ void GameMode::renderGUI() {
 }
 
 void GameMode::renderGameObjects(GLuint& shaderProgram) {
-	// Bind fur texture
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, furTex);
+	// Render game objects
 
 	for (auto& gameObject : gameObjects) {
 		// Identify the model
@@ -276,12 +215,106 @@ void GameMode::renderGameObjects(GLuint& shaderProgram) {
 		// Update the model-to-world matrix
 		modelToWorld = T(objPos.x, objPos.y, objPos.z) * Rx(objRot.x) * Ry(objRot.y) * Rz(objRot.z);
 
+		activateShader(shaderProgram);
+		glActiveTexture(GL_TEXTURE4);
+    	glBindTexture(GL_TEXTURE_2D, furTex);
+
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
 		// Draw the model
 		DrawModel(model, shaderProgram, "in_Position", "in_Normal", "in_TexCoord");
+		// DrawModel(model, shaderProgram, "in_Position", NULL, "in_TexCoord");
 	}	
 }
 
 void GameMode::finalizeFrame() {
 	glutSwapBuffers();
 }
+
+void GameMode::initGL() {
+    printf("Initializing GL settings...\n");
+    glClearColor(0.2, 0.2, 0.5, 0);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    printError("GL inits");
+}
+
+void GameMode::loadNecessaryShaders() {
+    printf("Loading shaders...\n");
+    program = loadShaders("shaders/terrainsplat.vert", "shaders/terrainsplat.frag");
+    objectShader = loadShaders("shaders/object.vert", "shaders/object.frag");
+
+	// Upload the projection matrix to the shader programs
+	glUseProgram(program);
+	glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
+	glUseProgram(objectShader);
+	glUniformMatrix4fv(glGetUniformLocation(objectShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
+
+    printError("shader compilation");
+}
+
+void GameMode::loadAndBindTextures() {
+    printf("Loading and binding textures...\n");
+    LoadTGATextureSimple("textures/grass.tga", &splat1);
+    LoadTGATextureSimple("textures/dirt.tga", &splat2);
+    LoadTGATextureSimple("textures/conc.tga", &splat3);
+    LoadTGATextureSimple("splatmap123.tga", &map);
+    LoadTGATextureSimple("textures/fur.tga", &furTex);
+    LoadTGATextureSimple("textures/rutor.tga", &debugTex);
+
+	glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, splat1);
+	glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, splat2);
+	glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, splat3);
+	glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, map);
+	glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, furTex);
+	glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, debugTex);
+
+    printError("texture loading and binding");
+}
+
+void GameMode::loadModels() {
+    printf("Loading models...\n");
+    bunnyModel = LoadModel("models/bunny.obj");
+    tm = terrain->setTerrainModel("terrain/fft-terrain.tga");
+    printError("model loading");
+}
+
+void GameMode::setupGUI() {
+    printf("Setting up GUI...\n");
+    gui->initTerrainGUI(terrain);
+    printError("GUI setup");
+}
+
+void GameMode::uploadTextureData(GLuint& shaderProgram, const std::string& mode) {
+	// Activate the shader program
+	activateShader(shaderProgram);
+
+	// Shared textures
+	glUniform1i(glGetUniformLocation(shaderProgram, "grass"), 0);
+	printError("grass");
+
+	// Terrain specific textures
+	if (mode == "terrain") {
+		printf("Uploading terrain textures...\n");
+		glUniform1i(glGetUniformLocation(shaderProgram, "dirt"), 1);
+		glUniform1i(glGetUniformLocation(shaderProgram, "conc"), 2);
+		glUniform1i(glGetUniformLocation(shaderProgram, "map"), 3);
+		printError("upload textures (terrain)");
+	}
+	// Object specific textures
+	else if (mode == "object")
+	{
+		printf("Uploading object textures...\n");
+		glUniform1i(glGetUniformLocation(shaderProgram, "furTex"), 4);
+		glUniform1i(glGetUniformLocation(shaderProgram, "debugTex"), 5);
+		printError("upload textures (object)");
+	}	
+	
+	printError("upload textures");
+}
+

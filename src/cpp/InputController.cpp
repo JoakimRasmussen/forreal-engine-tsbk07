@@ -63,7 +63,9 @@ void InputController::collectedMouseController(int button, int state, int x, int
 
 	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
 	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+	/* NOTE:function below causes "GL error 0x502" once after first mouse press! */
 	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
+	printError("glReadPixels");
 
 	// printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx, depth %f, stencil index %u\n",
 			// x, y, color[0], color[1], color[2], color[3], depth, index);
@@ -71,7 +73,6 @@ void InputController::collectedMouseController(int button, int state, int x, int
 	// Check ray
 	vec3 ray = picker->calculateMouseRay(x, y, Utils::windowWidth, Utils::windowHeight);
 	terrain->rayTriangleIntersection(camera->getPosition(), ray, picker->intersectionPoint, picker->debugIntersectionVector);
-
 	if (GUI::manualElevation && !GUI::PlaceBunny && !GUI::editTerrainTexture)
 	{
 		GUI::PlaceBunny = false;
@@ -92,8 +93,8 @@ void InputController::collectedMouseController(int button, int state, int x, int
 	// TODO: fix
 	bool debug = true;
 	if (debug)
-	{
 		for (int i = 0; i < 100; i++)
+	{
 		{
 				// Create a vector of points along the ray
 				vec3 pos = camera->getPosition() + i*ray;

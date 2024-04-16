@@ -19,7 +19,7 @@ void main()
     
     Normal = mat3(worldToView) * mat3(modelToWorld) * in_Normal; // Transform normal to world space
 
-    FragPos = in_Position * 0.001; // Scale up the position to make it more visible in the fragment shader
+    FragPos = in_Position;
 
     gl_Position = projectionMatrix * worldToView * modelToWorld * vec4(in_Position, 1.0);
 }

@@ -33,8 +33,15 @@ private:
     // Helper functions for setting up and managing game frames
     void setupFrameTiming();
     void clearScreen();
-    void setupShaders(GLuint& shaderProgram);
+    void activateShader(GLuint& shaderProgram);
     void uploadUniforms(GLuint& shaderProgram, const std::string& mode);
+    void initGL();
+    void loadNecessaryShaders();
+    void loadAndBindTextures();
+    void loadModels();
+    void uploadTextureData(GLuint& shaderProgram, const std::string& mode);
+    void setupGUI();
+
 
     // Render functions for different game components
     void renderTerrain(GLuint& shaderProgram, Model* tm);
@@ -73,7 +80,7 @@ private:
 
     // Texture data and models
     GLuint splat1, splat2, splat3, map;
-    GLuint tex1, tex2, furTex;
+    GLuint tex1, tex2, furTex, debugTex;
     Model* tm, *bunnyModel;
 
     // Matrix transformations and vectors for camera and objects
