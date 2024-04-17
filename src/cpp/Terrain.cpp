@@ -140,9 +140,22 @@ vec3 Terrain::getNormalAtPoint(float x, float z) const
 
 void Terrain::editTerrainAtIntersectionPoint(vec3 intersectionPoint)
 {
-	unsigned int x = intersectionPoint.x/quadSize;
-	unsigned int z = intersectionPoint.z/quadSize;
-	ttex.imageData[(x + z * ttex.width) * (ttex.bpp/8)] += tenIncrement;
+	unsigned int x = intersectionPoint.x / quadSize;
+	unsigned int z = intersectionPoint.z / quadSize;
+
+	// Iterate over the surrounding area with a radius of 1
+	for (int i = -1; i <= 1; i++) {
+		for (int j = -1; j <= 1; j++) {
+			unsigned int newX = x + i;
+			unsigned int newZ = z + j;
+
+			// Check if the new coordinates are within the terrain bounds
+			if (newX >= 0 && newX < ttex.width && newZ >= 0 && newZ < ttex.height) {
+				ttex.imageData[(newX + newZ * ttex.width) * (ttex.bpp / 8)] += tenIncrement;
+			}
+		}
+	}
+
 	terrainModel = generateTerrain(&ttex, currentElevation);
 }
 
