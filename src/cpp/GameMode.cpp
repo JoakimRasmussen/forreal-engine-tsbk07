@@ -254,25 +254,25 @@ void GameMode::loadNecessaryShaders() {
 
 void GameMode::loadAndBindTextures() {
     printf("Loading and binding textures...\n");
-    LoadTGATextureSimple("textures/grass.tga", &splat1);
-    LoadTGATextureSimple("textures/dirt.tga", &splat2);
-    LoadTGATextureSimple("textures/conc.tga", &splat3);
-    LoadTGATextureSimple("splatmap123.tga", &map);
+    LoadTGATextureSimple("textures/grass.tga", &grass);
+    LoadTGATextureSimple("textures/dirt.tga", &dirt);
+    LoadTGATextureSimple("textures/rock.tga", &rock);
+    LoadTGATextureSimple("splatmap.tga", &map);
     LoadTGATextureSimple("textures/fur.tga", &furTex);
     LoadTGATextureSimple("textures/rutor.tga", &debugTex);
 
 	glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, splat1);
+    glBindTexture(GL_TEXTURE_2D, grass);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, splat2);
+    glBindTexture(GL_TEXTURE_2D, dirt);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, splat3);
+    glBindTexture(GL_TEXTURE_2D, rock);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
@@ -307,14 +307,18 @@ void GameMode::uploadTextureData(GLuint& shaderProgram, const std::string& mode)
 	activateShader(shaderProgram);
 
 	// Shared textures
+	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(glGetUniformLocation(shaderProgram, "grass"), 0);
 	printError("grass");
 
 	// Terrain specific textures
 	if (mode == "terrain") {
 		printf("Uploading terrain textures...\n");
+		glActiveTexture(GL_TEXTURE1);
 		glUniform1i(glGetUniformLocation(shaderProgram, "dirt"), 1);
-		glUniform1i(glGetUniformLocation(shaderProgram, "conc"), 2);
+		glActiveTexture(GL_TEXTURE2);
+		glUniform1i(glGetUniformLocation(shaderProgram, "rock"), 2);
+		glActiveTexture(GL_TEXTURE3);
 		glUniform1i(glGetUniformLocation(shaderProgram, "map"), 3);
 		printError("upload textures (terrain)");
 	}

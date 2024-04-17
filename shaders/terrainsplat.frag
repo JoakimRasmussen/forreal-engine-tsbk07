@@ -6,7 +6,7 @@ in vec2 ex_TexCoord;
 
 out vec4 out_Color;
 
-uniform sampler2D grass, conc, dirt, map;
+uniform sampler2D grass, rock, dirt, map;
 uniform vec3 lightPosition;
 uniform vec3 objectPositions[100]; // Max number of objects
 uniform int numObjects; 		   // Actual number of objects
@@ -32,14 +32,24 @@ void main(void)
 
     shadowIntensity = max(shadowIntensity, 0.0); // No negative shadows
 
-    vec2 grassCoords = ex_TexCoord * 25.0;
-    vec2 concCoords = ex_TexCoord * 25.0;
-    vec2 dirtCoords = ex_TexCoord * 25.0;
+     // Calculate angle between the normal and the vertical (upward) direction
+    float angle = degrees(acos(dot(normalize(ex_Normal), vec3(0.0, 1.0, 0.0))));
+
+    // Texture coordinates multiplied by a factor for repetition
+    vec2 texCoords = ex_TexCoord * 25.0;
 
     vec4 m = texture(map, ex_TexCoord);
-    vec4 terrainColor = (texture(grass, grassCoords) * m.r +
-                         texture(conc, concCoords) * m.g +
-                         texture(dirt, dirtCoords) * m.b);
+    vec4 terrainColor;
+
+    // Choose texture based on the slope angle
+    if (angle > 60.0) {
+        terrainColor = texture(rock, texCoords); // Use dirt texture on steep slopes
+    } else {
+        // Use mix of textures based on 'map' texture weights
+        terrainColor = (texture(grass, texCoords) * m.r +
+                        texture(dirt, texCoords) * m.g +
+                        texture(rock, texCoords) * m.b);
+    }
 
     out_Color = shadowIntensity * lightIntensity * terrainColor;
 }

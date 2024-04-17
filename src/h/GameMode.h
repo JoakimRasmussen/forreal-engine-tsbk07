@@ -79,7 +79,7 @@ private:
     GLuint program, objectShader;
 
     // Texture data and models
-    GLuint splat1, splat2, splat3, map;
+    GLuint grass, rock, dirt, map;
     GLuint tex1, tex2, furTex, debugTex;
     Model* tm, *bunnyModel;
 
