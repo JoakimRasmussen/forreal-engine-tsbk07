@@ -32,10 +32,14 @@ void main(void)
 
     shadowIntensity = max(shadowIntensity, 0.0); // No negative shadows
 
+    vec2 grassCoords = ex_TexCoord * 25.0;
+    vec2 concCoords = ex_TexCoord * 25.0;
+    vec2 dirtCoords = ex_TexCoord * 25.0;
+
     vec4 m = texture(map, ex_TexCoord);
-    vec4 terrainColor = (texture(grass, ex_TexCoord) * m.r +
-                         texture(conc, ex_TexCoord) * m.g +
-                         texture(dirt, ex_TexCoord) * m.b);
+    vec4 terrainColor = (texture(grass, grassCoords) * m.r +
+                         texture(conc, concCoords) * m.g +
+                         texture(dirt, dirtCoords) * m.b);
 
     out_Color = shadowIntensity * lightIntensity * terrainColor;
 }

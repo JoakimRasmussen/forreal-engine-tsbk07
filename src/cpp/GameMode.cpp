@@ -263,12 +263,24 @@ void GameMode::loadAndBindTextures() {
 
 	glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, splat1);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 	glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, splat2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 	glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, splat3);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 	glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, map);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 	glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D, furTex);
 	glActiveTexture(GL_TEXTURE5);
