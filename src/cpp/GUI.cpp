@@ -24,9 +24,9 @@ void GUI::initTerrainGUI(Terrain* terrain)
 
 	// GUI for manual texture
 	sgCreateButton(500, 40, "Manual Texture", TextureButton);	
-	sgCreateButton(500, 60, "Grass texture", RockButton);
-	sgCreateButton(500, 80, "Rock texture", GrassButton);
-	sgCreateButton(500, 100, "Concrete texture", ConcreteButton);
+	sgCreateButton(500, 60, "Grass texture", GrassButton);
+	sgCreateButton(500, 80, "Dirt texture", DirtButton);
+	sgCreateButton(500, 100, "Rock texture", RockButton);
 
 
 	sgCreateStaticString(40, 80, "--------------------------");
@@ -84,7 +84,15 @@ void GUI::TextureButton()
 
 void GUI::GrassButton()
 {
-	printf("Gras texture\n");
+	printf("Grass texture\n");
+	textureColor[0] = 255;
+	textureColor[1] = 0;
+	textureColor[2] = 0;
+}
+
+void GUI::DirtButton()
+{
+	printf("Dirt texture\n");
 	textureColor[0] = 0;
 	textureColor[1] = 255;
 	textureColor[2] = 0;
@@ -93,14 +101,6 @@ void GUI::GrassButton()
 void GUI::RockButton()
 {
 	printf("Rock texture\n");
-	textureColor[0] = 255;
-	textureColor[1] = 0;
-	textureColor[2] = 0;
-}
-
-void GUI::ConcreteButton()
-{
-	printf("Concrete texture\n");
 	textureColor[0] = 0;
 	textureColor[1] = 0;
 	textureColor[2] = 255;

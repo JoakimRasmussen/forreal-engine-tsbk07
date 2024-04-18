@@ -17,9 +17,9 @@ public:
     static void PlaceBunnyButton();
     static void ElevationButton();
     static void TextureButton();
-    static void RockButton();
+    static void DirtButton();
     static void GrassButton();
-    static void ConcreteButton();
+    static void RockButton();
 
 
     static bool PlaceBunny;
