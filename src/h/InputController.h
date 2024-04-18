@@ -29,6 +29,13 @@ public:
 
     void cameraControls(GLfloat deltaTime, Camera* camera);
 
+    // getHitCoordinates
+    int getHitX() const {
+        return hitx;
+    }
+    int getHitY() const {
+        return hity;
+    }
     // Callabacks/bridge functions
     static void handleMouseMotionBridge(int x, int y);
     static void guiKeyboardBridge(unsigned char key, int x, int y);
@@ -36,12 +43,12 @@ public:
     static void collectedMouseControllerBridge(int button, int state, int x, int y);
     Utils utils;
 
-    int hitx = -1, hity = -1;
 
 private:
     // Mouse variables
     bool firstMouse = true;
     GLfloat lastX = 300, lastY = 300; // Screen width and height
+    int hitx = -1, hity = -1;
     static InputController* instance;
     // Test string
     char testString[1024] = "Type here";

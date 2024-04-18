@@ -32,8 +32,8 @@ public:
     void performHitTest();
 
     // Available colors for picking
-    static const int numColors = 12; // Define the number of colors
-    static const GLfloat availableColors[numColors][4];  // Declaration of the static array
+    static const int numColors = 100; // Define the number of colors
+    static GLfloat availableColors[numColors][4];  // Declaration of the static array
     int colorHits[numColors] = {0};  // Array to store the hits
 
 private:
@@ -62,7 +62,10 @@ private:
     void updateCameraVariables();
     void updatePositions();
     void uploadPositionData(GLuint& shaderProgram);
-
+    // void updateObjectPositions();
+    void generateColors(int numColors);
+    void HSVtoRGB(float h, float s, float v, float& r, float& g, float& b);
+    bool colorsAreEqual(const float* color1, const float* color2, size_t numElements);
     // State variables for time management
     GLfloat deltaTime = 0.0f;
     GLfloat lastFrame = 0.0f;
@@ -82,6 +85,7 @@ private:
     // Object placement specifics
     const float placementDistance = 10.0f;
     vec3 clickedPosition = vec3(0.0f, 0.0f, 0.0f);
+    int objectID = 0;
 
     // Shader programs
     GLuint program, objectShader, pickingShader;

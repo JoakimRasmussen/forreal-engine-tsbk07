@@ -54,13 +54,16 @@ void InputController::collectedMouseController(int button, int state, int x, int
     glutPostRedisplay();
 
     if(state != GLUT_DOWN) return;
-	printf("Mouse click at %d, %d\n", x, y);
+	// printf("Mouse click at %d, %d\n", x, y);
 
-    float color[4];
 	// hitx = x;
 	// hity = y;
+
+    float color[4];
 	
     glReadPixels(x, Utils::windowHeight - y - 1, 1, 1, GL_RGB, GL_FLOAT, &color);
+	// printf("Clicked on pixel %d, %d, color %f %f %f\n", x, y, color[0], color[1], color[2]);
+	// printf("Last color %f %f %f\n", picker->lastColor[0], picker->lastColor[1], picker->lastColor[2]);
     printError("glReadPixels");
 
     if (colorsAreEqual(color, picker->lastColor, 3)) {

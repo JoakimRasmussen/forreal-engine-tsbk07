@@ -10,8 +10,8 @@ class GameObject {
 public:
     Model* model; // The model of the object
 
-    GameObject(Model* model, float x, float y, float z, float rx, float ry, float rz, bool sleeping = false);
-
+    GameObject(Model* model, int objectID, float x, float y, float z, float rx, float ry, float rz, bool sleeping = false);
+    ~GameObject();
     void move(float dx, float dy, float dz);
     void newDestination();
     void moveTowardsDestination();
@@ -24,8 +24,12 @@ public:
     Model* getModel() const {
         return model;
     }
+    int getID() const {
+        return objectID;
+    }
 
 private:
+    int objectID;
     /* y isnt used */
     float x, y, z;
     float targetX, targetZ;

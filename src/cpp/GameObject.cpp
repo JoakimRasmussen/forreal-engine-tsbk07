@@ -1,8 +1,14 @@
 #include "../h/GameObject.h"
 
 // Constructor definition
-GameObject::GameObject(Model* model, float x, float y, float z, float rx, float ry, float rz, bool sleeping)
+GameObject::GameObject(Model* model, int objectID, float x, float y, float z, float rx, float ry, float rz, bool sleeping)
     : model(model), x(x), y(y), z(z), rx(rx), ry(ry), rz(rz), sleeping(sleeping) {
+    this->objectID = objectID;
+}
+
+// Destructor definition
+GameObject::~GameObject() {
+    // Destructor
 }
 
 void GameObject::move(float dx, float dy, float dz) {

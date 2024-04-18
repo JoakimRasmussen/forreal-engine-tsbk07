@@ -24,8 +24,12 @@ GameMode::GameMode() {
 
     // Projection matrix
     projectionMatrix = Utils::getProjectionMatrix();
+	
 
 }
+
+GLfloat GameMode::availableColors[GameMode::numColors][4];  // Definition of the static member
+
 
 void GameMode::init() {
 	printError("Pre-init checks");
@@ -38,6 +42,7 @@ void GameMode::init() {
 	uploadTextureData(program, "terrain");
 	uploadTextureData(objectShader, "object");
 	setupGUI();
+	generateColors(numColors);
 
 	printf("Done initializing game mode\n");
 	printError("Post-init checks");
@@ -56,10 +61,13 @@ void GameMode::run(int argc, char** argv) {
 	updateCameraVariables();
 	updatePositions();
 
+	// First Pass: Picking
 	activateShader(pickingShader);
 	uploadUniforms(pickingShader, "picking");
 	renderForPicking(pickingShader);
+	// clearScreen();
 
+	// Second Pass: Main rendering
 	activateShader(program);
 	uploadUniforms(program, "terrain");
 	renderTerrain(program, tm);
@@ -103,7 +111,9 @@ void GameMode::spawnBunnyOnTerrainClick() {
 
         // Create a new bunny object with the calculated position and rotations
 		bool isSleeping = true;
-        GameObject bunny(bunnyModel, x, y, z, rx, ry, rz, isSleeping);
+		int ID = objectID;
+		objectID++;
+        GameObject bunny(bunnyModel, ID, x, y, z, rx, ry, rz, isSleeping);
         
         // Add the new bunny to the game objects list
         gameObjects.push_back(bunny);
@@ -349,10 +359,12 @@ void GameMode::uploadTextureData(GLuint& shaderProgram, const std::string& mode)
 
 void GameMode::renderForPicking(GLuint& pickingShader) {
 
+	// Check if there are any objects to draw
+	if (gameObjects.size() == 0) {
+		return;
+	}
 	// Draw objects for picking
-	// Note: I only have 12 colors, but number of objects vary
 	for (std::size_t i = 0; i < gameObjects.size(); i++) {
-		// Set the color
 		int colorIndex = i % numColors;
 		if (!colorHits[colorIndex]) {
 			// Set the color
@@ -360,6 +372,8 @@ void GameMode::renderForPicking(GLuint& pickingShader) {
 		} else {
 			// Set the color
 			glUniform4f(glGetUniformLocation(pickingShader, "objectColor"), 0.5, 0, 0, 1);
+			gameObjects[i].getID();
+			printf("Object ID: %d\n", gameObjects[i].getID());
 		}
 		printError("color setting");
 
@@ -385,29 +399,46 @@ void GameMode::renderForPicking(GLuint& pickingShader) {
 	printError("picking");
 }
 
+void GameMode::generateColors(int numColors) {
+    const float saturation = 1.0f;  // Full saturation
+    const float value = 1.0f;       // Full brightness
+    for (int i = 0; i < numColors; i++) {
+        float hue = (float)i / numColors;  // Distribute hues evenly
+        GLfloat r, g, b;
+        HSVtoRGB(hue, saturation, value, r, g, b);  // Convert to RGB
 
-// Definition of the static const colors array
-const GLfloat GameMode::availableColors[12][4] = {
-    {1, 0, 0, 1},
-    {0, 1, 0, 1},
-    {0, 0, 1, 1},
-    {1, 1, 0, 1},
-    {1, 0, 1, 1},
-    {0, 1, 1, 1},
-    {1, 0.5, 0, 1},
-    {0, 1, 0.5, 1},
-    {0.5, 0, 1, 1},
-    {0.5, 1, 0.5, 1},
-    {1, 0.5, 0.5, 1},
-    {0.5, 0.5, 1, 1}
-};
+        availableColors[i][0] = r;
+        availableColors[i][1] = g;
+        availableColors[i][2] = b;
+        availableColors[i][3] = 1.0f;  // Alpha channel
+    }
+}
 
 void GameMode::performHitTest() {
+
+	// int hitx = inputController->getHitX();
+	// int hity = inputController->getHitY();
+	// float color[4];
+
+	// glReadPixels(hitx, Utils::windowHeight - hity - 1, 1, 1, GL_RGBA, GL_FLOAT, &color);
+	
+	// printf("Clicked on pixel %d, %d, color %f %f %f\n", hitx, hity, color[0], color[1], color[2]);
+	// printf("Last color %f %f %f\n", picker->lastColor[0], picker->lastColor[1], picker->lastColor[2]);
+    printError("glReadPixels");
+
+    // if (colorsAreEqual(color, picker->lastColor, 3)) {
+    //     picker->newColor = false;
+    // } else {
+    //     picker->newColor = true;
+    //     picker->setLastColor(color);
+    // }
 	// Reset the color hits
 	for (int i = 0; i < numColors; i++) {
 		colorHits[i] = 0;
 	}
+
 	if (picker->newColor) {
+		// printf("New color detected\n");
 		// Loop through the available colors and check for a match
 		for (int i = 0; i < numColors; i++) {
 			// Check if the color matches
@@ -423,4 +454,29 @@ void GameMode::performHitTest() {
 			}
 		}
 	}
+}
+
+void GameMode::HSVtoRGB(float h, float s, float v, float& r, float& g, float& b) {
+    int i = int(h * 6);
+    float f = h * 6 - i;
+    float p = v * (1 - s);
+    float q = v * (1 - f * s);
+    float t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+}
+
+bool GameMode::colorsAreEqual(const float* color1, const float* color2, size_t numElements) {
+    for (size_t i = 0; i < numElements; ++i) {
+        if (color1[i] != color2[i]) {
+            return false;
+        }
+    }
+    return true;
 }
