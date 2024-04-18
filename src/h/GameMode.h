@@ -29,6 +29,13 @@ public:
     // Elevation button controlled manually
     void manualElevationButton();
 
+    void performHitTest();
+
+    // Available colors for picking
+    static const int numColors = 12; // Define the number of colors
+    static const GLfloat availableColors[numColors][4];  // Declaration of the static array
+    int colorHits[numColors] = {0};  // Array to store the hits
+
 private:
     // Helper functions for setting up and managing game frames
     void setupFrameTiming();
@@ -48,6 +55,7 @@ private:
     void renderGUI();
     void renderGameObjects(GLuint& shaderProgram);
     void finalizeFrame();
+    void renderForPicking(GLuint& shaderProgram);
 
     // Object interaction functions
     void spawnBunnyOnTerrainClick();
@@ -76,7 +84,7 @@ private:
     vec3 clickedPosition = vec3(0.0f, 0.0f, 0.0f);
 
     // Shader programs
-    GLuint program, objectShader;
+    GLuint program, objectShader, pickingShader;
 
     // Texture data and models
     GLuint splat1, splat2, splat3, map;

@@ -56,6 +56,10 @@ void GameMode::run(int argc, char** argv) {
 	updateCameraVariables();
 	updatePositions();
 
+	activateShader(pickingShader);
+	uploadUniforms(pickingShader, "picking");
+	renderForPicking(pickingShader);
+
 	activateShader(program);
 	uploadUniforms(program, "terrain");
 	renderTerrain(program, tm);
@@ -98,7 +102,8 @@ void GameMode::spawnBunnyOnTerrainClick() {
         float rz = 0.0f;
 
         // Create a new bunny object with the calculated position and rotations
-        GameObject bunny(bunnyModel, x, y, z, rx, ry, rz);
+		bool isSleeping = true;
+        GameObject bunny(bunnyModel, x, y, z, rx, ry, rz, isSleeping);
         
         // Add the new bunny to the game objects list
         gameObjects.push_back(bunny);
@@ -164,9 +169,14 @@ void GameMode::activateShader(GLuint& shaderProgram) {
 }
 
 void GameMode::uploadUniforms(GLuint& shaderProgram, const std::string& mode) {
+	// Universal uniforms
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "worldToView"), 1, GL_TRUE, worldToView.m);
+
+	// Mode specific uniforms
+	if (mode == "terrain" || mode == "object") {
 	glUniform3f(glGetUniformLocation(shaderProgram, "cameraPosition"), cameraPos.x, cameraPos.y, cameraPos.z);
 	glUniform3f(glGetUniformLocation(shaderProgram, "lightPosition"), 5, 5, 5);
+	}
 	if (mode == "terrain") {
 		glUniform1f(glGetUniformLocation(shaderProgram, "mountainHeight"), terrain->currentMountainHeight);
 	}
@@ -242,12 +252,15 @@ void GameMode::loadNecessaryShaders() {
     printf("Loading shaders...\n");
     program = loadShaders("shaders/terrainsplat.vert", "shaders/terrainsplat.frag");
     objectShader = loadShaders("shaders/object.vert", "shaders/object.frag");
+	pickingShader = loadShaders("shaders/pick.vert", "shaders/pick.frag");
 
 	// Upload the projection matrix to the shader programs
 	glUseProgram(program);
 	glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 	glUseProgram(objectShader);
 	glUniformMatrix4fv(glGetUniformLocation(objectShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
+	glUseProgram(pickingShader);
+	glUniformMatrix4fv(glGetUniformLocation(pickingShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 
     printError("shader compilation");
 }
@@ -318,3 +331,80 @@ void GameMode::uploadTextureData(GLuint& shaderProgram, const std::string& mode)
 	printError("upload textures");
 }
 
+void GameMode::renderForPicking(GLuint& pickingShader) {
+
+	// Draw objects for picking
+	// Note: I only have 12 colors, but number of objects vary
+	for (std::size_t i = 0; i < gameObjects.size(); i++) {
+		// Set the color
+		int colorIndex = i % numColors;
+		if (!colorHits[colorIndex]) {
+			// Set the color
+			glUniform4fv(glGetUniformLocation(pickingShader, "objectColor"), 1, availableColors[colorIndex]);
+		} else {
+			// Set the color
+			glUniform4f(glGetUniformLocation(pickingShader, "objectColor"), 0.5, 0, 0, 1);
+		}
+		printError("color setting");
+
+		// Update the model-to-world matrix
+		vec3 objPos = gameObjects[i].getPosition();
+		float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
+		objPos.y = y;
+
+		// Retrieve the rotations
+		vec3 objRot = gameObjects[i].getRotation();
+
+		// Update the model-to-world matrix
+		modelToWorld = T(objPos.x, objPos.y, objPos.z) * Rx(objRot.x) * Ry(objRot.y) * Rz(objRot.z);
+		glUniformMatrix4fv(glGetUniformLocation(pickingShader, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
+
+		// Draw the object
+		DrawModel(gameObjects[i].getModel(), pickingShader, "in_Position", NULL, NULL);
+		printError("draw object");
+	}
+
+	glFlush(); // Ensure that all commands are executed
+	performHitTest(); // Check for hit
+	printError("picking");
+}
+
+
+// Definition of the static const colors array
+const GLfloat GameMode::availableColors[12][4] = {
+    {1, 0, 0, 1},
+    {0, 1, 0, 1},
+    {0, 0, 1, 1},
+    {1, 1, 0, 1},
+    {1, 0, 1, 1},
+    {0, 1, 1, 1},
+    {1, 0.5, 0, 1},
+    {0, 1, 0.5, 1},
+    {0.5, 0, 1, 1},
+    {0.5, 1, 0.5, 1},
+    {1, 0.5, 0.5, 1},
+    {0.5, 0.5, 1, 1}
+};
+
+void GameMode::performHitTest() {
+	// Reset the color hits
+	for (int i = 0; i < numColors; i++) {
+		colorHits[i] = 0;
+	}
+	if (picker->newColor) {
+		// Loop through the available colors and check for a match
+		for (int i = 0; i < numColors; i++) {
+			// Check if the color matches
+			if (picker->isHit({availableColors[i][0], availableColors[i][1], availableColors[i][2]})) {
+				// Increment the hit counter
+				colorHits[i]++;
+				// Print the hit color
+				printf("Hit color: %f %f %f\n", availableColors[i][0], availableColors[i][1], availableColors[i][2]);
+				// Reset the new color flag
+				picker->newColor = false;
+				// Break the loop
+				break;
+			}
+		}
+	}
+}

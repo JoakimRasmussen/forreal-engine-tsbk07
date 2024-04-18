@@ -36,6 +36,8 @@ public:
     static void collectedMouseControllerBridge(int button, int state, int x, int y);
     Utils utils;
 
+    int hitx = -1, hity = -1;
+
 private:
     // Mouse variables
     bool firstMouse = true;
@@ -43,6 +45,7 @@ private:
     static InputController* instance;
     // Test string
     char testString[1024] = "Type here";
+    bool colorsAreEqual(const float* color1, const float* color2, size_t numElements);
 
 };
 

@@ -50,22 +50,27 @@ void InputController::cameraControls(GLfloat deltaTime, Camera* camera) {
 void InputController::collectedMouseController(int button, int state, int x, int y)
 {
 
-	// guiMouse
 	if (button == 0) sgMouse(state, x, y);
-	glutPostRedisplay();
+    glutPostRedisplay();
 
-	// onMouse
-	if(state != GLUT_DOWN) 	return;
+    if(state != GLUT_DOWN) return;
+	printf("Mouse click at %d, %d\n", x, y);
 
-	GLbyte color[4];
-	GLfloat depth;
-	GLuint index;
+    float color[4];
+	// hitx = x;
+	// hity = y;
+	
+    glReadPixels(x, Utils::windowHeight - y - 1, 1, 1, GL_RGB, GL_FLOAT, &color);
+    printError("glReadPixels");
 
-	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
-	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-	/* NOTE:function below causes "GL error 0x502" once after first mouse press! */
-	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
-	printError("glReadPixels");
+    if (colorsAreEqual(color, picker->lastColor, 3)) {
+        picker->newColor = false;
+    } else {
+        picker->newColor = true;
+        picker->setLastColor(color);
+    }
+
+	// printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx\n", x, y, color[0], color[1], color[2], color[3]);
 
 	// printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx, depth %f, stencil index %u\n",
 			// x, y, color[0], color[1], color[2], color[3], depth, index);
@@ -200,4 +205,13 @@ void InputController::collectedMouseControllerBridge(int button, int state, int 
 	if (instance != nullptr) {
 		instance->collectedMouseController(button, state, x, y);
 	}
+}
+
+bool InputController::colorsAreEqual(const float* color1, const float* color2, size_t numElements) {
+    for (size_t i = 0; i < numElements; ++i) {
+        if (color1[i] != color2[i]) {
+            return false;
+        }
+    }
+    return true;
 }
