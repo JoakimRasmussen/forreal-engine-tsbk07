@@ -21,6 +21,8 @@ GameMode::GameMode() {
     inputController = new InputController(camera, terrain, picker);
     // Gui object
     gui = new GUI();
+	// Billboards object
+	billboards = new Billboards();
 
     // Projection matrix
     projectionMatrix = Utils::getProjectionMatrix();
@@ -65,6 +67,8 @@ void GameMode::run(int argc, char** argv) {
 	activateShader(objectShader);
 	uploadUniforms(objectShader, "object");
 	renderGameObjects(objectShader);
+
+	billboards->uploadBillboard(camera); 
 
 	renderGUI();
 
@@ -234,6 +238,8 @@ void GameMode::initGL() {
     glClearColor(0.2, 0.2, 0.5, 0);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     printError("GL inits");
 }
 
