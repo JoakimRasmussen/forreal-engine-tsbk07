@@ -10,6 +10,7 @@
 #include "GameObject.h"
 #include "Picking.h"
 #include "GL_utilities.h"
+#include "LoadTexture.h"
 
 /**
  * Class GameMode handles the main operations for the game including initialization,
@@ -79,7 +80,7 @@ private:
     GLuint program, objectShader;
 
     // Texture data and models
-    GLuint grass, rock, dirt, map;
+    GLuint grass, rock, dirt, map, texID1;
     GLuint tex1, tex2, furTex, debugTex;
     Model* tm, *bunnyModel;
 

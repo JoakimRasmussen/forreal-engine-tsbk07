@@ -218,7 +218,6 @@ void GameMode::renderGameObjects(GLuint& shaderProgram) {
 		activateShader(shaderProgram);
 		glActiveTexture(GL_TEXTURE4);
     	glBindTexture(GL_TEXTURE_2D, furTex);
-
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
 		// Draw the model
 		DrawModel(model, shaderProgram, "in_Position", "in_Normal", "in_TexCoord");
@@ -254,11 +253,18 @@ void GameMode::loadNecessaryShaders() {
 
 void GameMode::loadAndBindTextures() {
     printf("Loading and binding textures...\n");
-    LoadTGATextureSimple("textures/grass.tga", &grass);
-    LoadTGATextureSimple("textures/dirt.tga", &dirt);
-    LoadTGATextureSimple("textures/rock.tga", &rock);
+
+	// LoadTGATextureSimple("textures/grass.tga", &grass);
+    // LoadTGATextureSimple("textures/dirt.tga", &dirt);
+    // LoadTGATextureSimple("textures/rock.tga", &rock);
+    // LoadTGATextureSimple("textures/fur.tga", &furTex);
+
+	grass = LoadTexture("ue/grass2k/hres_grass.jpg", 1);
+	dirt = LoadTexture("ue/dirt2k/hres_dirt.jpg", 1);
+	rock = LoadTexture("ue/rock2k/hres_rock.jpg", 1);
+	furTex = LoadTexture("ue/fur2k/hres_fur.jpg", 1);
+
     LoadTGATextureSimple("splatmap.tga", &map);
-    LoadTGATextureSimple("textures/fur.tga", &furTex);
     LoadTGATextureSimple("textures/rutor.tga", &debugTex);
 
 	glActiveTexture(GL_TEXTURE0);
@@ -283,6 +289,9 @@ void GameMode::loadAndBindTextures() {
 
 	glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D, furTex);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 	glActiveTexture(GL_TEXTURE5);
     glBindTexture(GL_TEXTURE_2D, debugTex);
 
@@ -326,8 +335,10 @@ void GameMode::uploadTextureData(GLuint& shaderProgram, const std::string& mode)
 	else if (mode == "object")
 	{
 		printf("Uploading object textures...\n");
+		glActiveTexture(GL_TEXTURE4);
 		glUniform1i(glGetUniformLocation(shaderProgram, "furTex"), 4);
-		glUniform1i(glGetUniformLocation(shaderProgram, "debugTex"), 5);
+
+		//glUniform1i(glGetUniformLocation(shaderProgram, "debugTex"), 5);
 		printError("upload textures (object)");
 	}	
 	

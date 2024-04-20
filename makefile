@@ -1,7 +1,7 @@
 # Compiler and flags
 CC = g++
 CFLAGS = -g -Wall -DGL_GLEXT_PROTOTYPES -MMD -MP
-LIBS = -lX11 -lGL -lm
+LIBS = -lX11 -lGL -lm -lz
 
 # Set the directory in which you saved the common files
 COMMON_DIR = ext/
