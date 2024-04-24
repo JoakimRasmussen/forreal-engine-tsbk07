@@ -111,7 +111,7 @@ void GameMode::spawnBunnyOnTerrainClick() {
         float rz = 0.0f;
 
         // Create a new bunny object with the calculated position and rotations
-		bool isSleeping = true;
+		bool isSleeping = false;
 		int ID = objectID;
 		objectID++;
         GameObject bunny(bunnyModel, ID, x, y, z, rx, ry, rz, isSleeping);
@@ -371,10 +371,10 @@ void GameMode::renderForPicking(GLuint& pickingShader) {
 			// Set the color
 			glUniform4fv(glGetUniformLocation(pickingShader, "objectColor"), 1, availableColors[colorIndex]);
 		} else {
-			// Set the color
-			glUniform4f(glGetUniformLocation(pickingShader, "objectColor"), 0.5, 0, 0, 1);
-			gameObjects[i].getID();
-			printf("Object ID: %d\n", gameObjects[i].getID());
+			// Set the color to white
+			// glUniform4f(glGetUniformLocation(pickingShader, "objectColor"), 1.0f, 1.0f, 1.0f, 1.0f);
+			// Delete the object
+			deleteObject(gameObjects[i].getID());
 		}
 		printError("color setting");
 
@@ -422,7 +422,6 @@ void GameMode::performHitTest() {
 
 	glReadPixels(hitx, Utils::windowHeight - hity - 1, 1, 1, GL_RGBA, GL_FLOAT, &color);
     printError("glReadPixels");
-	picker->setLastColor(color);
 	inputController->resetHitCoordinates();
 	
 	// Reset the color hits
@@ -432,10 +431,9 @@ void GameMode::performHitTest() {
 
 	for (int i = 0; i < numColors; i++) {
 		// Check if the color matches
-		if (picker->isHit({availableColors[i][0], availableColors[i][1], availableColors[i][2]})) {
-			// Increment the hit counter
+		if (colorsAreEqual({color[0], color[1], color[2]}, {availableColors[i][0], availableColors[i][1], availableColors[i][2]}, 0.01f)) {
+			// Increment the hit counter for the corresponding color
 			colorHits[i]++;
-			// Break the loop
 			break;
 		}
 	}
@@ -457,11 +455,25 @@ void GameMode::HSVtoRGB(float h, float s, float v, float& r, float& g, float& b)
     }
 }
 
-bool GameMode::colorsAreEqual(const float* color1, const float* color2, size_t numElements) {
-    for (size_t i = 0; i < numElements; ++i) {
-        if (color1[i] != color2[i]) {
-            return false;
+bool GameMode::colorsAreEqual(const std::array<float, 3>& Color1, const std::array<float, 3>& Color2, float epsilon) {
+    // Check each color component for equality
+    return (std::abs(Color1[0] - Color2[0]) < epsilon &&
+            std::abs(Color1[1] - Color2[1]) < epsilon &&
+            std::abs(Color1[2] - Color2[2]) < epsilon);
+}
+void GameMode::deleteObject(int objectID) {
+    for (auto it = gameObjects.begin(); it != gameObjects.end(); ++it) {
+        if (it->getID() == objectID) {
+            it = gameObjects.erase(it);  // erase returns the next valid iterator
+            break;  // Since you're breaking, only one object gets deleted per function call
         }
     }
-    return true;
+}
+
+void GameMode::printObjectIDs() {
+	printf("Object IDs: ");
+	for (auto& gameObject : gameObjects) {
+		printf("%d ", gameObject.getID());
+	}
+	printf("\n");
 }

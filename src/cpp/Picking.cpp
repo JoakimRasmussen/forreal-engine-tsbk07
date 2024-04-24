@@ -57,17 +57,3 @@ vec3 Picking::getIntersectionPoint() {
 void Picking::updateIsPicking(bool isPicking) {
     this->isPicking = isPicking;
 }
-
-void Picking::setLastColor(float color[4]) {
-    lastColor[0] = color[0];
-    lastColor[1] = color[1];
-    lastColor[2] = color[2];
-    lastColor[3] = color[3];
-}
-
-bool Picking::isHit(const std::array<float, 3>& inputColor) {
-    // Check each color component (R, G, B) against the stored `lastColor` within `epsilon`
-    return (std::abs(inputColor[0] - lastColor[0]) < epsilon &&
-            std::abs(inputColor[1] - lastColor[1]) < epsilon &&
-            std::abs(inputColor[2] - lastColor[2]) < epsilon);
-}

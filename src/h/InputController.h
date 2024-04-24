@@ -59,7 +59,6 @@ private:
     static InputController* instance;
     // Test string
     char testString[1024] = "Type here";
-    bool colorsAreEqual(const float* color1, const float* color2, size_t numElements);
 
 };
 

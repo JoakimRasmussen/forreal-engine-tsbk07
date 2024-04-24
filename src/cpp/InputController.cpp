@@ -190,12 +190,3 @@ void InputController::collectedMouseControllerBridge(int button, int state, int 
 		instance->collectedMouseController(button, state, x, y);
 	}
 }
-
-bool InputController::colorsAreEqual(const float* color1, const float* color2, size_t numElements) {
-    for (size_t i = 0; i < numElements; ++i) {
-        if (color1[i] != color2[i]) {
-            return false;
-        }
-    }
-    return true;
-}

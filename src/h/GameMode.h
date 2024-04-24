@@ -65,7 +65,10 @@ private:
     // void updateObjectPositions();
     void generateColors(int numColors);
     void HSVtoRGB(float h, float s, float v, float& r, float& g, float& b);
-    bool colorsAreEqual(const float* color1, const float* color2, size_t numElements);
+    bool colorsAreEqual(const std::array<float, 3>& Color1, const std::array<float, 3>& Color2, float epsilon);
+    void deleteObject(int objectID);
+    void printObjectIDs();
+
     // State variables for time management
     GLfloat deltaTime = 0.0f;
     GLfloat lastFrame = 0.0f;
@@ -81,6 +84,7 @@ private:
     // Collections for game objects
     std::vector<GameObject> gameObjects;
     std::vector<vec3> objectPositions;
+    int objectCount = 0;
 
     // Object placement specifics
     const float placementDistance = 10.0f;

@@ -24,8 +24,6 @@ class Picking {
         vec4 toViewCoordinates(vec4 clipCoordinates, mat4 projectionMatrix);
         vec3 toWorldCoordinates(vec4 viewCoordinates, mat4 viewMatrix);
         vec3 getIntersectionPoint();
-        void setLastColor(float color[4]);
-        bool isHit(const std::array<float, 3>& inputColor);
 
         void updateIsPicking(bool isPicking);
         // TODO: make this private
@@ -34,10 +32,7 @@ class Picking {
         std::vector<vec3> debugIntersectionVector;
 
         bool isPicking = false;
-        float lastColor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-        bool newColor = false;
         
-
     private:
 
         // Variables
