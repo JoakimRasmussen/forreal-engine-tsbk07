@@ -36,6 +36,13 @@ public:
     int getHitY() const {
         return hity;
     }
+
+    // Reset hit coordinates
+    void resetHitCoordinates() {
+        hitx = -1;
+        hity = -1;
+    }
+    
     // Callabacks/bridge functions
     static void handleMouseMotionBridge(int x, int y);
     static void guiKeyboardBridge(unsigned char key, int x, int y);

@@ -65,7 +65,8 @@ void GameMode::run(int argc, char** argv) {
 	activateShader(pickingShader);
 	uploadUniforms(pickingShader, "picking");
 	renderForPicking(pickingShader);
-	// clearScreen();
+	performHitTest(); // Check for hit
+	clearScreen();
 
 	// Second Pass: Main rendering
 	activateShader(program);
@@ -395,7 +396,6 @@ void GameMode::renderForPicking(GLuint& pickingShader) {
 	}
 
 	glFlush(); // Ensure that all commands are executed
-	performHitTest(); // Check for hit
 	printError("picking");
 }
 
@@ -416,42 +416,27 @@ void GameMode::generateColors(int numColors) {
 
 void GameMode::performHitTest() {
 
-	// int hitx = inputController->getHitX();
-	// int hity = inputController->getHitY();
-	// float color[4];
+	int hitx = inputController->getHitX();
+	int hity = inputController->getHitY();
+	float color[4];
 
-	// glReadPixels(hitx, Utils::windowHeight - hity - 1, 1, 1, GL_RGBA, GL_FLOAT, &color);
-	
-	// printf("Clicked on pixel %d, %d, color %f %f %f\n", hitx, hity, color[0], color[1], color[2]);
-	// printf("Last color %f %f %f\n", picker->lastColor[0], picker->lastColor[1], picker->lastColor[2]);
+	glReadPixels(hitx, Utils::windowHeight - hity - 1, 1, 1, GL_RGBA, GL_FLOAT, &color);
     printError("glReadPixels");
-
-    // if (colorsAreEqual(color, picker->lastColor, 3)) {
-    //     picker->newColor = false;
-    // } else {
-    //     picker->newColor = true;
-    //     picker->setLastColor(color);
-    // }
+	picker->setLastColor(color);
+	inputController->resetHitCoordinates();
+	
 	// Reset the color hits
 	for (int i = 0; i < numColors; i++) {
 		colorHits[i] = 0;
 	}
 
-	if (picker->newColor) {
-		// printf("New color detected\n");
-		// Loop through the available colors and check for a match
-		for (int i = 0; i < numColors; i++) {
-			// Check if the color matches
-			if (picker->isHit({availableColors[i][0], availableColors[i][1], availableColors[i][2]})) {
-				// Increment the hit counter
-				colorHits[i]++;
-				// Print the hit color
-				printf("Hit color: %f %f %f\n", availableColors[i][0], availableColors[i][1], availableColors[i][2]);
-				// Reset the new color flag
-				picker->newColor = false;
-				// Break the loop
-				break;
-			}
+	for (int i = 0; i < numColors; i++) {
+		// Check if the color matches
+		if (picker->isHit({availableColors[i][0], availableColors[i][1], availableColors[i][2]})) {
+			// Increment the hit counter
+			colorHits[i]++;
+			// Break the loop
+			break;
 		}
 	}
 }
