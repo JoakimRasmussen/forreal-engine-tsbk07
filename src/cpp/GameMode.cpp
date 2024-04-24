@@ -65,7 +65,7 @@ void GameMode::run(int argc, char** argv) {
 	activateShader(pickingShader);
 	uploadUniforms(pickingShader, "picking");
 	renderForPicking(pickingShader);
-	performHitTest(); // Check for hit
+	performHitTest();
 	clearScreen();
 
 	// Second Pass: Main rendering
@@ -127,6 +127,7 @@ void GameMode::spawnBunnyOnTerrainClick() {
     }
 }
 
+/* For shadow rendering */
 void GameMode::updatePositions() {
     // Clear the previous position data
     objectPositions.clear();
@@ -243,7 +244,6 @@ void GameMode::renderGameObjects(GLuint& shaderProgram) {
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
 		// Draw the model
 		DrawModel(model, shaderProgram, "in_Position", "in_Normal", "in_TexCoord");
-		// DrawModel(model, shaderProgram, "in_Position", NULL, "in_TexCoord");
 	}	
 }
 
@@ -464,8 +464,8 @@ bool GameMode::colorsAreEqual(const std::array<float, 3>& Color1, const std::arr
 void GameMode::deleteObject(int objectID) {
     for (auto it = gameObjects.begin(); it != gameObjects.end(); ++it) {
         if (it->getID() == objectID) {
-            it = gameObjects.erase(it);  // erase returns the next valid iterator
-            break;  // Since you're breaking, only one object gets deleted per function call
+            it = gameObjects.erase(it);
+            break;
         }
     }
 }
