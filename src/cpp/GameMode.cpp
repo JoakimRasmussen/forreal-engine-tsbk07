@@ -99,7 +99,8 @@ void GameMode::spawnBunnyOnTerrainClick() {
         float z = clickedPosition.z;
 
         // Determine y position on terrain, adding a small offset to position the bunny slightly above the terrain
-        float y = terrain->getHeightAtPoint(x, z) + 0.6f;
+        // float y = terrain->getHeightAtPoint(x, z) + 0.6f;
+		float y = 0;
 
         // Retrieve the normal vector from the terrain at the clicked position
         vec3 normal = terrain->getNormalAtPoint(x, z);
@@ -137,7 +138,7 @@ void GameMode::updatePositions() {
         // Update the position of the game object
         vec3 objPos = gameObject.getPosition();
         float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
-		objPos.y = y;
+		objPos.y += y;
 
         // Store the updated position
         objectPositions.push_back(objPos);
@@ -221,9 +222,12 @@ void GameMode::renderGameObjects(GLuint& shaderProgram) {
 		// Identify the model
 		Model* model = gameObject.getModel();
 		gameObject.moveTowardsDestination();
+		if (inputController->bunnyJump) {
+			gameObject.jump();
+		}
 		vec3 objPos = gameObject.getPosition();
 		float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
-		objPos.y = y;
+		objPos.y += y;
 
 		// Update rotations
 		vec3 normal = terrain->getNormalAtPoint(objPos.x, objPos.z);
@@ -245,6 +249,8 @@ void GameMode::renderGameObjects(GLuint& shaderProgram) {
 		// Draw the model
 		DrawModel(model, shaderProgram, "in_Position", "in_Normal", "in_TexCoord");
 	}	
+	inputController->bunnyJump = false;
+
 }
 
 void GameMode::finalizeFrame() {
@@ -381,7 +387,7 @@ void GameMode::renderForPicking(GLuint& pickingShader) {
 		// Update the model-to-world matrix
 		vec3 objPos = gameObjects[i].getPosition();
 		float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
-		objPos.y = y;
+		objPos.y += y;
 
 		// Retrieve the rotations
 		vec3 objRot = gameObjects[i].getRotation();
@@ -461,6 +467,7 @@ bool GameMode::colorsAreEqual(const std::array<float, 3>& Color1, const std::arr
             std::abs(Color1[1] - Color2[1]) < epsilon &&
             std::abs(Color1[2] - Color2[2]) < epsilon);
 }
+
 void GameMode::deleteObject(int objectID) {
     for (auto it = gameObjects.begin(); it != gameObjects.end(); ++it) {
         if (it->getID() == objectID) {

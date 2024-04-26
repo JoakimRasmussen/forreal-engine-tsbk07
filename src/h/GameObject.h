@@ -6,6 +6,8 @@
 #include "VectorUtils4.h"
 #include "LittleOBJLoader.h"
 
+#include "math.h"
+
 class GameObject {
 public:
     Model* model; // The model of the object
@@ -20,6 +22,7 @@ public:
     vec3 getPosition() const;
     void setRotation(float rx, float ry, float rz);
     vec3 getRotation() const;
+    void jump();
 
     Model* getModel() const {
         return model;
@@ -34,12 +37,16 @@ private:
     float x, y, z;
     float targetX, targetZ;
     float rx, ry, rz;
-    float speed = 0.05f;
+    float speed = 0.1f;
     float turnSpeed = 0.05f;
     int turnIterations = 0;
     int max_iterations = 100;
     bool destinationReached = true;
     bool sleeping = false;
+
+    float yVelocity = 0.0f; // Vertical velocity
+    int jumpTime = 0;
+    bool isJumping = false;
     
     float lerpAngle(float from, float to, float t);
     float normalizeAngle(float angle);

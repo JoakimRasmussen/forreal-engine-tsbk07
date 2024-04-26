@@ -42,6 +42,8 @@ public:
         hitx = -1;
         hity = -1;
     }
+
+    bool bunnyJump = false;
     
     // Callabacks/bridge functions
     static void handleMouseMotionBridge(int x, int y);

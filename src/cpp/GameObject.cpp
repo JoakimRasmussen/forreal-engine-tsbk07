@@ -34,24 +34,50 @@ void GameObject::moveTowardsDestination() {
     float dz = targetZ - z;
     float distance = sqrt(dx * dx + dz * dz);
 
+    // Handle jumping and gravity
+    if (isJumping) {
+        y += yVelocity; // Apply vertical velocity
+        jumpTime++;
+        yVelocity -= 0.01f + 0.0025f * jumpTime; // Gravity effect, adjust as needed
+
+        // Check if landed
+        if (y <= 0) {
+            y = 0;
+            yVelocity = 0;
+            isJumping = false;
+            jumpTime = 0;
+        }
+    }
+
     if (distance < 0.1f) {
         destinationReached = true;
         return;
     }
 
-    // Update rotation
-    float desiredRy = atan2(dx, dz);
-    desiredRy = normalizeAngle(desiredRy);
-    ry = lerpAngle(ry, desiredRy, turnSpeed);
-    ry = normalizeAngle(ry);
+    // Horizontal movement towards destination
+    // if (!isJumping || y == 0) { // Move horizontally if not jumping or has landed
+        float desiredRy = atan2(dx, dz);
+        desiredRy = normalizeAngle(desiredRy);
+        ry = lerpAngle(ry, desiredRy, turnSpeed);
+        ry = normalizeAngle(ry);
 
-    if (fabs(ry - desiredRy) < 0.2 || turnIterations > max_iterations) {
-        // Move the bunny
-        x += speed * dx / distance;
-        z += speed * dz / distance;
-        turnIterations = 0;
-    } else {
-        turnIterations++;
+        if (fabs(ry - desiredRy) < 0.2 || turnIterations > max_iterations) {
+            x += speed * dx / distance;
+            z += speed * dz / distance;
+            turnIterations = 0;
+            // jump(); // Jump after reaching destination
+        } else {
+            turnIterations++;
+        }
+    // }
+}
+
+void GameObject::jump() {
+    // printf("Trying to jump\n");
+    if (!isJumping) {
+        // printf("Jumping\n");
+        yVelocity = 0.5f; // Initial jump velocity, adjust as needed
+        isJumping = true;
     }
 }
 
