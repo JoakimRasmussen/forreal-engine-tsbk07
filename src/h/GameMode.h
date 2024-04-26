@@ -56,6 +56,7 @@ private:
     void renderGameObjects(GLuint& shaderProgram);
     void finalizeFrame();
     void renderForPicking(GLuint& shaderProgram);
+    void renderSkybox(GLuint& shaderProgram);
 
     // Object interaction functions
     void spawnBunnyOnTerrainClick();
@@ -92,12 +93,13 @@ private:
     int objectID = 0;
 
     // Shader programs
-    GLuint program, objectShader, pickingShader;
+    GLuint program, objectShader, pickingShader, skyboxShader;
 
     // Texture data and models
     GLuint grass, rock, dirt, map;
-    GLuint tex1, tex2, furTex, debugTex;
-    Model* tm, *bunnyModel;
+    GLuint furTex, debugTex;
+    GLuint skyboxTex;
+    Model* tm, *bunnyModel, *skyboxModel;
 
     // Matrix transformations and vectors for camera and objects
     mat4 worldToView, modelToWorld, lookAtVectors;
