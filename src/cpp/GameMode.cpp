@@ -190,12 +190,14 @@ void GameMode::activateShader(GLuint& shaderProgram) {
 
 void GameMode::uploadUniforms(GLuint& shaderProgram, const std::string& mode) {
 	// Universal uniforms
+	if (mode != "skybox") {
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "worldToView"), 1, GL_TRUE, worldToView.m);
+	}
 
 	// Mode specific uniforms
 	if (mode == "terrain" || mode == "object") {
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "worldToView"), 1, GL_TRUE, worldToView.m);
-	glUniform3f(glGetUniformLocation(shaderProgram, "cameraPosition"), cameraPos.x, cameraPos.y, cameraPos.z);
-	glUniform3f(glGetUniformLocation(shaderProgram, "lightPosition"), 5, 5, 5);
+		glUniform3f(glGetUniformLocation(shaderProgram, "cameraPosition"), cameraPos.x, cameraPos.y, cameraPos.z);
+		glUniform3f(glGetUniformLocation(shaderProgram, "lightPosition"), 5, 5, 5);
 	}
 	if (mode == "terrain") {
 		glUniform1f(glGetUniformLocation(shaderProgram, "mountainHeight"), terrain->currentMountainHeight);
