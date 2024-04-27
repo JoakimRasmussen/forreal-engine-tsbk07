@@ -41,6 +41,9 @@ void GameMode::init() {
 	uploadTextureData(objectShader, "object");
 	setupGUI();
 
+	/* BILLBOARD TESTING */
+	billboards->init();
+
 	printf("Done initializing game mode\n");
 	printError("Post-init checks");
 	printf("--------------------------------\n");
@@ -69,6 +72,8 @@ void GameMode::run(int argc, char** argv) {
 	renderGameObjects(objectShader);
 
 	billboards->uploadBillboard(camera); 
+
+	printf("Camera Position: (%.2f, %.2f, %.2f)\n", cameraPos.x, cameraPos.y, cameraPos.z);
 
 	renderGUI();
 
@@ -237,7 +242,7 @@ void GameMode::initGL() {
     printf("Initializing GL settings...\n");
     glClearColor(0.2, 0.2, 0.5, 0);
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    glDisable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     printError("GL inits");
