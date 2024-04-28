@@ -56,11 +56,17 @@ void GameMode::init() {
 
 	// BILLBOARD START
 	billboardShader = loadShaders("shaders/billboardShader.vert", "shaders/billboardShader.frag");
-	quad = LoadDataToModel(vertices2, NULL, texcoord2, NULL, indices2, 4, 6);
 	glUseProgram(billboardShader);
+	quad = LoadDataToModel(vertices2, NULL, texcoord2, NULL, indices2, 4, 6);
 	glUniformMatrix4fv(glGetUniformLocation(billboardShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
-	glUniform1i(glGetUniformLocation(billboardShader, "tex"), 0); // Might have to change...
+
 	LoadTGATextureSimple("textures/Ingemar-256-vpl.tga", &lir);
+	glActiveTexture(GL_TEXTURE10);
+	glUniform1i(glGetUniformLocation(billboardShader, "tex"), 10);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	
 	// BILLBOARD END
 
 	printf("Done initializing game mode\n");
@@ -69,7 +75,7 @@ void GameMode::init() {
 }
 
 GLfloat a = 0.0;
-vec3 campos = {0, 0.5, 4};
+vec3 campos = {10, 5, 8};
 vec3 forward = {0, 0, -4};
 vec3 up = {0, 1, 0};
 
@@ -98,15 +104,22 @@ void GameMode::run(int argc, char** argv) {
 	renderGUI();
 
 	// BILLBOARD START
+	/*
+	FOUND THE BUG, IT SEEMS LIKE QUAD IS NOT BEING CREATED PROPERLY
+	IT IS REPLACED BY TM!?!?!?!?!?
+	*/
 	mat4 wtv, m;
 	glUseProgram(billboardShader);
-	wtv = lookAtv(campos, campos + forward, up);
-	a += 0.1;
+	wtv = lookAtv(camera->getPosition(), camera->getPosition() + camera->getForwardVector(), camera->getUpVector());
+	//a += 0.1;
 	glBindTexture(GL_TEXTURE_2D, lir);
-	m = Mult(wtv, Mult(T(-1, 0.5, 0), Mult(Ry(-a), Rz(M_PI/8))));
-	m = T(m.m[3], m.m[7], m.m[11]);
+	m = Mult(worldToView, Mult(T(5, 1, 0), Mult(Ry(-a),Rz(M_PI/8))));
 	glUniformMatrix4fv(glGetUniformLocation(billboardShader, "modelToViewMatrix"), 1, GL_TRUE, m.m);
-	DrawModel(quad, billboardShader, "in_Position", NULL, "in_TexCoord");
+	DrawModel(tm, billboardShader, "in_Position", NULL, "in_TexCoord");
+	m = Mult(m, Ry(3.14/2));
+	glUniformMatrix4fv(glGetUniformLocation(billboardShader, "modelToViewMatrix"), 1, GL_TRUE, m.m);
+	DrawModel(tm, billboardShader, "in_Position", NULL, "in_TexCoord");
+	// BILLBOARD END
 
 	finalizeFrame();
 	printError("Post-run checks");

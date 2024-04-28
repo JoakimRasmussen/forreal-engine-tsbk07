@@ -22,7 +22,7 @@ void display(void)
 int main(int argc, char **argv)
 {
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitContextVersion(3, 2);
 	glutInitWindowSize (Utils::windowWidth, Utils::windowHeight);
 	glutCreateWindow ("TSBK07 Project");
