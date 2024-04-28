@@ -1,21 +1,5 @@
 #include "../h/GameMode.h"
 
-GLuint lir;
-GLuint billboardShader;
-
-// Another quad
-vec3 vertices2[] = {	-20.5,0.0,-20.5,
-						20.5,0.0,-20.5,
-						20.5,0.0,20.5,
-						-20.5,0.0,20.5};
-
-vec2 texcoord2[] = {	vec2(100.0f, 100.0f),
-						vec2(0.0f, 100.0f),
-						vec2(0.0f, 0.0f),
-						vec2(100.0f, 0.0f)};
-
-GLuint indices2[] = {0,3,2, 0,2,1};
-
 GameMode::GameMode() {
     // Constructor implementation
 
@@ -37,6 +21,8 @@ GameMode::GameMode() {
     inputController = new InputController(camera, terrain, picker);
     // Gui object
     gui = new GUI();
+	// Billboards object
+	billboards = new Billboards(camera);
 
     // Projection matrix
     projectionMatrix = Utils::getProjectionMatrix();
@@ -49,37 +35,19 @@ void GameMode::init() {
 
 	initGL();
 
-
 	loadNecessaryShaders();
 	loadAndBindTextures();
 	loadModels();
 	uploadTextureData(program, "terrain");
 	uploadTextureData(objectShader, "object");
+	uploadTextureData(billboards->billboardShader, "billboard");
 	setupGUI();
-
-	// BILLBOARD START
-	billboardShader = loadShaders("shaders/billboardShader.vert", "shaders/billboardShader.frag");
-	glUseProgram(billboardShader);
-	quad = LoadModel("models/Tree1.obj");
-	glUniformMatrix4fv(glGetUniformLocation(billboardShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
-
-	LoadTGATextureSimple("textures/Ingemar-256-vpl.tga", &lir);
-	glActiveTexture(GL_TEXTURE10);
-	glUniform1i(glGetUniformLocation(billboardShader, "tex"), 10);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// BILLBOARD END
 
 
 	printf("Done initializing game mode\n");
 	printError("Post-init checks");
 	printf("--------------------------------\n");
 }
-
-GLfloat a = 0.0;
-vec3 campos = {10, 5, 8};
-vec3 forward = {0, 0, -4};
-vec3 up = {0, 1, 0};
 
 void GameMode::run(int argc, char** argv) {
     printError("Pre-run checks");
@@ -104,23 +72,8 @@ void GameMode::run(int argc, char** argv) {
 	renderGameObjects(objectShader);
 
 	// BILLBOARD START
-	/*
-	FOUND THE BUG, IT SEEMS LIKE QUAD IS NOT BEING CREATED PROPERLY
-	IT IS REPLACED BY TM!?!?!?!?!?
-	*/
-	mat4 wtv, m;
 
-	glUseProgram(billboardShader);
-	wtv = lookAtv(camera->getPosition(), camera->getPosition() + camera->getForwardVector(), camera->getUpVector());
-	//a += 0.1;
-	glBindTexture(GL_TEXTURE_2D, lir);
-	m = Mult(worldToView, Mult(T(5, 1, 0), Mult(Ry(-a),Rz(M_PI/8))));
-	glUniformMatrix4fv(glGetUniformLocation(billboardShader, "modelToViewMatrix"), 1, GL_TRUE, m.m);
-	DrawModel(quad, billboardShader, "in_Position", NULL, "in_TexCoord");
-
-	m = Mult(m, Ry(3.14/2));
-	glUniformMatrix4fv(glGetUniformLocation(billboardShader, "modelToViewMatrix"), 1, GL_TRUE, m.m);
-	DrawModel(quad, billboardShader, "in_Position", NULL, "in_TexCoord");
+	billboards->renderBillboard();
 
 	// BILLBOARD END
 
@@ -301,12 +254,15 @@ void GameMode::loadNecessaryShaders() {
     printf("Loading shaders...\n");
     program = loadShaders("shaders/terrainsplat.vert", "shaders/terrainsplat.frag");
     objectShader = loadShaders("shaders/object.vert", "shaders/object.frag");
+	billboards->billboardShader = loadShaders("shaders/billboardShader.vert", "shaders/billboardShader.frag");
 
 	// Upload the projection matrix to the shader programs
 	glUseProgram(program);
 	glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 	glUseProgram(objectShader);
 	glUniformMatrix4fv(glGetUniformLocation(objectShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
+	glUseProgram(billboards->billboardShader);
+	glUniformMatrix4fv(glGetUniformLocation(billboards->billboardShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 
     printError("shader compilation");
 }
@@ -326,6 +282,7 @@ void GameMode::loadAndBindTextures() {
 
     LoadTGATextureSimple("splatmap.tga", &map);
     LoadTGATextureSimple("textures/rutor.tga", &debugTex);
+	LoadTGATextureSimple("textures/billboard-plant.tga", &billboards->billboardTexture);
 
 	glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, grass);
@@ -355,6 +312,9 @@ void GameMode::loadAndBindTextures() {
 	glActiveTexture(GL_TEXTURE5);
     glBindTexture(GL_TEXTURE_2D, debugTex);
 
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, billboards->billboardTexture);
+
     printError("texture loading and binding");
 }
 
@@ -362,6 +322,7 @@ void GameMode::loadModels() {
     printf("Loading models...\n");
     bunnyModel = LoadModel("models/bunny.obj");
     tm = terrain->setTerrainModel("terrain/fft-terrain.tga");
+	billboards->billboardModel = LoadModel("models/bill.obj");
     printError("model loading");
 }
 
@@ -400,7 +361,16 @@ void GameMode::uploadTextureData(GLuint& shaderProgram, const std::string& mode)
 
 		//glUniform1i(glGetUniformLocation(shaderProgram, "debugTex"), 5);
 		printError("upload textures (object)");
-	}	
+	}
+	// Billboard specific textures
+	else if (mode == "billboard")
+	{
+		printf("Uploading billboard textures...\n");
+		glActiveTexture(GL_TEXTURE6);
+		glUniform1i(glGetUniformLocation(shaderProgram, "tex"), 6);
+		printError("upload textures (billboard)");
+	}
+	else
 	
 	printError("upload textures");
 }

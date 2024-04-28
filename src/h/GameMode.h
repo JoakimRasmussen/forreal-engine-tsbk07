@@ -79,12 +79,12 @@ private:
     vec3 clickedPosition = vec3(0.0f, 0.0f, 0.0f);
 
     // Shader programs
-    GLuint program, objectShader;
+    GLuint program, objectShader, billboardShader; // done
 
     // Texture data and models
-    GLuint grass, rock, dirt, map, plant;
+    GLuint grass, rock, dirt, map, plant; // done
     GLuint tex1, tex2, furTex, debugTex;
-    Model* tm, *bunnyModel, *quad;
+    Model* tm, *bunnyModel, *bill; // done
 
     // Matrix transformations and vectors for camera and objects
     mat4 worldToView, modelToWorld, lookAtVectors;
