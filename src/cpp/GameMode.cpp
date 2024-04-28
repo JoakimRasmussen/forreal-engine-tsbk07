@@ -1,5 +1,20 @@
 #include "../h/GameMode.h"
 
+Model *quad;
+GLuint lir;
+GLuint billboardShader;
+
+// Another quad
+vec3 vertices2[] = {	-20.5,0.0,-20.5,
+						20.5,0.0,-20.5,
+						20.5,0.0,20.5,
+						-20.5,0.0,20.5};
+vec2 texcoord2[] = {	vec2(100.0f, 100.0f),
+						vec2(0.0f, 100.0f),
+						vec2(0.0f, 0.0f),
+						vec2(100.0f, 0.0f)};
+GLuint indices2[] = {	0,3,2, 0,2,1};
+
 GameMode::GameMode() {
     // Constructor implementation
 
@@ -21,8 +36,6 @@ GameMode::GameMode() {
     inputController = new InputController(camera, terrain, picker);
     // Gui object
     gui = new GUI();
-	// Billboards object
-	billboards = new Billboards();
 
     // Projection matrix
     projectionMatrix = Utils::getProjectionMatrix();
@@ -41,13 +54,24 @@ void GameMode::init() {
 	uploadTextureData(objectShader, "object");
 	setupGUI();
 
-	/* BILLBOARD TESTING */
-	billboards->init();
+	// BILLBOARD START
+	billboardShader = loadShaders("shaders/billboardShader.vert", "shaders/billboardShader.frag");
+	quad = LoadDataToModel(vertices2, NULL, texcoord2, NULL, indices2, 4, 6);
+	glUseProgram(billboardShader);
+	glUniformMatrix4fv(glGetUniformLocation(billboardShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
+	glUniform1i(glGetUniformLocation(billboardShader, "tex"), 0); // Might have to change...
+	LoadTGATextureSimple("textures/Ingemar-256-vpl.tga", &lir);
+	// BILLBOARD END
 
 	printf("Done initializing game mode\n");
 	printError("Post-init checks");
 	printf("--------------------------------\n");
 }
+
+GLfloat a = 0.0;
+vec3 campos = {0, 0.5, 4};
+vec3 forward = {0, 0, -4};
+vec3 up = {0, 1, 0};
 
 void GameMode::run(int argc, char** argv) {
     printError("Pre-run checks");
@@ -71,11 +95,18 @@ void GameMode::run(int argc, char** argv) {
 	uploadUniforms(objectShader, "object");
 	renderGameObjects(objectShader);
 
-	billboards->uploadBillboard(camera); 
-
-	printf("Camera Position: (%.2f, %.2f, %.2f)\n", cameraPos.x, cameraPos.y, cameraPos.z);
-
 	renderGUI();
+
+	// BILLBOARD START
+	mat4 wtv, m;
+	glUseProgram(billboardShader);
+	wtv = lookAtv(campos, campos + forward, up);
+	a += 0.1;
+	glBindTexture(GL_TEXTURE_2D, lir);
+	m = Mult(wtv, Mult(T(-1, 0.5, 0), Mult(Ry(-a), Rz(M_PI/8))));
+	m = T(m.m[3], m.m[7], m.m[11]);
+	glUniformMatrix4fv(glGetUniformLocation(billboardShader, "modelToViewMatrix"), 1, GL_TRUE, m.m);
+	DrawModel(quad, billboardShader, "in_Position", NULL, "in_TexCoord");
 
 	finalizeFrame();
 	printError("Post-run checks");
