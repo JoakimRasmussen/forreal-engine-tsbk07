@@ -1,6 +1,5 @@
 #include "../h/GameMode.h"
 
-Model *quad;
 GLuint lir;
 GLuint billboardShader;
 
@@ -9,11 +8,13 @@ vec3 vertices2[] = {	-20.5,0.0,-20.5,
 						20.5,0.0,-20.5,
 						20.5,0.0,20.5,
 						-20.5,0.0,20.5};
+
 vec2 texcoord2[] = {	vec2(100.0f, 100.0f),
 						vec2(0.0f, 100.0f),
 						vec2(0.0f, 0.0f),
 						vec2(100.0f, 0.0f)};
-GLuint indices2[] = {	0,3,2, 0,2,1};
+
+GLuint indices2[] = {0,3,2, 0,2,1};
 
 GameMode::GameMode() {
     // Constructor implementation
@@ -47,6 +48,8 @@ void GameMode::init() {
 	printf("Initializing game mode...\n");
 
 	initGL();
+
+
 	loadNecessaryShaders();
 	loadAndBindTextures();
 	loadModels();
@@ -57,7 +60,7 @@ void GameMode::init() {
 	// BILLBOARD START
 	billboardShader = loadShaders("shaders/billboardShader.vert", "shaders/billboardShader.frag");
 	glUseProgram(billboardShader);
-	quad = LoadDataToModel(vertices2, NULL, texcoord2, NULL, indices2, 4, 6);
+	quad = LoadModel("models/Tree1.obj");
 	glUniformMatrix4fv(glGetUniformLocation(billboardShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 
 	LoadTGATextureSimple("textures/Ingemar-256-vpl.tga", &lir);
@@ -65,9 +68,8 @@ void GameMode::init() {
 	glUniform1i(glGetUniformLocation(billboardShader, "tex"), 10);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	
 	// BILLBOARD END
+
 
 	printf("Done initializing game mode\n");
 	printError("Post-init checks");
@@ -101,25 +103,28 @@ void GameMode::run(int argc, char** argv) {
 	uploadUniforms(objectShader, "object");
 	renderGameObjects(objectShader);
 
-	renderGUI();
-
 	// BILLBOARD START
 	/*
 	FOUND THE BUG, IT SEEMS LIKE QUAD IS NOT BEING CREATED PROPERLY
 	IT IS REPLACED BY TM!?!?!?!?!?
 	*/
 	mat4 wtv, m;
+
 	glUseProgram(billboardShader);
 	wtv = lookAtv(camera->getPosition(), camera->getPosition() + camera->getForwardVector(), camera->getUpVector());
 	//a += 0.1;
 	glBindTexture(GL_TEXTURE_2D, lir);
 	m = Mult(worldToView, Mult(T(5, 1, 0), Mult(Ry(-a),Rz(M_PI/8))));
 	glUniformMatrix4fv(glGetUniformLocation(billboardShader, "modelToViewMatrix"), 1, GL_TRUE, m.m);
-	DrawModel(tm, billboardShader, "in_Position", NULL, "in_TexCoord");
+	DrawModel(quad, billboardShader, "in_Position", NULL, "in_TexCoord");
+
 	m = Mult(m, Ry(3.14/2));
 	glUniformMatrix4fv(glGetUniformLocation(billboardShader, "modelToViewMatrix"), 1, GL_TRUE, m.m);
-	DrawModel(tm, billboardShader, "in_Position", NULL, "in_TexCoord");
+	DrawModel(quad, billboardShader, "in_Position", NULL, "in_TexCoord");
+
 	// BILLBOARD END
+
+	renderGUI();
 
 	finalizeFrame();
 	printError("Post-run checks");

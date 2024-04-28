@@ -82,9 +82,9 @@ private:
     GLuint program, objectShader;
 
     // Texture data and models
-    GLuint grass, rock, dirt, map, texID1;
+    GLuint grass, rock, dirt, map, plant;
     GLuint tex1, tex2, furTex, debugTex;
-    Model* tm, *bunnyModel;
+    Model* tm, *bunnyModel, *quad;
 
     // Matrix transformations and vectors for camera and objects
     mat4 worldToView, modelToWorld, lookAtVectors;
