@@ -4,6 +4,7 @@
 bool GUI::PlaceBunny = false;
 bool GUI::manualElevation = false;
 bool GUI::editTerrainTexture = false;
+bool GUI::PlaceBillboard = false;
 GLubyte GUI::textureColor[4] = {0, 0, 0, 255};
 
 GUI::GUI() {
@@ -43,6 +44,7 @@ void GUI::initTerrainGUI(Terrain* terrain)
 
 	sgCreateStaticString(40, 240, "--------------------------");
 	sgCreateButton(40, 260, "Place a Bunny", PlaceBunnyButton);
+	sgCreateButton(200, 260, "Place a Plant", PlaceBillboardButton);
 }
 
 void GUI::drawGUI()
@@ -55,6 +57,17 @@ void GUI::PlaceBunnyButton()
 	if (!PlaceBunny)
 	{
 		PlaceBunny = true;
+	}
+}
+void GUI::PlaceBillboardButton()
+{
+	if (PlaceBillboard)
+	{
+		PlaceBillboard = false;
+	}
+	else
+	{
+		PlaceBillboard = true;
 	}
 }
 

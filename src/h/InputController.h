@@ -7,19 +7,22 @@
 #include "Terrain.h"
 #include "Utils.h"
 #include "Picking.h"
+#include "Billboard.h"
 #include "GUI.h"
 
 class Camera;
 class Terrain;
 class Picking;
+class Billboard;
 
 class InputController {
 public:
 
-    InputController(Camera* camera, Terrain* terrain, Picking* picker);
+    InputController(Camera* camera, Terrain* terrain, Picking* picker, Billboard* billboard);
     Camera* camera;
     Terrain* terrain;
     Picking* picker;
+    Billboard* billboard;
     void handleKeyboardInput(GLfloat deltaTime);
     void handleMouseMotion(int x, int y);
     void guiKeyboard(unsigned char key, int x, int y);

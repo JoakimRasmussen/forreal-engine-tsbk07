@@ -11,7 +11,7 @@
 #include "Picking.h"
 #include "GL_utilities.h"
 #include "LoadTexture.h"
-#include "Billboards.h"
+#include "Billboard.h"
 
 /**
  * Class GameMode handles the main operations for the game including initialization,
@@ -68,7 +68,7 @@ private:
     GUI* gui;
     Utils* utils;
     Picking* picker;
-    Billboards* billboards;
+    Billboard* billboard;
 
     // Collections for game objects
     std::vector<GameObject> gameObjects;

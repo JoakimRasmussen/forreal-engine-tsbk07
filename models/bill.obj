@@ -1,0 +1,14 @@
+# List of geometric vertices, with (x, y, z) coordinates.
+v -1.0 1.0 0.0
+v 1.0 1.0 0.0
+v 1.0 -1.0 0.0
+v -1.0 -1.0 0.0
+
+# Texture coordinates for mapping an image onto the quad
+vt 0.0 1.0
+vt 1.0 1.0
+vt 1.0 0.0
+vt 0.0 0.0
+
+# Definition of a face with vertex and texture coordinate indices
+f 1/1 2/2 3/3 4/4

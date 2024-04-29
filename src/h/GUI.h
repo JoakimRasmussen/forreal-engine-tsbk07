@@ -20,11 +20,13 @@ public:
     static void DirtButton();
     static void GrassButton();
     static void RockButton();
+    static void PlaceBillboardButton();
 
 
     static bool PlaceBunny;
     static bool manualElevation;
     static bool editTerrainTexture;
+    static bool PlaceBillboard;
     static GLubyte textureColor[4];
 
 private:

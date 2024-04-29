@@ -17,12 +17,12 @@ GameMode::GameMode() {
     terrain = new Terrain();
 	// Picking object
 	picker = new Picking(camera);
-    // Input controller object
-    inputController = new InputController(camera, terrain, picker);
     // Gui object
     gui = new GUI();
 	// Billboards object
-	billboards = new Billboards(camera);
+	billboard = new Billboard(camera);
+    // Input controller object
+    inputController = new InputController(camera, terrain, picker, billboard);
 
     // Projection matrix
     projectionMatrix = Utils::getProjectionMatrix();
@@ -40,7 +40,7 @@ void GameMode::init() {
 	loadModels();
 	uploadTextureData(program, "terrain");
 	uploadTextureData(objectShader, "object");
-	uploadTextureData(billboards->billboardShader, "billboard");
+	uploadTextureData(billboard->billboardShader, "billboard");
 	setupGUI();
 
 
@@ -70,12 +70,8 @@ void GameMode::run(int argc, char** argv) {
 	activateShader(objectShader);
 	uploadUniforms(objectShader, "object");
 	renderGameObjects(objectShader);
-
-	// BILLBOARD START
-
-	billboards->renderBillboard();
-
-	// BILLBOARD END
+	
+	billboard->renderBillboard();
 
 	renderGUI();
 
@@ -254,15 +250,15 @@ void GameMode::loadNecessaryShaders() {
     printf("Loading shaders...\n");
     program = loadShaders("shaders/terrainsplat.vert", "shaders/terrainsplat.frag");
     objectShader = loadShaders("shaders/object.vert", "shaders/object.frag");
-	billboards->billboardShader = loadShaders("shaders/billboardShader.vert", "shaders/billboardShader.frag");
+	billboard->billboardShader = loadShaders("shaders/billboardShader.vert", "shaders/billboardShader.frag");
 
 	// Upload the projection matrix to the shader programs
 	glUseProgram(program);
 	glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 	glUseProgram(objectShader);
 	glUniformMatrix4fv(glGetUniformLocation(objectShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
-	glUseProgram(billboards->billboardShader);
-	glUniformMatrix4fv(glGetUniformLocation(billboards->billboardShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
+	glUseProgram(billboard->billboardShader);
+	glUniformMatrix4fv(glGetUniformLocation(billboard->billboardShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 
     printError("shader compilation");
 }
@@ -279,10 +275,10 @@ void GameMode::loadAndBindTextures() {
 	dirt = LoadTexture("ue/dirt2k/hres_dirt.jpg", 1);
 	rock = LoadTexture("ue/rock2k/hres_rock.jpg", 1);
 	furTex = LoadTexture("ue/fur2k/hres_fur.jpg", 1);
+	billboard->billboardTexture = LoadTexture("ue/bil-plants/billboard-plant.png", 1);
 
     LoadTGATextureSimple("splatmap.tga", &map);
     LoadTGATextureSimple("textures/rutor.tga", &debugTex);
-	LoadTGATextureSimple("textures/billboard-plant.tga", &billboards->billboardTexture);
 
 	glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, grass);
@@ -313,7 +309,7 @@ void GameMode::loadAndBindTextures() {
     glBindTexture(GL_TEXTURE_2D, debugTex);
 
 	glActiveTexture(GL_TEXTURE6);
-	glBindTexture(GL_TEXTURE_2D, billboards->billboardTexture);
+	glBindTexture(GL_TEXTURE_2D, billboard->billboardTexture);
 
     printError("texture loading and binding");
 }
@@ -322,7 +318,7 @@ void GameMode::loadModels() {
     printf("Loading models...\n");
     bunnyModel = LoadModel("models/bunny.obj");
     tm = terrain->setTerrainModel("terrain/fft-terrain.tga");
-	billboards->billboardModel = LoadModel("models/bill.obj");
+	billboard->billboardModel = LoadModel("models/bill.obj");
     printError("model loading");
 }
 

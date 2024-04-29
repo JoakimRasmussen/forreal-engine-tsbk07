@@ -3,11 +3,12 @@
 
 InputController* InputController::instance = nullptr;
 
-InputController::InputController(Camera* camera, Terrain* terrain, Picking* picker) {
+InputController::InputController(Camera* camera, Terrain* terrain, Picking* picker, Billboard* billboard) {
     // Constructor implementation
 	this->camera = camera;
 	this->terrain = terrain;
 	this->picker = picker;
+	this->billboard = billboard;
 	instance = this;
 }
 
@@ -82,9 +83,14 @@ void InputController::collectedMouseController(int button, int state, int x, int
 	{
 		terrain->editTerrainTextureAtIntersectionPoint(picker->intersectionPoint, GUI::textureColor, 5);
 	}
+	if (GUI::PlaceBillboard && !GUI::editTerrainTexture && !GUI::manualElevation && !GUI::PlaceBunny)
+	{
+		billboard->addBillboard(picker->intersectionPoint);
+	}
 	
 	if (GUI::PlaceBunny)
 	{
+		// Smart lösning, implementera för resten!!!
 		GUI::manualElevation = false;
 		GUI::editTerrainTexture = false;
 		picker->updateIsPicking(true);
