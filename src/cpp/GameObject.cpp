@@ -199,7 +199,6 @@ void GameObject::resetJumpState() {
     y = 0;
     yVelocity = 0;
     isJumping = false;
-    jumpTime = 0;
     prepareNewJump = true;
 }
 
@@ -233,7 +232,6 @@ void GameObject::jump() {
         isJumping = true;
     }
 }
-
 
 /**
  * Determines whether the game object should jump based on a given percentage.
@@ -269,7 +267,6 @@ void GameObject::startJump(float jumpHeight) {
     float gravity = 9.81f; // Gravity in meters per second squared
     yVelocity = sqrt(2 * gravity * jumpHeight); // Calculate initial jump velocity for the desired height
     isJumping = true; // Set jumping state to true
-    jumpTime = 0; // Reset jump time
 }
 
 

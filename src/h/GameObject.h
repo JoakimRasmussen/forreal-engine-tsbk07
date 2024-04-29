@@ -52,32 +52,30 @@ private:
 
     // Jumping and Physics Related
     float yVelocity = 0.0f; // Vertical velocity
-    int jumpTime = 1;
     bool isJumping = false;
+    vec2 jumpDirection;
+    bool prepareNewJump = true;
+    float jumpSpeed = 4.0f;
 
     // Private Movement Functions
     void newDestination();
-
-    // Private Helper Functions
-    float lerpAngle(float from, float to, float t);
-    float normalizeAngle(float angle);
-    float distanceToTarget();
-    bool isCloseEnough(float distance);
     void handleJumping();
     void handleHorizontalMovement(float distance);
     bool hasLanded();
     void resetJumpState();
+    void moveForward(float dx, float dy, float distance);
+    bool shouldJump(int percentage);
+    void startJump(float jumpHeight);
+
+    // Private Helper Functions
+    float lerpAngle(float from, float to, float t);
+    float normalizeAngle(float angle);
+    bool isCloseEnough(float distance);
+    float distanceToTarget();
     float calculateDesiredRotation(float dx, float dy);
     void rotateTowards(float desiredRy);
     bool shouldMoveForward(float desiredRy);
-    void moveForward(float dx, float dy, float distance);
-
-    bool shouldJump(int percentage);
     vec2 randomDirection();
-    void startJump(float jumpHeight);
-    vec2 jumpDirection;
-    bool prepareNewJump = true;
-    float jumpSpeed = 4.0f;
 };
 
 #endif // GAMEOBJECT_H
