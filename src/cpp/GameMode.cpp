@@ -41,6 +41,7 @@ void GameMode::init() {
 	loadModels();
 	uploadTextureData(program, "terrain");
 	uploadTextureData(objectShader, "object");
+	uploadTextureData(skyboxShader, "skybox");
 	setupGUI();
 	generateColors(numColors);
 
@@ -69,16 +70,23 @@ void GameMode::run(int argc, char** argv) {
 	clearScreen();
 
 	// Second Pass: Main rendering
+	// Skybox rendering
+	activateShader(skyboxShader);
+	uploadUniforms(skyboxShader, "skybox");
+	renderSkybox(skyboxShader);
+
+	// Terrain rendering
 	activateShader(program);
 	uploadUniforms(program, "terrain");
 	renderTerrain(program, tm);
 
+	// Object rendering
 	spawnBunnyOnTerrainClick();
-
 	activateShader(objectShader);
 	uploadUniforms(objectShader, "object");
 	renderGameObjects(objectShader);
 
+	// GUI rendering
 	renderGUI();
 
 	finalizeFrame();
@@ -183,12 +191,14 @@ void GameMode::activateShader(GLuint& shaderProgram) {
 
 void GameMode::uploadUniforms(GLuint& shaderProgram, const std::string& mode) {
 	// Universal uniforms
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "worldToView"), 1, GL_TRUE, worldToView.m);
+	if (mode != "skybox") {
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "worldToView"), 1, GL_TRUE, worldToView.m);
+	}
 
 	// Mode specific uniforms
 	if (mode == "terrain" || mode == "object") {
-	glUniform3f(glGetUniformLocation(shaderProgram, "cameraPosition"), cameraPos.x, cameraPos.y, cameraPos.z);
-	glUniform3f(glGetUniformLocation(shaderProgram, "lightPosition"), 5, 5, 5);
+		glUniform3f(glGetUniformLocation(shaderProgram, "cameraPosition"), cameraPos.x, cameraPos.y, cameraPos.z);
+		glUniform3f(glGetUniformLocation(shaderProgram, "lightPosition"), 5, 5, 5);
 	}
 	if (mode == "terrain") {
 		glUniform1f(glGetUniformLocation(shaderProgram, "mountainHeight"), terrain->currentMountainHeight);
@@ -267,6 +277,7 @@ void GameMode::loadNecessaryShaders() {
     program = loadShaders("shaders/terrainsplat.vert", "shaders/terrainsplat.frag");
     objectShader = loadShaders("shaders/object.vert", "shaders/object.frag");
 	pickingShader = loadShaders("shaders/pick.vert", "shaders/pick.frag");
+	skyboxShader = loadShaders("shaders/skybox.vert", "shaders/skybox.frag");
 
 	// Upload the projection matrix to the shader programs
 	glUseProgram(program);
@@ -275,6 +286,8 @@ void GameMode::loadNecessaryShaders() {
 	glUniformMatrix4fv(glGetUniformLocation(objectShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 	glUseProgram(pickingShader);
 	glUniformMatrix4fv(glGetUniformLocation(pickingShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
+	glUseProgram(skyboxShader);
+	glUniformMatrix4fv(glGetUniformLocation(skyboxShader, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
 
     printError("shader compilation");
 }
@@ -287,6 +300,7 @@ void GameMode::loadAndBindTextures() {
     LoadTGATextureSimple("splatmap.tga", &map);
     LoadTGATextureSimple("textures/fur.tga", &furTex);
     LoadTGATextureSimple("textures/rutor.tga", &debugTex);
+	LoadTGATextureSimple("textures/SkyBoxFull.tga", &skyboxTex);
 
 	glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, grass);
@@ -316,6 +330,9 @@ void GameMode::loadAndBindTextures() {
 	glActiveTexture(GL_TEXTURE5);
     glBindTexture(GL_TEXTURE_2D, debugTex);
 
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, skyboxTex);
+
     printError("texture loading and binding");
 }
 
@@ -323,6 +340,7 @@ void GameMode::loadModels() {
     printf("Loading models...\n");
     bunnyModel = LoadModel("models/bunny.obj");
     tm = terrain->setTerrainModel("terrain/fft-terrain.tga");
+	skyboxModel = LoadModelPlus("models/skyboxfull.obj");
     printError("model loading");
 }
 
@@ -337,13 +355,13 @@ void GameMode::uploadTextureData(GLuint& shaderProgram, const std::string& mode)
 	activateShader(shaderProgram);
 
 	// Shared textures
-	glActiveTexture(GL_TEXTURE0);
-	glUniform1i(glGetUniformLocation(shaderProgram, "grass"), 0);
-	printError("grass");
 
 	// Terrain specific textures
 	if (mode == "terrain") {
 		printf("Uploading terrain textures...\n");
+		glActiveTexture(GL_TEXTURE0);
+		glUniform1i(glGetUniformLocation(shaderProgram, "grass"), 0);
+		printError("grass");
 		glActiveTexture(GL_TEXTURE1);
 		glUniform1i(glGetUniformLocation(shaderProgram, "dirt"), 1);
 		glActiveTexture(GL_TEXTURE2);
@@ -360,6 +378,15 @@ void GameMode::uploadTextureData(GLuint& shaderProgram, const std::string& mode)
 		glUniform1i(glGetUniformLocation(shaderProgram, "debugTex"), 5);
 		printError("upload textures (object)");
 	}	
+	// Skybox specific textures
+	else if (mode == "skybox")
+	{
+		printf("Uploading skybox textures...\n");
+		glActiveTexture(GL_TEXTURE6);
+		glUniform1i(glGetUniformLocation(shaderProgram, "skyboxTex"), 6);
+		printError("upload textures (skybox)");
+	}
+	else
 	
 	printError("upload textures");
 }
@@ -483,4 +510,25 @@ void GameMode::printObjectIDs() {
 		printf("%d ", gameObject.getObjectID());
 	}
 	printf("\n");
+}
+
+void GameMode::renderSkybox(GLuint& shaderProgram) {
+	glEnable(GL_DEPTH_CLAMP);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+
+	activateShader(shaderProgram);
+	mat4 modelToWorld = IdentityMatrix();
+	mat4 worldToView = lookAtv(SetVec3(0,0,0), forwardVec, upVec);
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "worldToView"), 1, GL_TRUE, worldToView.m);
+	// Rebind the skybox texture
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, skyboxTex);
+	DrawModel(skyboxModel, shaderProgram, "in_Position", NULL, "in_TexCoord");
+
+	glDisable(GL_DEPTH_CLAMP);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	printError("draw skybox");
 }
