@@ -43,8 +43,6 @@ public:
         hity = -1;
     }
 
-    bool bunnyJump = false;
-    
     // Callabacks/bridge functions
     static void handleMouseMotionBridge(int x, int y);
     static void guiKeyboardBridge(unsigned char key, int x, int y);

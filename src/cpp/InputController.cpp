@@ -96,16 +96,7 @@ void InputController::handleKeyboardInput(GLfloat deltaTime) {
     // Implementation of keyboard input handling
 	// General controlls
     cameraControls(deltaTime, camera);
-
-	// Bunny jump
-	if (glutKeyIsDown(' ')) {
-		if (!bunnyJump) {
-			bunnyJump = true;
-		}
-	}
-	else {
-		bunnyJump = false;
-	}
+	
 	// Escape key
 	if (glutKeyIsDown(27)) {
 		exit(0);

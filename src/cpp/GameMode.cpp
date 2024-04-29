@@ -221,9 +221,8 @@ void GameMode::renderGameObjects(GLuint& shaderProgram) {
 	for (auto& gameObject : gameObjects) {
 		// Identify the model
 		Model* model = gameObject.getModel();
-		gameObject.moveTowardsDestination();
-		if (inputController->bunnyJump) {
-			gameObject.jump();
+		if (model == bunnyModel) {
+			gameObject.bunnyMovement();
 		}
 		vec3 objPos = gameObject.getPosition();
 		float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
@@ -249,8 +248,6 @@ void GameMode::renderGameObjects(GLuint& shaderProgram) {
 		// Draw the model
 		DrawModel(model, shaderProgram, "in_Position", "in_Normal", "in_TexCoord");
 	}	
-	inputController->bunnyJump = false;
-
 }
 
 void GameMode::finalizeFrame() {
@@ -380,7 +377,7 @@ void GameMode::renderForPicking(GLuint& pickingShader) {
 			// Set the color to white
 			// glUniform4f(glGetUniformLocation(pickingShader, "objectColor"), 1.0f, 1.0f, 1.0f, 1.0f);
 			// Delete the object
-			deleteObject(gameObjects[i].getID());
+			deleteObject(gameObjects[i].getObjectID());
 		}
 		printError("color setting");
 
@@ -470,7 +467,7 @@ bool GameMode::colorsAreEqual(const std::array<float, 3>& Color1, const std::arr
 
 void GameMode::deleteObject(int objectID) {
     for (auto it = gameObjects.begin(); it != gameObjects.end(); ++it) {
-        if (it->getID() == objectID) {
+        if (it->getObjectID() == objectID) {
             it = gameObjects.erase(it);
             break;
         }
@@ -480,7 +477,7 @@ void GameMode::deleteObject(int objectID) {
 void GameMode::printObjectIDs() {
 	printf("Object IDs: ");
 	for (auto& gameObject : gameObjects) {
-		printf("%d ", gameObject.getID());
+		printf("%d ", gameObject.getObjectID());
 	}
 	printf("\n");
 }
