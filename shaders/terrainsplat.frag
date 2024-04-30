@@ -69,7 +69,7 @@ uniform int numObjects;             // Actual number of objects
 
 void main(void) {
     const vec3 lightDir = normalize(vec3(0.58, 0.58, 0.58));
-    float ambientIntensity = 0.1; // Reduced ambient light
+    float ambientIntensity = 1; // Reduced ambient light
     float lightIntensity = dot(normalize(ex_Normal), lightDir) + ambientIntensity;
 
     float shadowIntensity = 1.0;       // Start with no shadow
