@@ -51,25 +51,14 @@ void InputController::cameraControls(GLfloat deltaTime, Camera* camera) {
 void InputController::collectedMouseController(int button, int state, int x, int y)
 {
 
-	// guiMouse
 	if (button == 0) sgMouse(state, x, y);
-	glutPostRedisplay();
+    glutPostRedisplay();
 
-	// onMouse
-	if(state != GLUT_DOWN) 	return;
+    if(state != GLUT_DOWN) return;
 
-	GLbyte color[4];
-	GLfloat depth;
-	GLuint index;
-
-	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
-	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-	/* NOTE:function below causes "GL error 0x502" once after first mouse press! */
-	glReadPixels(x, Utils::windowWidth - y - 1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
-	printError("glReadPixels");
-
-	// printf("Clicked on pixel %d, %d, color %02hhx%02hhx%02hhx%02hhx, depth %f, stencil index %u\n",
-			// x, y, color[0], color[1], color[2], color[3], depth, index);
+	// Save clicked coordinates
+	this->hitx = x;
+	this->hity = y;
 
 	// Check ray
 	vec3 ray = picker->calculateMouseRay(x, y, Utils::windowWidth, Utils::windowHeight);
@@ -113,7 +102,7 @@ void InputController::handleKeyboardInput(GLfloat deltaTime) {
     // Implementation of keyboard input handling
 	// General controlls
     cameraControls(deltaTime, camera);
-
+	
 	// Escape key
 	if (glutKeyIsDown(27)) {
 		exit(0);

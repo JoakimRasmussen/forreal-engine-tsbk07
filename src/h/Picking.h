@@ -4,6 +4,7 @@
 #include "VectorUtils4.h"
 #include "Camera.h"
 #include <vector>
+#include <array>
 
 class Camera;
 
@@ -32,12 +33,13 @@ class Picking {
 
         bool isPicking = false;
         
-
     private:
 
         // Variables
         int mouseX = 0;
         int mouseY = 0;
+
+        const float epsilon = 0.01f;
         Camera* camera;
 
     protected:

@@ -31,6 +31,13 @@ public:
     // Elevation button controlled manually
     void manualElevationButton();
 
+    void performHitTest();
+
+    // Available colors for picking
+    static const int numColors = 100; // Define the number of colors
+    static GLfloat availableColors[numColors][4];  // Declaration of the static array
+    int colorHits[numColors] = {0};  // Array to store the hits
+
 private:
     // Helper functions for setting up and managing game frames
     void setupFrameTiming();
@@ -44,18 +51,25 @@ private:
     void uploadTextureData(GLuint& shaderProgram, const std::string& mode);
     void setupGUI();
 
-
     // Render functions for different game components
     void renderTerrain(GLuint& shaderProgram, Model* tm);
     void renderGUI();
     void renderGameObjects(GLuint& shaderProgram);
     void finalizeFrame();
+    void renderForPicking(GLuint& shaderProgram);
+    void renderSkybox(GLuint& shaderProgram);
 
     // Object interaction functions
     void spawnBunnyOnTerrainClick();
     void updateCameraVariables();
     void updatePositions();
     void uploadPositionData(GLuint& shaderProgram);
+    // void updateObjectPositions();
+    void generateColors(int numColors);
+    void HSVtoRGB(float h, float s, float v, float& r, float& g, float& b);
+    bool colorsAreEqual(const std::array<float, 3>& Color1, const std::array<float, 3>& Color2, float epsilon);
+    void deleteObject(int objectID);
+    void printObjectIDs();
 
     // State variables for time management
     GLfloat deltaTime = 0.0f;
@@ -73,18 +87,21 @@ private:
     // Collections for game objects
     std::vector<GameObject> gameObjects;
     std::vector<vec3> objectPositions;
+    int objectCount = 0;
 
     // Object placement specifics
     const float placementDistance = 10.0f;
     vec3 clickedPosition = vec3(0.0f, 0.0f, 0.0f);
+    int objectID = 0;
 
     // Shader programs
-    GLuint program, objectShader, billboardShader; // done
+    GLuint program, objectShader, pickingShader, skyboxShader, billboardShader;
 
     // Texture data and models
-    GLuint grass, rock, dirt, map, plant; // done
-    GLuint tex1, tex2, furTex, debugTex;
-    Model* tm, *bunnyModel, *bill; // done
+    GLuint grass, rock, dirt, map, plant;
+    GLuint furTex, debugTex;
+    GLuint skyboxTex;
+    Model* tm, *bunnyModel, *skyboxModel, *bill;
 
     // Matrix transformations and vectors for camera and objects
     mat4 worldToView, modelToWorld, lookAtVectors;

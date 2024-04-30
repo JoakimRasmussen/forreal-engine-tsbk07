@@ -57,4 +57,3 @@ vec3 Picking::getIntersectionPoint() {
 void Picking::updateIsPicking(bool isPicking) {
     this->isPicking = isPicking;
 }
-

@@ -8,7 +8,6 @@ out vec2 TexCoord;    // Pass texture coordinates to fragment shader
 out vec3 Normal;      // Pass normal to fragment shader
 out vec3 FragPos;     // Pass fragment position to fragment shader
 
-// Updated uniforms to match your naming
 uniform mat4 projectionMatrix;
 uniform mat4 modelToWorld;
 uniform mat4 worldToView;
