@@ -105,6 +105,8 @@ void InputController::handleKeyboardInput(GLfloat deltaTime) {
 	
 	// Escape key
 	if (glutKeyIsDown(27)) {
+		// destroy billboard
+		billboard->~Billboard();
 		exit(0);
 	}
 }

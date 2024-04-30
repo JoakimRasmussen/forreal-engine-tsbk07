@@ -8,6 +8,13 @@ Billboard::Billboard(Camera *camera, Terrain *terrain) {
     this->modelToViewMatrix = IdentityMatrix();
 }
 
+// Destructor
+Billboard::~Billboard() {
+    // Delete the billboard model
+    billboardPositions.clear();
+    delete this->billboardModel;
+}
+
 void Billboard::renderBillboard()
 {
     for (unsigned int i = 0; i < this->billboardPositions.size(); i++)

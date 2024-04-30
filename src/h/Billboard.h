@@ -17,7 +17,11 @@ class Billboard
 {
 public:
 
+    // Constructor
     Billboard(Camera *camera, Terrain *terrain);
+    // Destructor
+    ~Billboard();
+
     void renderBillboard();
     void addBillboard(vec3 position);
 
