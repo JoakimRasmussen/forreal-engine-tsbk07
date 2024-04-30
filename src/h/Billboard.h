@@ -7,15 +7,17 @@
 #include "LoadTexture.h"
 #include "LittleOBJLoader.h"
 #include "Camera.h"
+#include "Terrain.h"
 
 
 class Camera;
+class Terrain;
 
 class Billboard
 {
 public:
 
-    Billboard(Camera *camera);
+    Billboard(Camera *camera, Terrain *terrain);
     void renderBillboard();
     void addBillboard(vec3 position);
 
@@ -23,6 +25,7 @@ public:
     GLuint billboardTexture;
     Model* billboardModel;
     Camera* camera;
+    Terrain* terrain;
 
     GLfloat posX;
     GLfloat posY;

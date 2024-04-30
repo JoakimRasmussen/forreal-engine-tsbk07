@@ -20,7 +20,7 @@ GameMode::GameMode() {
     // Gui object
     gui = new GUI();
 	// Billboards object
-	billboard = new Billboard(camera);
+	billboard = new Billboard(camera, terrain);
     // Input controller object
     inputController = new InputController(camera, terrain, picker, billboard);
 
@@ -316,7 +316,7 @@ void GameMode::loadAndBindTextures() {
 
 void GameMode::loadModels() {
     printf("Loading models...\n");
-    bunnyModel = LoadModel("models/bunny.obj");
+    bunnyModel = LoadModel("models/bunnyplus.obj");
     tm = terrain->setTerrainModel("terrain/fft-terrain.tga");
 	billboard->billboardModel = LoadModel("models/bill.obj");
     printError("model loading");
