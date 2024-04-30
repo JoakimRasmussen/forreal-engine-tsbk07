@@ -52,7 +52,7 @@ void Billboard::renderBillboard()
         DrawModel(this->billboardModel, this->billboardShader, "in_Position", NULL, "in_TexCoord");  */
 
         // World-orientated billboards
-        this->modelToViewMatrix = worldToView*(T(this->posX, this->posY, this->posZ)*Rx(rx)*Ry(ry)*Rz(rz)); 
+        this->modelToViewMatrix = worldToView*(T(this->posX, this->posY + 0.5, this->posZ)*Rx(rx)*Ry(ry)*Rz(rz)); 
         glUniformMatrix4fv(glGetUniformLocation(this->billboardShader, "modelToViewMatrix"), 1, GL_TRUE, this->modelToViewMatrix.m);
         DrawModel(this->billboardModel, this->billboardShader, "in_Position", NULL, "in_TexCoord");
 
