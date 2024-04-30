@@ -34,8 +34,8 @@ public:
         return projectionMatrix;
     }
 
-    static const int windowWidth = 2560;
-    static const int windowHeight = 1440;
+    static const int windowWidth = 1080;
+    static const int windowHeight = 720;
 
 private:
 
