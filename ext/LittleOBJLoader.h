@@ -63,6 +63,7 @@ Model** LoadModelSet(const char* name);  // Multi-part OBJ!
 // Drawing models
 void DrawModel(Model *m, GLuint program, const char* vertexVariableName, const char* normalVariableName, const char* texCoordVariableName);
 void PlaceModel(Model *m,GLuint program,GLfloat positionX,GLfloat positionY,GLfloat positionZ,GLfloat angleX,GLfloat angleY,GLfloat angleZ);
+void PlaceModelScale(Model *m,GLuint program,GLfloat positionX,GLfloat positionY,GLfloat positionZ,GLfloat angleX,GLfloat angleY,GLfloat angleZ,GLfloat scaleX,GLfloat scaleY,GLfloat scaleZ);
 void DrawWireframeModel(Model *m, GLuint program, const char* vertexVariableName, const char* normalVariableName, const char* texCoordVariableName);
 
 // Utility functions that you may need if you want to modify the model.

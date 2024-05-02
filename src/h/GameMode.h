@@ -39,6 +39,7 @@ public:
     int colorHits[numColors] = {0};  // Array to store the hits
 
 private:
+
     // Helper functions for setting up and managing game frames
     void setupFrameTiming();
     void clearScreen();
@@ -70,6 +71,7 @@ private:
     bool colorsAreEqual(const std::array<float, 3>& Color1, const std::array<float, 3>& Color2, float epsilon);
     void deleteObject(int objectID);
     void printObjectIDs();
+    void renderDebug();
 
     // State variables for time management
     GLfloat deltaTime = 0.0f;
@@ -109,6 +111,8 @@ private:
 
     // Projection matrix reference
     const GLfloat* projectionMatrix;
+
+    bool debugMode = false;
 };
 
 #endif // GAME_MODE_H

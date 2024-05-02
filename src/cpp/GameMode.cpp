@@ -91,13 +91,47 @@ void GameMode::run(int argc, char** argv) {
 	uploadUniforms(objectShader, "object");
 	renderGameObjects(objectShader);
 	
+	// Billboard rendering
 	billboard->renderBillboard();
+
+	// Debugging
+	if (debugMode)
+	{
+		renderDebug();
+	}
 
 	// GUI rendering
 	renderGUI();
 
 	finalizeFrame();
 	printError("Post-run checks");
+}
+
+void GameMode::renderDebug()
+{
+	// Render all points in the vector as spheres
+	activateShader(objectShader);
+	for (const auto& position : picker->debugIntersectionVector) {
+		// Render the debug bunny
+		PlaceModelScale(bunnyModel, program, position.x, position.y, position.z, 0, 0, 0, 2, 2, 2);
+		DrawModel(bunnyModel, program, "in_Position", "in_Normal", "in_TexCoord");
+		printf("Intersection position: %f %f %f\n", position.x, position.y, position.z);
+	}
+	for (const auto& position : picker->debugRayVector) {
+		// Render the sphere
+		PlaceModelScale(bunnyModel, program, position.x, position.y, position.z, 0, 0, 0, 1, 1, 1);
+		DrawModel(bunnyModel, program, "in_Position", "in_Normal", "in_TexCoord");
+	}
+
+	vec3 intersectionPoint = picker->getIntersectionPoint();
+	PlaceModelScale(bunnyModel, program, intersectionPoint.x, intersectionPoint.y, intersectionPoint.z, 0, 0, 0, 10, 10, 10);
+	DrawModel(bunnyModel, program, "in_Position", "in_Normal", "in_TexCoord");
+
+	if (picker->debugIntersectionVector.size() > 0)
+	{
+		printf("Intersection %ld debug points\n", picker->debugIntersectionVector.size());
+		
+	}
 }
 
 

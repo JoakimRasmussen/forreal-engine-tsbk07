@@ -71,8 +71,8 @@ void InputController::collectedMouseController(int button, int state, int x, int
 	this->hity = y;
 
 	// Check ray
-	vec3 ray = picker->calculateMouseRay(x, y, Utils::windowWidth, Utils::windowHeight);
-	terrain->rayTriangleIntersection(camera->getPosition(), ray, picker->intersectionPoint, picker->debugIntersectionVector);
+	vec3 ray = picker->calculateMouseRay(x, y, Utils::windowWidth, Utils::windowHeight);	
+	terrain->rayTriangleIntersection(camera->getPosition() + camera->getForwardVector(), ray, picker->intersectionPoint, picker->debugIntersectionVector);
 	if (GUI::manualElevation)
 	{
 		GUI::PlaceBunny = false;
@@ -114,6 +114,8 @@ void InputController::collectedMouseController(int button, int state, int x, int
 				picker->debugRayVector.push_back(pos);
 		}
 	}
+
+	
 }
 
 void InputController::handleKeyboardInput(GLfloat deltaTime) {

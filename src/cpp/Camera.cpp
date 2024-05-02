@@ -17,7 +17,7 @@ vec3 Camera::getPosition() const {
     return position;
 }
 vec3 Camera::getForwardVector() const {
-    return forwardVector;
+    return normalize(forwardVector);
 }
 vec3 Camera::getUpVector() const {
     return upVector;

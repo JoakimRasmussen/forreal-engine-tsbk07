@@ -49,6 +49,9 @@ void GUI::PlaceBunnyButton()
 	if (!PlaceBunny)
 	{
 		PlaceBunny = true;
+		PlaceBillboard = false;
+		manualElevation = false;
+		editTerrainTexture = false;
 	}
 }
 void GUI::PlaceBillboardButton()
@@ -60,6 +63,8 @@ void GUI::PlaceBillboardButton()
 	else
 	{
 		PlaceBillboard = true;
+		manualElevation = false;
+		editTerrainTexture = false;
 	}
 }
 
@@ -72,6 +77,9 @@ void GUI::ElevationButton()
 	else
 	{
 		manualElevation = true;
+		PlaceBunny = false;
+		PlaceBillboard = false;
+		editTerrainTexture = false;
 	}
 }
 
@@ -84,6 +92,9 @@ void GUI::TextureButton()
 	else
 	{
 		editTerrainTexture = true;
+		PlaceBunny = false;
+		PlaceBillboard = false;
+		manualElevation = false;
 	}
 }
 

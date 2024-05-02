@@ -159,113 +159,178 @@ void Terrain::editTerrainAtIntersectionPoint(vec3 intersectionPoint)
 	terrainModel = generateTerrain(&ttex, currentElevation);
 }
 
-/* Möller-Trumbore intersection algorithm, temporary solution with the two triangles.... */
+// /* Möller-Trumbore intersection algorithm, temporary solution with the two triangles.... */
+// bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint, std::vector<vec3>& intersectionVector)
+// {
+
+// 	GLint i = 0;
+// 	vec3 closestIntersectionPoint = vec3(0.0f, 0.0f, 0.0f);
+// 	vec3* ipVector = (vec3 *)malloc(sizeof(GLfloat) * 50);
+	
+// 	// Loop over all triangles in the terrain model
+// 	for (unsigned int x = 0; x < ttex.width; x++)
+// 	{
+// 		for (unsigned int z = 0; z < ttex.height; z++)
+// 		{
+// 			// First triangle
+// 			vec3 vertex1 = terrainModel->vertexArray[x + z * ttex.width];
+// 			vec3 vertex2 = terrainModel->vertexArray[x + (z+1) * ttex.width];
+// 			vec3 vertex3 = terrainModel->vertexArray[(x+1) + z * ttex.width];
+
+// 			const float eps = 1e-8;
+// 			vec3 edge1 = vertex2 - vertex1;
+// 			vec3 edge2 = vertex3 - vertex1;
+// 			vec3 h = cross(rayDirection, edge2);
+// 			float det = dot(edge1, h);
+
+// 			// Check if ray is parallel to the triangle
+// 			if (det > -eps && det < eps) 
+// 				continue;
+
+// 			float invDet = 1.0f / det;
+// 			vec3 s = rayOrigin - vertex1;
+// 			float u = invDet * dot(s, h); // first barycentric coordinate
+
+// 			vec3 q = cross(s, edge1);
+// 			float v = invDet * dot(rayDirection, q); // second barycentric coordinate
+
+// 			// Check if the intersection point is inside the triangle
+// 			if (u >= 0 && v >= 0 && u + v <= 1)
+// 			{
+// 				// Calculate the intersection point
+// 				float t = invDet * dot(edge2, q);
+// 				intersectionPoint = rayOrigin + t * rayDirection;
+
+// 				ipVector[i] = intersectionPoint;
+
+// 				// Check if the intersection point is closer than the previous one
+// 				if (i == 0 || abs(Norm(intersectionPoint - rayOrigin)) < abs(Norm(closestIntersectionPoint - rayOrigin)))
+// 				{
+// 					closestIntersectionPoint = intersectionPoint;
+// 				}
+// 				i++;
+// 				continue;
+// 			}
+
+// 			// Second triangle
+// 			vertex1 = terrainModel->vertexArray[(x+1) + z * ttex.width];
+// 			vertex2 = terrainModel->vertexArray[x + (z+1) * ttex.width];
+// 			vertex3 = terrainModel->vertexArray[(x+1) + (z+1) * ttex.width];
+
+// 			edge1 = vertex2 - vertex1;
+// 			edge2 = vertex3 - vertex1;
+// 			h = cross(rayDirection, edge2);
+// 			det = dot(edge1, h);
+
+// 			// Check if ray is parallel to the triangle
+// 			if (det > -eps && det < eps)
+// 				continue;
+
+// 			invDet = 1.0f / det;
+// 			s = rayOrigin - vertex1;
+// 			u = invDet * dot(s, h); // first barycentric coordinate
+
+// 			q = cross(s, edge1);
+// 			v = invDet * dot(rayDirection, q); // second barycentric coordinate
+
+// 			// Check if the intersection point is inside the triangle
+// 			if (u >= 0 && v >= 0 && u + v <= 1)
+// 			{
+// 				// Calculate the intersection point
+// 				float t = invDet * dot(edge2, q);
+// 				intersectionPoint = rayOrigin + t * rayDirection;
+
+// 				ipVector[i] = intersectionPoint;
+
+// 				// Check if the intersection point is closer than the previous one
+// 				if (i == 0 || abs(Norm(intersectionPoint - rayOrigin)) < abs(Norm(closestIntersectionPoint - rayOrigin)))
+// 				{
+// 					closestIntersectionPoint = intersectionPoint;
+// 				}
+// 				i++;
+// 				continue;
+// 			}
+// 		}
+// 	}
+// 	if (i > 0)
+// 	{
+// 		// Loop over all intersection points and print them out
+// 		for (int j = 0; j < i; j++)
+// 		{
+// 			// printf("Intersection point in Terrain.cpp: %f, %f, %f\n", ipVector[j].x, ipVector[j].y, ipVector[j].z);
+// 			intersectionVector.push_back(ipVector[j]);
+// 		}
+// 		intersectionPoint = closestIntersectionPoint;
+// 		return true;
+// 	}
+// 	// No intersection found
+// 	// printf("No intersection found\n");
+// 	return false;
+// }
+
+#include <vector>
+#include <limits>
+
 bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint, std::vector<vec3>& intersectionVector)
 {
+    vec3 closestIntersectionPoint = vec3(std::numeric_limits<float>::max());
+    float closestDistance = std::numeric_limits<float>::max();
+    bool hasIntersection = false;
 
-	GLint i = 0;
-	vec3 closestIntersectionPoint = vec3(0.0f, 0.0f, 0.0f);
-	vec3* ipVector = (vec3 *)malloc(sizeof(GLfloat) * 50);
-	
-	// Loop over all triangles in the terrain model
-	for (unsigned int x = 0; x < ttex.width; x++)
-	{
-		for (unsigned int z = 0; z < ttex.height; z++)
-		{
-			// First triangle
-			vec3 vertex1 = terrainModel->vertexArray[x + z * ttex.width];
-			vec3 vertex2 = terrainModel->vertexArray[x + (z+1) * ttex.width];
-			vec3 vertex3 = terrainModel->vertexArray[(x+1) + z * ttex.width];
+    auto checkIntersection = [&](const vec3& v1, const vec3& v2, const vec3& v3) {
+        const float eps = 1e-8;
+        vec3 edge1 = v2 - v1;
+        vec3 edge2 = v3 - v1;
+        vec3 h = cross(rayDirection, edge2);
+        float det = dot(edge1, h);
 
-			const float eps = 1e-8;
-			vec3 edge1 = vertex2 - vertex1;
-			vec3 edge2 = vertex3 - vertex1;
-			vec3 h = cross(rayDirection, edge2);
-			float det = dot(edge1, h);
+        if (std::abs(det) < eps)
+            return false; // Ray is parallel to the triangle
 
-			// Check if ray is parallel to the triangle
-			if (det > -eps && det < eps) 
-				continue;
+        float invDet = 1.0f / det;
+        vec3 s = rayOrigin - v1;
+        float u = invDet * dot(s, h); // First barycentric coordinate
+        if (u < 0.0f || u > 1.0f) return false;
 
-			float invDet = 1.0f / det;
-			vec3 s = rayOrigin - vertex1;
-			float u = invDet * dot(s, h); // first barycentric coordinate
+        vec3 q = cross(s, edge1);
+        float v = invDet * dot(rayDirection, q); // Second barycentric coordinate
+        if (v < 0.0f || u + v > 1.0f) return false;
 
-			vec3 q = cross(s, edge1);
-			float v = invDet * dot(rayDirection, q); // second barycentric coordinate
+        float t = invDet * dot(edge2, q); // Compute t to find intersection point
+        if (t > eps) { // Intersection is in positive ray direction
+            vec3 ip = rayOrigin + t * rayDirection;
+            float dist = dot(ip - rayOrigin, ip - rayOrigin);
+            if (dist < closestDistance && dist < 5000.0f) {
+                closestDistance = dist;
+                closestIntersectionPoint = ip;
+                hasIntersection = true;
+            }
+        }
+        return true;
+    };
 
-			// Check if the intersection point is inside the triangle
-			if (u >= 0 && v >= 0 && u + v <= 1)
-			{
-				// Calculate the intersection point
-				float t = invDet * dot(edge2, q);
-				intersectionPoint = rayOrigin + t * rayDirection;
+    // Loop over all triangles in the terrain model
+    for (unsigned int x = 0; x < ttex.width; x++) {
+        for (unsigned int z = 0; z < ttex.height; z++) {
+            vec3 vertex1 = terrainModel->vertexArray[x + z * ttex.width];
+            vec3 vertex2 = terrainModel->vertexArray[x + (z + 1) * ttex.width];
+            vec3 vertex3 = terrainModel->vertexArray[(x + 1) + z * ttex.width];
+            checkIntersection(vertex1, vertex2, vertex3);
 
-				ipVector[i] = intersectionPoint;
+            vertex1 = terrainModel->vertexArray[(x + 1) + z * ttex.width];
+            vertex2 = terrainModel->vertexArray[x + (z + 1) * ttex.width];
+            vertex3 = terrainModel->vertexArray[(x + 1) + (z + 1) * ttex.width];
+            checkIntersection(vertex1, vertex2, vertex3);
+        }
+    }
 
-				// Check if the intersection point is closer than the previous one
-				if (i == 0 || abs(Norm(intersectionPoint - rayOrigin)) < abs(Norm(closestIntersectionPoint - rayOrigin)))
-				{
-					closestIntersectionPoint = intersectionPoint;
-				}
-				i++;
-				continue;
-			}
+    if (hasIntersection) {
+        intersectionPoint = closestIntersectionPoint;
+        intersectionVector.push_back(closestIntersectionPoint); // Store or process the intersection point
+        return true;
+    }
 
-			// Second triangle
-			vertex1 = terrainModel->vertexArray[(x+1) + z * ttex.width];
-			vertex2 = terrainModel->vertexArray[x + (z+1) * ttex.width];
-			vertex3 = terrainModel->vertexArray[(x+1) + (z+1) * ttex.width];
-
-			edge1 = vertex2 - vertex1;
-			edge2 = vertex3 - vertex1;
-			h = cross(rayDirection, edge2);
-			det = dot(edge1, h);
-
-			// Check if ray is parallel to the triangle
-			if (det > -eps && det < eps)
-				continue;
-
-			invDet = 1.0f / det;
-			s = rayOrigin - vertex1;
-			u = invDet * dot(s, h); // first barycentric coordinate
-
-			q = cross(s, edge1);
-			v = invDet * dot(rayDirection, q); // second barycentric coordinate
-
-			// Check if the intersection point is inside the triangle
-			if (u >= 0 && v >= 0 && u + v <= 1)
-			{
-				// Calculate the intersection point
-				float t = invDet * dot(edge2, q);
-				intersectionPoint = rayOrigin + t * rayDirection;
-
-				ipVector[i] = intersectionPoint;
-
-				// Check if the intersection point is closer than the previous one
-				if (i == 0 || abs(Norm(intersectionPoint - rayOrigin)) < abs(Norm(closestIntersectionPoint - rayOrigin)))
-				{
-					closestIntersectionPoint = intersectionPoint;
-				}
-				i++;
-				continue;
-			}
-		}
-	}
-	if (i > 0)
-	{
-		// Loop over all intersection points and print them out
-		for (int j = 0; j < i; j++)
-		{
-			// printf("Intersection point in Terrain.cpp: %f, %f, %f\n", ipVector[j].x, ipVector[j].y, ipVector[j].z);
-			intersectionVector.push_back(ipVector[j]);
-		}
-		intersectionPoint = closestIntersectionPoint;
-		return true;
-	}
-	// No intersection found
-	// printf("No intersection found\n");
-	return false;
+    return false; // No intersection found
 }
 
 void Terrain::updateTerrain()
