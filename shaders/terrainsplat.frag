@@ -69,7 +69,7 @@ uniform int numObjects;             // Actual number of objects
 
 void main(void) {
     const vec3 lightDir = normalize(vec3(0.58, 0.58, 0.58));
-    float ambientIntensity = 1; // Reduced ambient light
+    float ambientIntensity = 0.3; // Reduced ambient light
     float lightIntensity = dot(normalize(ex_Normal), lightDir) + ambientIntensity;
 
     float shadowIntensity = 1.0;       // Start with no shadow
@@ -77,10 +77,12 @@ void main(void) {
     float shadowDropOff = 10.0;        // How quickly the shadow fades
 
     for (int i = 0; i < numObjects; i++) {
-        float distance = length(surface - objectPositions[i]);
-        if (distance < objectInfluenceRadius) {
-            float shadowFactor = (objectInfluenceRadius - distance) / objectInfluenceRadius;
-            shadowIntensity -= shadowFactor * 0.8 * exp(-distance / shadowDropOff);
+        vec3 diff = surface - objectPositions[i];
+        float horizontalDistance = length(diff.xz); // distance on the horizontal plane
+        float verticalDistance = abs(diff.y); // absolute height difference
+        if (horizontalDistance < objectInfluenceRadius) {
+            float shadowFactor = (objectInfluenceRadius - horizontalDistance) / objectInfluenceRadius;
+            shadowIntensity -= shadowFactor * 0.8 * exp(-verticalDistance / shadowDropOff);
         }
     }
 

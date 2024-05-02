@@ -24,10 +24,7 @@ public:
     Picking* picker;
     Billboard* billboard;
     void handleKeyboardInput(GLfloat deltaTime);
-    void handleMouseMotion(int x, int y);
-    void guiKeyboard(unsigned char key, int x, int y);
     void guiDrag(int x, int y);
-    void onMouse(int button, int state, int x, int y);
     void collectedMouseController(int button, int state, int x, int y);
 
     void cameraControls(GLfloat deltaTime, Camera* camera);
@@ -46,23 +43,17 @@ public:
         hity = -1;
     }
 
-    // Callabacks/bridge functions
-    static void handleMouseMotionBridge(int x, int y);
-    static void guiKeyboardBridge(unsigned char key, int x, int y);
+    // Callbacks/bridge functions
     static void guiDragBridge(int x, int y);
     static void collectedMouseControllerBridge(int button, int state, int x, int y);
     Utils utils;
 
 
 private:
+
     // Mouse variables
-    bool firstMouse = true;
-    GLfloat lastX = 300, lastY = 300; // Screen width and height
     int hitx = -1, hity = -1;
     static InputController* instance;
-    // Test string
-    char testString[1024] = "Type here";
-
 };
 
 #endif

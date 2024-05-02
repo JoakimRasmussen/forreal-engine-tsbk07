@@ -14,37 +14,29 @@ GUI::GUI() {
 
 void GUI::initTerrainGUI(Terrain* terrain)
 {
-	sgSetScale(1);
-	sgCreateStaticString(400, 160, "This is the terrain GUI");
+	sgSetScale(2);
+	sgCreateStaticString(400, 160, "GUI");
 	sgCreateStaticString(40, 20, "Elevation slider"); 
 	sgCreateSlider(40, 40, 200, &terrain->currentElevation, 1, 20);
 	sgCreateDisplayFloat(40, 60, "Elevation value: ", &terrain->currentElevation);
-	// sgCreateButton(40, 80, "Place Bunny", PlaceBunnyButton);
 	
-	sgCreateButton(500, 20, "Manual Elevation", ElevationButton);	
+	sgCreateButton(500, 20, "Toggle Manual Elevation", ElevationButton);	
 
 	// GUI for manual texture
-	sgCreateButton(500, 40, "Manual Texture", TextureButton);	
+	sgCreateButton(500, 40, "Toggle Manual Texture", TextureButton);	
 	sgCreateButton(500, 60, "Grass texture", GrassButton);
 	sgCreateButton(500, 80, "Dirt texture", DirtButton);
 	sgCreateButton(500, 100, "Rock texture", RockButton);
 
-
 	sgCreateStaticString(40, 80, "--------------------------");
 
-	sgCreateStaticString(40, 100, "Mountain slider"); 
-	sgCreateSlider(40, 120, 200, &terrain->currentMountainHeight, 1, 500);
-	sgCreateDisplayFloat(40, 140, "Mountain value: ", &terrain->currentMountainHeight);
-
-	sgCreateStaticString(40, 160, "--------------------------");
-
-	sgCreateStaticString(40, 180, "Smooth slider");
-	sgCreateSlider(40, 200, 200, &terrain->quadSize, 1, 20);
-	sgCreateDisplayFloat(40, 220, "Smooth value: ", &terrain->quadSize);
+	sgCreateStaticString(40, 100, "Smooth slider");
+	sgCreateSlider(40, 120, 200, &terrain->quadSize, 1, 20);
+	sgCreateDisplayFloat(40, 140, "Smooth value: ", &terrain->quadSize);
 
 	sgCreateStaticString(40, 240, "--------------------------");
 	sgCreateButton(40, 260, "Place a Bunny", PlaceBunnyButton);
-	sgCreateButton(200, 260, "Place a Plant", PlaceBillboardButton);
+	sgCreateButton(200, 260, "Toggle Place Plants", PlaceBillboardButton);
 }
 
 void GUI::drawGUI()

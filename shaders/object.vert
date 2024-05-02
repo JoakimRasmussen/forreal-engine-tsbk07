@@ -16,7 +16,7 @@ void main()
 {
     TexCoord = in_TexCoord; // Pass texture coordinates through
     
-    Normal = mat3(worldToView) * mat3(modelToWorld) * in_Normal; // Transform normal to world space
+    Normal = mat3(modelToWorld) * in_Normal; // Transform normal to world space
 
     FragPos = in_Position;
 

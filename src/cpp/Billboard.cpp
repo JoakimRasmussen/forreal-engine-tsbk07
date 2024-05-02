@@ -35,21 +35,8 @@ void Billboard::renderBillboard()
 
         // Calculate rotation to align with terrain
         float rx = atan2(normal.z, normal.y);
-        // If we want camera orientated billboards
-        //vec3 toCamera = normalize(cameraPos - vec3(this->posX, this->posY, this->posZ));
-        //float ry = atan2(toCamera.x, toCamera.z); // Face camera
         float ry = 0.0f;
         float rz = 0.0f;
-
-        // Camera orientated billboards
-        /* // Place first billboard
-        this->modelToViewMatrix = worldToView * (T(this->posX, this->posY + 0.5, this->posZ) * Rx(rx) * Ry(ry) * Rz(rz));
-        glUniformMatrix4fv(glGetUniformLocation(this->billboardShader, "modelToViewMatrix"), 1, GL_TRUE, this->modelToViewMatrix.m);
-        DrawModel(this->billboardModel, this->billboardShader, "in_Position", NULL, "in_TexCoord");
-        // Place second billboard with 180 degree rotation
-        this->modelToViewMatrix = worldToView * (T(this->posX, this->posY + 0.5, this->posZ) * Rx(rx) * Ry(ry + M_PI) * Rz(rz));
-        glUniformMatrix4fv(glGetUniformLocation(this->billboardShader, "modelToViewMatrix"), 1, GL_TRUE, this->modelToViewMatrix.m);
-        DrawModel(this->billboardModel, this->billboardShader, "in_Position", NULL, "in_TexCoord");  */
 
         // World-orientated billboards
         this->modelToViewMatrix = worldToView*(T(this->posX, this->posY + 0.5, this->posZ)*Rx(rx)*Ry(ry)*Rz(rz)); 
