@@ -23,7 +23,6 @@ GameMode::GameMode() {
 	billboard = new Billboard(camera, terrain);
     // Input controller object
     inputController = new InputController(camera, terrain, picker, billboard);
-
     // Projection matrix
     projectionMatrix = Utils::getProjectionMatrix();
 	
@@ -48,7 +47,6 @@ void GameMode::init() {
 	uploadTextureData(skyboxShader, "skybox");
 	setupGUI();
 	generateColors(numColors);
-
 
 	printf("Done initializing game mode\n");
 	printError("Post-init checks");
@@ -130,7 +128,6 @@ void GameMode::renderDebug()
 	if (picker->debugIntersectionVector.size() > 0)
 	{
 		printf("Intersection %ld debug points\n", picker->debugIntersectionVector.size());
-		
 	}
 }
 

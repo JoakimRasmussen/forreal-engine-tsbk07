@@ -54,7 +54,6 @@ void Billboard::renderBillboard()
         this->modelToViewMatrix = Mult(this->modelToViewMatrix, Ry(rz + M_PI*3/2));
         glUniformMatrix4fv(glGetUniformLocation(this->billboardShader, "modelToViewMatrix"), 1, GL_TRUE, this->modelToViewMatrix.m);
         DrawModel(this->billboardModel, this->billboardShader, "in_Position", NULL, "in_TexCoord");
-
     }
 }
 
