@@ -387,8 +387,8 @@ void GameMode::loadAndBindTextures() {
 void GameMode::loadModels() {
     printf("Loading models...\n");
     bunnyModel = LoadModel("models/bunnyplus.obj");
-    // tm = terrain->setTerrainModel("terrain/fft-terrain-test.tga");
-    tm = terrain->setTerrainModel("terrain/fft-terrain.tga");
+    tm = terrain->setTerrainModel("terrain/fft-terrain-test.tga");
+    // tm = terrain->setTerrainModel("terrain/fft-terrain.tga");
 	billboard->billboardModel = LoadModel("models/bill.obj");
 	skyboxModel = LoadModelPlus("models/skyboxfull.obj");
     printError("model loading");

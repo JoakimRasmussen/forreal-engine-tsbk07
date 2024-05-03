@@ -14,7 +14,8 @@ GUI::GUI() {
 
 void GUI::initTerrainGUI(Terrain* terrain)
 {
-	sgSetScale(2);
+	// sgSetScale(2);
+	adjustWindowScale();
 	sgCreateStaticString(400, 160, "GUI");
 	sgCreateStaticString(40, 20, "Elevation slider"); 
 	sgCreateSlider(40, 40, 200, &terrain->currentElevation, 1, 20);
@@ -42,6 +43,25 @@ void GUI::initTerrainGUI(Terrain* terrain)
 void GUI::drawGUI()
 {
 	sgDraw();
+}
+
+void GUI::adjustWindowScale() {
+
+    // Calculate scale based on current resolution compared to base resolution
+    float scaleX = static_cast<float>(Utils::windowWidth) / baseWidth;
+    float scaleY = static_cast<float>(Utils::windowHeight) / baseHeight;
+
+    // Average the scale factors to avoid distortion
+    float averageScale = (scaleX + scaleY) / 2.0f;
+
+    // Round the average scale to the nearest integer
+    int roundedScale = static_cast<int>(std::round(averageScale));
+
+    // Ensure the scale is at least 1
+    roundedScale = std::max(1, roundedScale);
+
+    // Set the scale using your specific function, adjusting the factor as necessary
+    sgSetScale(roundedScale);
 }
 
 void GUI::PlaceBunnyButton()
