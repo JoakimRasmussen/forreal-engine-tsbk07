@@ -29,9 +29,6 @@ GameMode::GameMode() {
 
 }
 
-GLfloat GameMode::availableColors[GameMode::numColors][4];  // Definition of the static member
-
-
 void GameMode::init() {
 	printError("Pre-init checks");
 	printf("Initializing game mode...\n");
@@ -46,7 +43,7 @@ void GameMode::init() {
 	uploadTextureData(billboard->billboardShader, "billboard");
 	uploadTextureData(skyboxShader, "skybox");
 	setupGUI();
-	generateColors(numColors);
+	Utils::generateColors();
 
 	printf("Done initializing game mode\n");
 	printError("Post-init checks");
@@ -390,7 +387,8 @@ void GameMode::loadAndBindTextures() {
 void GameMode::loadModels() {
     printf("Loading models...\n");
     bunnyModel = LoadModel("models/bunnyplus.obj");
-    tm = terrain->setTerrainModel("terrain/fft-terrain-test.tga");
+    // tm = terrain->setTerrainModel("terrain/fft-terrain-test.tga");
+    tm = terrain->setTerrainModel("terrain/fft-terrain.tga");
 	billboard->billboardModel = LoadModel("models/bill.obj");
 	skyboxModel = LoadModelPlus("models/skyboxfull.obj");
     printError("model loading");
@@ -454,58 +452,32 @@ void GameMode::uploadTextureData(GLuint& shaderProgram, const std::string& mode)
 }
 
 void GameMode::renderForPicking(GLuint& pickingShader) {
+    if (gameObjects.empty()) {
+        return;
+    }
 
-	// Check if there are any objects to draw
-	if (gameObjects.size() == 0) {
-		return;
-	}
-	// Draw objects for picking
-	for (std::size_t i = 0; i < gameObjects.size(); i++) {
-		int colorIndex = i % numColors;
-		if (!colorHits[colorIndex]) {
-			// Set the color
-			glUniform4fv(glGetUniformLocation(pickingShader, "objectColor"), 1, availableColors[colorIndex]);
-		} else {
-			// Set the color to white
-			// glUniform4f(glGetUniformLocation(pickingShader, "objectColor"), 1.0f, 1.0f, 1.0f, 1.0f);
-			// Delete the object
-			deleteObject(gameObjects[i].getObjectID());
-		}
-		printError("color setting");
+    for (std::size_t i = 0; i < gameObjects.size(); i++) {
+        int colorIndex = i % numColors;
+        if (!colorHits[colorIndex]) {
+            // Set the color through Utils
+            const GLfloat* color = Utils::getColor(colorIndex);
+            glUniform4fv(glGetUniformLocation(pickingShader, "objectColor"), 1, color);
+        } else {
+            // Option to set to white or delete the object
+            deleteObject(gameObjects[i].getObjectID());
+        }
+        printError("color setting");
 
-		// Update the model-to-world matrix
-		vec3 objPos = gameObjects[i].getPosition();
-		float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
-		objPos.y += y;
+        // Position and rotation updates remain unchanged
+        vec3 objPos = gameObjects[i].getPosition();
+        float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
+        objPos.y += y;
+        vec3 objRot = gameObjects[i].getRotation();
+        modelToWorld = T(objPos.x, objPos.y, objPos.z) * Rx(objRot.x) * Ry(objRot.y) * Rz(objRot.z);
+        glUniformMatrix4fv(glGetUniformLocation(pickingShader, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
 
-		// Retrieve the rotations
-		vec3 objRot = gameObjects[i].getRotation();
-
-		// Update the model-to-world matrix
-		modelToWorld = T(objPos.x, objPos.y, objPos.z) * Rx(objRot.x) * Ry(objRot.y) * Rz(objRot.z);
-		glUniformMatrix4fv(glGetUniformLocation(pickingShader, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
-
-		// Draw the object
-		DrawModel(gameObjects[i].getModel(), pickingShader, "in_Position", NULL, NULL);
-		printError("draw object");
-	}
-
-	glFlush(); // Ensure that all commands are executed
-	printError("picking");
-}
-
-void GameMode::generateColors(int numColors) {
-    const float saturation = 1.0f;  // Full saturation
-    const float value = 1.0f;       // Full brightness
-    for (int i = 0; i < numColors; i++) {
-        float hue = (float)i / numColors;  // Distribute hues evenly
-        GLfloat r, g, b;
-        HSVtoRGB(hue, saturation, value, r, g, b);  // Convert to RGB
-
-        availableColors[i][0] = r;
-        availableColors[i][1] = g;
-        availableColors[i][2] = b;
-        availableColors[i][3] = 1.0f;  // Alpha channel
+        DrawModel(gameObjects[i].getModel(), pickingShader, "in_Position", NULL, NULL);
+        printError("draw object");
     }
 }
 
@@ -513,48 +485,23 @@ void GameMode::performHitTest() {
 
 	int hitx = inputController->getHitX();
 	int hity = inputController->getHitY();
-	float color[4];
+	float pickedColor[4];
 
-	glReadPixels(hitx, Utils::windowHeight - hity - 1, 1, 1, GL_RGBA, GL_FLOAT, &color);
+	glReadPixels(hitx, Utils::windowHeight - hity - 1, 1, 1, GL_RGBA, GL_FLOAT, &pickedColor);
     printError("glReadPixels");
 	inputController->resetHitCoordinates();
 	
 	// Reset the color hits
-	for (int i = 0; i < numColors; i++) {
-		colorHits[i] = 0;
-	}
-
-	for (int i = 0; i < numColors; i++) {
-		// Check if the color matches
-		if (colorsAreEqual({color[0], color[1], color[2]}, {availableColors[i][0], availableColors[i][1], availableColors[i][2]}, 0.01f)) {
-			// Increment the hit counter for the corresponding color
-			colorHits[i]++;
-			break;
-		}
-	}
-}
-
-void GameMode::HSVtoRGB(float h, float s, float v, float& r, float& g, float& b) {
-    int i = int(h * 6);
-    float f = h * 6 - i;
-    float p = v * (1 - s);
-    float q = v * (1 - f * s);
-    float t = v * (1 - (1 - f) * s);
-    switch (i % 6) {
-        case 0: r = v, g = t, b = p; break;
-        case 1: r = q, g = v, b = p; break;
-        case 2: r = p, g = v, b = t; break;
-        case 3: r = p, g = q, b = v; break;
-        case 4: r = t, g = p, b = v; break;
-        case 5: r = v, g = p, b = q; break;
+    for (int i = 0; i < numColors; i++) {
+        colorHits[i] = 0;
     }
-}
 
-bool GameMode::colorsAreEqual(const std::array<float, 3>& Color1, const std::array<float, 3>& Color2, float epsilon) {
-    // Check each color component for equality
-    return (std::abs(Color1[0] - Color2[0]) < epsilon &&
-            std::abs(Color1[1] - Color2[1]) < epsilon &&
-            std::abs(Color1[2] - Color2[2]) < epsilon);
+    // Using the new Utils function to check for color match
+    int matchedColorIndex = Utils::colorMatch(pickedColor);
+    if (matchedColorIndex != -1) {
+        // Increment the hit counter for the corresponding color
+        colorHits[matchedColorIndex]++;
+    }
 }
 
 void GameMode::deleteObject(int objectID) {
