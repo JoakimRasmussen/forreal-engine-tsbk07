@@ -151,7 +151,7 @@ void Terrain::editTerrainAtIntersectionPoint(vec3 intersectionPoint)
 
 			// Check if the new coordinates are within the terrain bounds
 			if (newX >= 0 && newX < ttex.width && newZ >= 0 && newZ < ttex.height) {
-				ttex.imageData[(newX + newZ * ttex.width) * (ttex.bpp / 8)] += tenIncrement;
+				ttex.imageData[(newX + newZ * ttex.width) * (ttex.bpp / 8)] += heightIncrement;
 			}
 		}
 	}

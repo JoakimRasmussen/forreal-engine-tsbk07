@@ -32,7 +32,7 @@ public:
     float currentMountainHeight = 1100.0;
     float quadSize = 1.0;
     float previousQuadSize = 1.0;
-    float tenIncrement = 10;
+    float heightIncrement = 10;
     bool test = false;
     bool edit = false;
     GLubyte colorPixel[4];
