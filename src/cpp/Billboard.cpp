@@ -35,7 +35,7 @@ void Billboard::renderBillboard()
 
         // Calculate rotation to align with terrain
         float rx = 0.0f;
-        float ry = atan2(normal.z, normal.x);;
+        float ry = atan2(normal.z, normal.x);
         float rz = 0.0f;
 
         // World-orientated billboards

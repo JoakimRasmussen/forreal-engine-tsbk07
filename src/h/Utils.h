@@ -25,8 +25,8 @@ public:
     static bool colorsAreEqual(const std::array<float, 3>& color1, const std::array<float, 3>& color2, float epsilon);
     static void generateColors();
     static const GLfloat* getColor(int index);
-    static const int windowWidth = 1080;
-    static const int windowHeight = 720;
+    static const int windowWidth = 1920;
+    static const int windowHeight = 1080;
 
     static const int numColors = 100;
 private:
