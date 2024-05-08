@@ -24,6 +24,7 @@ public:
 
     void renderBillboard();
     void addBillboard(vec3 position);
+    void setTexture(GLuint texture, GLuint textureUnit);
 
     GLuint billboardShader;
     GLuint billboardTexture;

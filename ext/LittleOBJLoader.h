@@ -62,6 +62,7 @@ Model** LoadModelSet(const char* name);  // Multi-part OBJ!
 
 // Drawing models
 void DrawModel(Model *m, GLuint program, const char* vertexVariableName, const char* normalVariableName, const char* texCoordVariableName);
+void PlaceModel(Model *m, GLuint program, GLfloat positionX, GLfloat positionY, GLfloat positionZ);
 void PlaceModel(Model *m,GLuint program,GLfloat positionX,GLfloat positionY,GLfloat positionZ,GLfloat angleX,GLfloat angleY,GLfloat angleZ);
 void PlaceModelScale(Model *m,GLuint program,GLfloat positionX,GLfloat positionY,GLfloat positionZ,GLfloat angleX,GLfloat angleY,GLfloat angleZ,GLfloat scaleX,GLfloat scaleY,GLfloat scaleZ);
 void DrawWireframeModel(Model *m, GLuint program, const char* vertexVariableName, const char* normalVariableName, const char* texCoordVariableName);
@@ -1309,6 +1310,18 @@ void PlaceModel(
 	mat4 rot = Rx(angleX)*Ry(angleY)*Rz(angleZ);
 	mat4 total = trans * rot; 
 	glUniformMatrix4fv(glGetUniformLocation(program, "modelToWorld"), 1, GL_TRUE, total.m);
+}
+
+void PlaceModel(
+	Model *m, 
+	GLuint program, 
+	GLfloat positionX,
+	GLfloat positionY,
+	GLfloat positionZ
+	)
+{
+	mat4 trans = T(positionX, positionY, positionZ);
+	glUniformMatrix4fv(glGetUniformLocation(program, "modelToWorld"), 1, GL_TRUE, trans.m);
 }
 
 void PlaceModelScale(

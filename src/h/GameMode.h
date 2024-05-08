@@ -8,6 +8,7 @@
 #include "GUI.h"
 #include "Utils.h"
 #include "GameObject.h"
+#include "GameObject2.h"
 #include "Picking.h"
 #include "GL_utilities.h"
 #include "LoadTexture.h"
@@ -82,7 +83,7 @@ private:
     Billboard* billboard;
 
     // Collections for game objects
-    std::vector<GameObject> gameObjects;
+    std::vector<GameObject2> gameObjects;
     std::vector<vec3> objectPositions;
     int objectCount = 0;
 

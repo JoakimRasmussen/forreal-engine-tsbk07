@@ -63,11 +63,11 @@ void GameMode::run(int argc, char** argv) {
 	updatePositions();
 
 	// First Pass: Picking
-	activateShader(pickingShader);
-	uploadUniforms(pickingShader, "picking");
-	renderForPicking(pickingShader);
-	performHitTest();
-	clearScreen();
+	// activateShader(pickingShader);
+	// uploadUniforms(pickingShader, "picking");
+	// renderForPicking(pickingShader);
+	// performHitTest();
+	// clearScreen();
 
 	// Second Pass: Main rendering
 	// Skybox rendering
@@ -140,31 +140,37 @@ void GameMode::spawnBunnyOnTerrainClick() {
         // Coordinates of the clicked position
         float x = clickedPosition.x;
         float z = clickedPosition.z;
-
-        // Determine y position on terrain, adding a small offset to position the bunny slightly above the terrain
-        // float y = terrain->getHeightAtPoint(x, z) + 0.6f;
 		float y = 0;
 
-        // Retrieve the normal vector from the terrain at the clicked position
-        vec3 normal = terrain->getNormalAtPoint(x, z);
+		GameObject2 bunny(bunnyModel, terrain, objectID);
+		bunny.setPosition(x, z);
+		bunny.setTexture(furTex, 4);
 
-        // Calculate rotation to align with terrain
-        float rx = atan2(normal.z, normal.y);
-        // float ry = atan2(toCamera.x, toCamera.z); // Face camera
-		float ry = 0.0f;
-        float rz = 0.0f;
+        // // Determine y position on terrain, adding a small offset to position the bunny slightly above the terrain
+        // // float y = terrain->getHeightAtPoint(x, z) + 0.6f;
+		// float y = 0;
 
-        // Create a new bunny object with the calculated position and rotations
-		bool isSleeping = false;
-		int ID = objectID;
-		objectID++;
-        GameObject bunny(bunnyModel, ID, x, y, z, rx, ry, rz, isSleeping);
+        // // Retrieve the normal vector from the terrain at the clicked position
+        // vec3 normal = terrain->getNormalAtPoint(x, z);
+
+        // // Calculate rotation to align with terrain
+        // float rx = atan2(normal.z, normal.y);
+        // // float ry = atan2(toCamera.x, toCamera.z); // Face camera
+		// float ry = 0.0f;
+        // float rz = 0.0f;
+
+        // // Create a new bunny object with the calculated position and rotations
+		// bool isSleeping = false;
+		// int ID = objectID;
+		// objectID++;
+        // GameObject bunny(bunnyModel, ID, x, y, z, rx, ry, rz, isSleeping);
         
         // Add the new bunny to the game objects list
         gameObjects.push_back(bunny);
 
         // Place the bunny model into the scene with the specified shader
-        PlaceModel(bunnyModel, objectShader, x, y, z, rx, ry, rz);
+        PlaceModel(bunnyModel, objectShader, x, y, z);
+		printf("Bunny placed at: %f %f %f\n", x, y, z);
         
         // Check for any errors during the placement operation
         printError("Spawn bunny on terrain click!");
@@ -180,8 +186,8 @@ void GameMode::updatePositions() {
     for (auto& gameObject : gameObjects) {
         // Update the position of the game object
         vec3 objPos = gameObject.getPosition();
-        float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
-		objPos.y += y;
+        // float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
+		// objPos.y += y;
 
         // Store the updated position
         objectPositions.push_back(objPos);
@@ -264,33 +270,35 @@ void GameMode::renderGameObjects(GLuint& shaderProgram) {
 	// Render game objects
 
 	for (auto& gameObject : gameObjects) {
-		// Identify the model
-		Model* model = gameObject.getModel();
-		if (model == bunnyModel) {
-			gameObject.bunnyMovement();
-		}
-		vec3 objPos = gameObject.getPosition();
-		float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
-		objPos.y += y;
 
-		// Update rotations
-		vec3 normal = terrain->getNormalAtPoint(objPos.x, objPos.z);
+		gameObject.renderGameObject(shaderProgram, false);
+		// // Identify the model
+		// Model* model = gameObject.getModel();
+		// if (model == bunnyModel) {
+		// 	gameObject.bunnyMovement();
+		// }
+		// vec3 objPos = gameObject.getPosition();
+		// float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
+		// objPos.y += y;
 
-		// Calculate rotation to align with terrain and face camera
-		gameObject.updateAlignmentToTerrain(normal);
+		// // Update rotations
+		// vec3 normal = terrain->getNormalAtPoint(objPos.x, objPos.z);
 
-		// Retrieve the rotations
-		vec3 objRot = gameObject.getRotation();
+		// // Calculate rotation to align with terrain and face camera
+		// gameObject.updateAlignmentToTerrain(normal);
 
-		// Update the model-to-world matrix
-		modelToWorld = T(objPos.x, objPos.y, objPos.z) * Rx(objRot.x) * Ry(objRot.y) * Rz(objRot.z);
+		// // Retrieve the rotations
+		// vec3 objRot = gameObject.getRotation();
 
-		activateShader(shaderProgram);
-		glActiveTexture(GL_TEXTURE4);
-    	glBindTexture(GL_TEXTURE_2D, furTex);
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
-		// Draw the model
-		DrawModel(model, shaderProgram, "in_Position", "in_Normal", "in_TexCoord");
+		// // Update the model-to-world matrix
+		// modelToWorld = T(objPos.x, objPos.y, objPos.z) * Rx(objRot.x) * Ry(objRot.y) * Rz(objRot.z);
+
+		// activateShader(shaderProgram);
+		// glActiveTexture(GL_TEXTURE4);
+    	// glBindTexture(GL_TEXTURE_2D, furTex);
+		// glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
+		// // Draw the model
+		// DrawModel(model, shaderProgram, "in_Position", "in_Normal", "in_TexCoord");
 	}	
 }
 
@@ -332,14 +340,14 @@ void GameMode::loadNecessaryShaders() {
 void GameMode::loadAndBindTextures() {
     printf("Loading and binding textures...\n");
 
-	// LoadTGATextureSimple("textures/grass.tga", &grass);
-    // LoadTGATextureSimple("textures/dirt.tga", &dirt);
-    // LoadTGATextureSimple("textures/rock.tga", &rock);
+	LoadTGATextureSimple("textures/grass.tga", &grass);
+    LoadTGATextureSimple("textures/dirt.tga", &dirt);
+    LoadTGATextureSimple("textures/rock.tga", &rock);
     // LoadTGATextureSimple("textures/fur.tga", &furTex);
 
-	grass = LoadTexture("ue/grass2k/hres_grass.jpg", 1);
-	dirt = LoadTexture("ue/dirt2k/hres_dirt.jpg", 1);
-	rock = LoadTexture("ue/rock2k/hres_rock.jpg", 1);
+	// grass = LoadTexture("ue/grass2k/hres_grass.jpg", 1);
+	// dirt = LoadTexture("ue/dirt2k/hres_dirt.jpg", 1);
+	// rock = LoadTexture("ue/rock2k/hres_rock.jpg", 1);
 	furTex = LoadTexture("ue/fur2k/hres_fur.jpg", 1);
 	billboard->billboardTexture = LoadTexture("ue/bil-plants/billboard-plant.png", 1);
 
@@ -403,6 +411,7 @@ void GameMode::setupGUI() {
 void GameMode::uploadTextureData(GLuint& shaderProgram, const std::string& mode) {
 	// Activate the shader program
 	activateShader(shaderProgram);
+	// printf("Using shader program: %d\n", shaderProgram);
 
 	// Shared textures
 
@@ -425,7 +434,7 @@ void GameMode::uploadTextureData(GLuint& shaderProgram, const std::string& mode)
 	{
 		printf("Uploading object textures...\n");
 		glActiveTexture(GL_TEXTURE4);
-		glUniform1i(glGetUniformLocation(shaderProgram, "furTex"), 4);
+		glUniform1i(glGetUniformLocation(shaderProgram, "objTex"), 4);
 
 		//glUniform1i(glGetUniformLocation(shaderProgram, "debugTex"), 5);
 		printError("upload textures (object)");
@@ -468,16 +477,18 @@ void GameMode::renderForPicking(GLuint& pickingShader) {
         }
         printError("color setting");
 
-        // Position and rotation updates remain unchanged
-        vec3 objPos = gameObjects[i].getPosition();
-        float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
-        objPos.y += y;
-        vec3 objRot = gameObjects[i].getRotation();
-        modelToWorld = T(objPos.x, objPos.y, objPos.z) * Rx(objRot.x) * Ry(objRot.y) * Rz(objRot.z);
-        glUniformMatrix4fv(glGetUniformLocation(pickingShader, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
+		gameObjects[i].renderGameObject(pickingShader, true);
 
-        DrawModel(gameObjects[i].getModel(), pickingShader, "in_Position", NULL, NULL);
-        printError("draw object");
+        // // Position and rotation updates remain unchanged
+        // vec3 objPos = gameObjects[i].getPosition();
+        // float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
+        // objPos.y += y;
+        // vec3 objRot = gameObjects[i].getRotation();
+        // modelToWorld = T(objPos.x, objPos.y, objPos.z) * Rx(objRot.x) * Ry(objRot.y) * Rz(objRot.z);
+        // glUniformMatrix4fv(glGetUniformLocation(pickingShader, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
+
+        // DrawModel(gameObjects[i].getModel(), pickingShader, "in_Position", NULL, NULL);
+        // printError("draw object");
     }
 }
 
