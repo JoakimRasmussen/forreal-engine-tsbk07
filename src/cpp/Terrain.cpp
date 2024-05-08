@@ -159,6 +159,42 @@ void Terrain::editTerrainAtIntersectionPoint(vec3 intersectionPoint)
 	terrainModel = generateTerrain(&ttex, currentElevation);
 }
 
+void Terrain::smoothTerrainAtIntersectionPoint(vec3 intersectionPoint)
+{
+	unsigned int x = intersectionPoint.x / quadSize;
+	unsigned int z = intersectionPoint.z / quadSize;
+	GLfloat mean = 0.0;
+
+	// Iterate over the surrounding area with a radius of 1
+	for (int i = -2; i <= 2; i++) {
+		for (int j = -2; j <= 2; j++) {
+			unsigned int newX = x + i;
+			unsigned int newZ = z + j;
+
+			// Check if the new coordinates are within the terrain bounds
+			if (newX >= 0 && newX < ttex.width && newZ >= 0 && newZ < ttex.height) {
+				mean += ttex.imageData[(newX + newZ * ttex.width) * (ttex.bpp / 8)];
+			}
+		}
+	}
+
+	mean = mean/25.0;
+	for (int i = -2; i <= 2; i++) {
+		for (int j = -2; j <= 2; j++) {
+			unsigned int newX = x + i;
+			unsigned int newZ = z + j;
+
+			// Check if the new coordinates are within the terrain bounds
+			if (newX >= 0 && newX < ttex.width && newZ >= 0 && newZ < ttex.height) {
+				ttex.imageData[(newX + newZ * ttex.width) * (ttex.bpp / 8)] = mean;
+			}
+		}
+	}
+
+	terrainModel = generateTerrain(&ttex, currentElevation);
+
+}
+
 // /* Möller-Trumbore intersection algorithm, temporary solution with the two triangles.... */
 // bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint, std::vector<vec3>& intersectionVector)
 // {

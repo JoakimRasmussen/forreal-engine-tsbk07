@@ -22,12 +22,14 @@ public:
     static void GrassButton();
     static void RockButton();
     static void PlaceBillboardButton();
+    static void SmoothButton();
 
 
     static bool PlaceBunny;
     static bool manualElevation;
     static bool editTerrainTexture;
     static bool PlaceBillboard;
+    static bool smoothTerrain;
     static GLubyte textureColor[4];
 
 private:
