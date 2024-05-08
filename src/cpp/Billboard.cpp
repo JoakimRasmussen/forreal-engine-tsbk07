@@ -34,8 +34,8 @@ void Billboard::renderBillboard()
         mat4 worldToView = lookAtv(cameraPos, cameraPos + forwardVec, upVec);
 
         // Calculate rotation to align with terrain
-        float rx = atan2(normal.z, normal.y);
-        float ry = 0.0f;
+        float rx = 0.0f;
+        float ry = atan2(normal.z, normal.x);;
         float rz = 0.0f;
 
         // World-orientated billboards
