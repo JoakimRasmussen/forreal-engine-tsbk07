@@ -17,7 +17,7 @@ class GameObject2
         // Constructor
         GameObject2(Model* model, Terrain* terrain, int objectID);
         // Destructor
-        ~GameObject2();
+        //~GameObject2();
 
         void renderGameObject(GLuint& shaderProgram, bool pickingPhase = false);
         void setTexture(GLuint& texture, GLuint textureUnit);

@@ -143,6 +143,7 @@ void GameMode::spawnBunnyOnTerrainClick() {
 		float y = 0;
 
 		GameObject2 bunny(bunnyModel, terrain, objectID);
+		objectID++;
 		bunny.setPosition(x, z);
 		bunny.setTexture(furTex, 4);
 
@@ -166,7 +167,9 @@ void GameMode::spawnBunnyOnTerrainClick() {
         // GameObject bunny(bunnyModel, ID, x, y, z, rx, ry, rz, isSleeping);
         
         // Add the new bunny to the game objects list
+		printf("before pushback\n");
         gameObjects.push_back(bunny);
+		printf("after pushback\n");
 
         // Place the bunny model into the scene with the specified shader
         PlaceModel(bunnyModel, objectShader, x, y, z);

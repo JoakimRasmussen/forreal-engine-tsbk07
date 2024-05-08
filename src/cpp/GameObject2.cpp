@@ -13,10 +13,10 @@ GameObject2::GameObject2(Model* model, Terrain *terrain, int objectID) {
 }
 
 // Destructor
-GameObject2::~GameObject2() {
+/* GameObject2::~GameObject2() {
     // Delete the game object model
     delete this->model;
-}
+} */
 
 void GameObject2::renderGameObject(GLuint& shaderProgram, bool pickingPhase)
 {
