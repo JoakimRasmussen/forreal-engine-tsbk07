@@ -63,11 +63,11 @@ void GameMode::run(int argc, char** argv) {
 	updatePositions();
 
 	// First Pass: Picking
-	// activateShader(pickingShader);
-	// uploadUniforms(pickingShader, "picking");
-	// renderForPicking(pickingShader);
-	// performHitTest();
-	// clearScreen();
+	activateShader(pickingShader);
+	uploadUniforms(pickingShader, "picking");
+	renderForPicking(pickingShader);
+	performHitTest();
+	clearScreen();
 
 	// Second Pass: Main rendering
 	// Skybox rendering
@@ -128,7 +128,6 @@ void GameMode::renderDebug()
 	}
 }
 
-
 void GameMode::spawnBunnyOnTerrainClick() {
     if (picker->isPicking) {
         // Update picker state
@@ -142,38 +141,16 @@ void GameMode::spawnBunnyOnTerrainClick() {
         float z = clickedPosition.z;
 		float y = 0;
 
-		GameObject2 bunny(bunnyModel, terrain, objectID);
+		GameObject bunny(bunnyModel, terrain, objectID);
 		objectID++;
 		bunny.setPosition(x, z);
 		bunny.setTexture(furTex, 4);
 
-        // // Determine y position on terrain, adding a small offset to position the bunny slightly above the terrain
-        // // float y = terrain->getHeightAtPoint(x, z) + 0.6f;
-		// float y = 0;
-
-        // // Retrieve the normal vector from the terrain at the clicked position
-        // vec3 normal = terrain->getNormalAtPoint(x, z);
-
-        // // Calculate rotation to align with terrain
-        // float rx = atan2(normal.z, normal.y);
-        // // float ry = atan2(toCamera.x, toCamera.z); // Face camera
-		// float ry = 0.0f;
-        // float rz = 0.0f;
-
-        // // Create a new bunny object with the calculated position and rotations
-		// bool isSleeping = false;
-		// int ID = objectID;
-		// objectID++;
-        // GameObject bunny(bunnyModel, ID, x, y, z, rx, ry, rz, isSleeping);
-        
         // Add the new bunny to the game objects list
-		printf("before pushback\n");
         gameObjects.push_back(bunny);
-		printf("after pushback\n");
 
         // Place the bunny model into the scene with the specified shader
         PlaceModel(bunnyModel, objectShader, x, y, z);
-		printf("Bunny placed at: %f %f %f\n", x, y, z);
         
         // Check for any errors during the placement operation
         printError("Spawn bunny on terrain click!");
@@ -182,17 +159,11 @@ void GameMode::spawnBunnyOnTerrainClick() {
 
 /* For shadow rendering */
 void GameMode::updatePositions() {
-    // Clear the previous position data
-    objectPositions.clear();
 
-    // Update positions of game objects
+    objectPositions.clear();
     for (auto& gameObject : gameObjects) {
         // Update the position of the game object
         vec3 objPos = gameObject.getPosition();
-        // float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
-		// objPos.y += y;
-
-        // Store the updated position
         objectPositions.push_back(objPos);
 
 		if (objectPositions.size() >= 100) break;
@@ -200,7 +171,6 @@ void GameMode::updatePositions() {
 }
 
 void GameMode::manualElevationButton() {
-	// Test manual elevation button
 	if (GUI::manualElevation) {
 		// Set manual elevation
 		terrain->editTerrainAtIntersectionPoint(picker->getIntersectionPoint());
@@ -208,11 +178,8 @@ void GameMode::manualElevationButton() {
 }
 
 void GameMode::updateCameraVariables() {
-	// Update camera position
 	cameraPos = camera->getPosition();
-	// Update forward vector (normalized)
 	forwardVec = Normalize(camera->getForwardVector());
-	// Update up vector
 	upVec = camera->getUpVector();
 	worldToView = lookAtv(cameraPos, cameraPos + forwardVec, upVec);
 }
@@ -225,7 +192,6 @@ void GameMode::setupFrameTiming() {
 }
 
 void GameMode::clearScreen() {
-	// Clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -270,38 +236,9 @@ void GameMode::renderGUI() {
 }
 
 void GameMode::renderGameObjects(GLuint& shaderProgram) {
-	// Render game objects
-
 	for (auto& gameObject : gameObjects) {
-
+		gameObject.bunnyMovement();
 		gameObject.renderGameObject(shaderProgram, false);
-		// // Identify the model
-		// Model* model = gameObject.getModel();
-		// if (model == bunnyModel) {
-		// 	gameObject.bunnyMovement();
-		// }
-		// vec3 objPos = gameObject.getPosition();
-		// float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
-		// objPos.y += y;
-
-		// // Update rotations
-		// vec3 normal = terrain->getNormalAtPoint(objPos.x, objPos.z);
-
-		// // Calculate rotation to align with terrain and face camera
-		// gameObject.updateAlignmentToTerrain(normal);
-
-		// // Retrieve the rotations
-		// vec3 objRot = gameObject.getRotation();
-
-		// // Update the model-to-world matrix
-		// modelToWorld = T(objPos.x, objPos.y, objPos.z) * Rx(objRot.x) * Ry(objRot.y) * Rz(objRot.z);
-
-		// activateShader(shaderProgram);
-		// glActiveTexture(GL_TEXTURE4);
-    	// glBindTexture(GL_TEXTURE_2D, furTex);
-		// glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
-		// // Draw the model
-		// DrawModel(model, shaderProgram, "in_Position", "in_Normal", "in_TexCoord");
 	}	
 }
 
@@ -412,11 +349,7 @@ void GameMode::setupGUI() {
 }
 
 void GameMode::uploadTextureData(GLuint& shaderProgram, const std::string& mode) {
-	// Activate the shader program
 	activateShader(shaderProgram);
-	// printf("Using shader program: %d\n", shaderProgram);
-
-	// Shared textures
 
 	// Terrain specific textures
 	if (mode == "terrain") {
@@ -481,17 +414,6 @@ void GameMode::renderForPicking(GLuint& pickingShader) {
         printError("color setting");
 
 		gameObjects[i].renderGameObject(pickingShader, true);
-
-        // // Position and rotation updates remain unchanged
-        // vec3 objPos = gameObjects[i].getPosition();
-        // float y = terrain->getHeightAtPoint(objPos.x, objPos.z) + 0.6f;
-        // objPos.y += y;
-        // vec3 objRot = gameObjects[i].getRotation();
-        // modelToWorld = T(objPos.x, objPos.y, objPos.z) * Rx(objRot.x) * Ry(objRot.y) * Rz(objRot.z);
-        // glUniformMatrix4fv(glGetUniformLocation(pickingShader, "modelToWorld"), 1, GL_TRUE, modelToWorld.m);
-
-        // DrawModel(gameObjects[i].getModel(), pickingShader, "in_Position", NULL, NULL);
-        // printError("draw object");
     }
 }
 
