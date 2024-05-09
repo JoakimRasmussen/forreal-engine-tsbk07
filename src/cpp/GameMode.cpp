@@ -1,8 +1,6 @@
 #include "../h/GameMode.h"
 
 GameMode::GameMode() {
-    // Constructor implementation
-
     // Initial camera settings
     vec3 cameraPosition = vec3(0.0f, 5.0f, 8.0f);
     vec3 forwardVector = vec3(2.0f, 0.0f, 2.0f);
@@ -11,22 +9,13 @@ GameMode::GameMode() {
 
     objectPositions.reserve(100);
 
-    // Camera object
     camera = new Camera(cameraPosition, forwardVector, cameraUpVector, cameraSpeed);
-    // Terrain object
     terrain = new Terrain();
-	// Picking object
 	picker = new Picking(camera);
-    // Gui object
     gui = new GUI();
-	// Billboards object
 	billboard = new Billboard(camera, terrain);
-    // Input controller object
     inputController = new InputController(camera, terrain, picker, billboard);
-    // Projection matrix
     projectionMatrix = Utils::getProjectionMatrix();
-	
-
 }
 
 void GameMode::init() {
@@ -39,7 +28,7 @@ void GameMode::init() {
 	loadAndBindTextures();
 	loadModels();
 	uploadTextureData(program, "terrain");
-	uploadTextureData(objectShader, "object");
+	// uploadTextureData(objectShader, "object");
 	uploadTextureData(billboard->billboardShader, "billboard");
 	uploadTextureData(skyboxShader, "skybox");
 	setupGUI();
@@ -144,14 +133,16 @@ void GameMode::spawnBunnyOnTerrainClick() {
 		GameObject bunny(bunnyModel, terrain, objectID);
 		objectID++;
 		bunny.setPosition(x, z);
-		bunny.setTexture(furTex, 4);
-
+		if (Utils::isChanceSuccessful(50)){
+			bunny.setTexture(whiteFur, 4);
+		}
+		else {
+			bunny.setTexture(brownFur, 5);
+		}
         // Add the new bunny to the game objects list
         gameObjects.push_back(bunny);
-
         // Place the bunny model into the scene with the specified shader
         PlaceModel(bunnyModel, objectShader, x, y, z);
-        
         // Check for any errors during the placement operation
         printError("Spawn bunny on terrain click!");
     }
@@ -280,19 +271,18 @@ void GameMode::loadNecessaryShaders() {
 void GameMode::loadAndBindTextures() {
     printf("Loading and binding textures...\n");
 
-	LoadTGATextureSimple("textures/grass.tga", &grass);
-    LoadTGATextureSimple("textures/dirt.tga", &dirt);
-    LoadTGATextureSimple("textures/rock.tga", &rock);
-    // LoadTGATextureSimple("textures/fur.tga", &furTex);
+	// LoadTGATextureSimple("textures/grass.tga", &grass);
+    // LoadTGATextureSimple("textures/dirt.tga", &dirt);
+    // LoadTGATextureSimple("textures/rock.tga", &rock);
+    LoadTGATextureSimple("textures/fur.tga", &whiteFur);
 
-	// grass = LoadTexture("ue/grass2k/hres_grass.jpg", 1);
-	// dirt = LoadTexture("ue/dirt2k/hres_dirt.jpg", 1);
-	// rock = LoadTexture("ue/rock2k/hres_rock.jpg", 1);
-	furTex = LoadTexture("ue/fur2k/hres_fur.jpg", 1);
+	grass = LoadTexture("ue/grass2k/hres_grass.jpg", 1);
+	dirt = LoadTexture("ue/dirt2k/hres_dirt.jpg", 1);
+	rock = LoadTexture("ue/rock2k/hres_rock.jpg", 1);
+	brownFur = LoadTexture("ue/fur2k/hres_fur.jpg", 1);
 	billboard->billboardTexture = LoadTexture("ue/bil-plants/billboard-plant.png", 1);
 
     LoadTGATextureSimple("splatmap.tga", &map);
-    LoadTGATextureSimple("textures/rutor.tga", &debugTex);
 	LoadTGATextureSimple("textures/SkyBoxFull.tga", &skyboxTex);
 
 	glActiveTexture(GL_TEXTURE0);
@@ -316,18 +306,21 @@ void GameMode::loadAndBindTextures() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	glActiveTexture(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_2D, furTex);
+    glBindTexture(GL_TEXTURE_2D, whiteFur);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	
 	glActiveTexture(GL_TEXTURE5);
-    glBindTexture(GL_TEXTURE_2D, debugTex);
+    glBindTexture(GL_TEXTURE_2D, brownFur);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	glActiveTexture(GL_TEXTURE6);
 	glBindTexture(GL_TEXTURE_2D, billboard->billboardTexture);
 
 	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D, skyboxTex);
+
 
     printError("texture loading and binding");
 }
@@ -369,10 +362,7 @@ void GameMode::uploadTextureData(GLuint& shaderProgram, const std::string& mode)
 	else if (mode == "object")
 	{
 		printf("Uploading object textures...\n");
-		glActiveTexture(GL_TEXTURE4);
-		glUniform1i(glGetUniformLocation(shaderProgram, "objTex"), 4);
 
-		//glUniform1i(glGetUniformLocation(shaderProgram, "debugTex"), 5);
 		printError("upload textures (object)");
 	}
 	// Billboard specific textures

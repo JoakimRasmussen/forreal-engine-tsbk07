@@ -25,6 +25,9 @@ public:
     static bool colorsAreEqual(const std::array<float, 3>& color1, const std::array<float, 3>& color2, float epsilon);
     static void generateColors();
     static const GLfloat* getColor(int index);
+    static const bool isChanceSuccessful(int percentage);
+    static float normalizeAngle(float angle);
+    static float lerpAngle(float from, float to, float speed);
     static const int windowWidth = 1080;
     static const int windowHeight = 720;
 

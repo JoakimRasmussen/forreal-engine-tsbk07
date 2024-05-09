@@ -40,19 +40,14 @@ class GameObject
             return objectTexture != 0 && textureUnit != 0;
         }
 
-        // GLuint shaderProgram;
-
     private:
 
         void updateJump();
-        bool isChanceSuccessful(int percentage);
         vec2 getRandomDirection();
         bool hasLanded();
         void resetJumpState();
         void rotateTowardsDirection(vec2 direction);
         bool rotationComplete();
-        float normalizeAngle(float angle);
-        float lerpAngle(float from, float to, float speed);
         void updateAlignmentToTerrain();
 
         GLuint objectTexture, textureUnit;

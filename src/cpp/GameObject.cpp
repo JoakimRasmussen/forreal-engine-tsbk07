@@ -3,11 +3,8 @@
 // Constructor
 GameObject::GameObject(Model* model, Terrain *terrain, int objectID) {
     this->terrain = terrain;
-    printError("GameObject - terrain");
     this->objectID = objectID;
-    printError("GameObject - objectID");
     this->model = model;
-    printError("GameObject - model");
     this->modelToWorldMatrix = IdentityMatrix();
 
     // Initialize the object's position
@@ -28,8 +25,6 @@ GameObject::GameObject(Model* model, Terrain *terrain, int objectID) {
 
     // Initialize the object's jump state
     this->jumpDirection = vec2(0.0f, 0.0f);
-
-    // Initialize the object's jump physics
     this->jumpSpeed = 4.0f;
     this->jumpHeight = 2.0f;
     this->gravity = 9.81f;
@@ -41,7 +36,6 @@ GameObject::GameObject(Model* model, Terrain *terrain, int objectID) {
 
     // Initialize the object's movement behavior
     this->resetJumpState();
-
 }
 
 void GameObject::renderGameObject(GLuint& shaderProgram, bool pickingPhase)
@@ -61,10 +55,10 @@ void GameObject::renderGameObject(GLuint& shaderProgram, bool pickingPhase)
     glUseProgram(shaderProgram);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelToWorld"), 1, GL_TRUE, modelToWorldMatrix.m);
 
-    // // Upload the fur texture to the shader
-    // glActiveTexture(GL_TEXTURE0 + textureUnit);
-    // // glActiveTexture(GL_TEXTURE4);
-    // glBindTexture(GL_TEXTURE_2D, objectTexture);
+    // Upload the fur texture to the shader
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_2D, objectTexture);
+    glUniform1i(glGetUniformLocation(shaderProgram, "objectTexture"), textureUnit);
 
     // Render the object
     if (pickingPhase) {
@@ -91,7 +85,7 @@ void GameObject::bunnyMovement()
 
     // Select new random direction
     if (prepareNewJump) {
-        if (!isChanceSuccessful(jumpPercentage)) {
+        if (!Utils::isChanceSuccessful(jumpPercentage)) {
         return;
         }
         jumpDirection = getRandomDirection();
@@ -134,19 +128,6 @@ void GameObject::resetJumpState() {
 }
 
 /**
- * Determines whether the game object should perform an action based on a given percentage.
- * 
- * @param percentage The percentage chance (1 to 100) of the game object performing an action.
- * @return True if the game object should perform the action, false otherwise.
- */
-bool GameObject::isChanceSuccessful(int percentage) {
-    if (percentage < 1 || percentage > 100) {
-        throw std::invalid_argument("Percentage must be between 1 and 100.");
-    }
-    return (rand() % 100) < percentage;
-}
-
-/**
  * Generates a random direction vector for the game object to jump in.
  * 
  * @return A random direction vector, uniformly distributed.
@@ -165,49 +146,13 @@ vec2 GameObject::getRandomDirection() {
 
 void GameObject::rotateTowardsDirection(vec2 direction) {
     float angle = atan2(direction.x, direction.y);
-    angle = normalizeAngle(angle);
-    rotY = lerpAngle(rotY, angle, 0.05f);
-    rotY = normalizeAngle(rotY);
-}
-
-float GameObject::normalizeAngle(float angle) {
-    // Normalize angle to range [-PI, PI]
-    angle = fmod(angle + M_PI, 2 * M_PI);
-    if (angle < 0) angle += 2 * M_PI;
-    angle -= M_PI;
-
-    // Snap values close to -PI or PI to -PI or PI to handle precision issues at boundaries
-    const float epsilon = 1e-5;  // A small threshold to handle precision
-    if (fabs(angle - M_PI) < epsilon) {
-        angle = M_PI;
-    } else if (fabs(angle + M_PI) < epsilon) {
-        angle = -M_PI;
-    }
-
-    return angle;
-}
-
-float GameObject::lerpAngle(float from, float to, float speed) {
-    float difference = to - from;
-    if (difference > M_PI) {
-        difference -= 2 * M_PI;  // Adjust for wrap-around
-    } else if (difference < -M_PI) {
-        difference += 2 * M_PI;  // Adjust for wrap-around
-    }
-
-    float adjusted = from + difference * speed;
-    
-    // Normalize the result to keep within -PI to PI
-    if (adjusted > M_PI) {
-        adjusted -= 2 * M_PI;
-    } else if (adjusted < -M_PI) {
-        adjusted += 2 * M_PI;
-    }
-    return adjusted;
+    angle = Utils::normalizeAngle(angle);
+    rotY = Utils::lerpAngle(rotY, angle, 0.05f);
+    rotY = Utils::normalizeAngle(rotY);
 }
 
 bool GameObject::rotationComplete() {
-    float endAngle = normalizeAngle(atan2(jumpDirection.x, jumpDirection.y));
+    float endAngle = Utils::normalizeAngle(atan2(jumpDirection.x, jumpDirection.y));
     float angleCheck = fabs(rotY - endAngle) < 0.2f;
     bool iterationCheck = turnIterations++ > maxIterations;
     return angleCheck || iterationCheck;
