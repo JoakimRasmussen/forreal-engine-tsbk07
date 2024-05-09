@@ -5,6 +5,7 @@ bool GUI::PlaceBunny = false;
 bool GUI::manualElevation = false;
 bool GUI::editTerrainTexture = false;
 bool GUI::PlaceBillboard = false;
+bool GUI::smoothTerrain = false;
 GLubyte GUI::textureColor[4] = {0, 0, 0, 255};
 
 GUI::GUI() {
@@ -32,6 +33,10 @@ void GUI::initTerrainGUI(Terrain* terrain)
 	sgCreateButton(500, 140, "Grass texture", GrassButton);
 	sgCreateButton(500, 160, "Dirt texture", DirtButton);
 	sgCreateButton(500, 180, "Rock texture", RockButton);
+	sgCreateStaticString(500, 200, "--------------------------");
+
+	sgCreateButton(500, 220, "Toggle Smooth Terrain", SmoothButton);
+	sgCreateStaticString(500, 240, "--------------------------");
 
 	sgCreateStaticString(40, 80, "--------------------------");
 	sgCreateStaticString(40, 100, "Smooth slider");
@@ -76,6 +81,7 @@ void GUI::PlaceBunnyButton()
 		PlaceBillboard = false;
 		manualElevation = false;
 		editTerrainTexture = false;
+		smoothTerrain = false;
 	}
 }
 void GUI::PlaceBillboardButton()
@@ -89,6 +95,7 @@ void GUI::PlaceBillboardButton()
 		PlaceBillboard = true;
 		manualElevation = false;
 		editTerrainTexture = false;
+		smoothTerrain = false;
 	}
 }
 
@@ -104,6 +111,7 @@ void GUI::ElevationButton()
 		PlaceBunny = false;
 		PlaceBillboard = false;
 		editTerrainTexture = false;
+		smoothTerrain = false;
 	}
 }
 
@@ -119,6 +127,23 @@ void GUI::TextureButton()
 		PlaceBunny = false;
 		PlaceBillboard = false;
 		manualElevation = false;
+		smoothTerrain = false;
+	}
+}
+
+void GUI::SmoothButton()
+{
+	if (smoothTerrain)
+	{
+		smoothTerrain = false;
+	}
+	else
+	{
+		smoothTerrain = true;
+		PlaceBunny = false;
+		PlaceBillboard = false;
+		manualElevation = false;
+		editTerrainTexture = false;
 	}
 }
 

@@ -78,13 +78,23 @@ void InputController::collectedMouseController(int button, int state, int x, int
 		GUI::PlaceBunny = false;
 		GUI::editTerrainTexture = false;
 		GUI::PlaceBillboard = false;
+		GUI::smoothTerrain = false;
 		terrain->editTerrainAtIntersectionPoint(picker->intersectionPoint);
+	}
+	if (GUI::smoothTerrain)
+	{
+		GUI::PlaceBunny = false;
+		GUI::editTerrainTexture = false;
+		GUI::PlaceBillboard = false;
+		GUI::manualElevation = false;
+		terrain->smoothTerrainAtIntersectionPoint(picker->intersectionPoint);
 	}
 	if (GUI::editTerrainTexture)
 	{
 		GUI::PlaceBunny = false;
 		GUI::PlaceBillboard = false;
 		GUI::manualElevation = false;
+		GUI::smoothTerrain = false;
 		terrain->editTerrainTextureAtIntersectionPoint(picker->intersectionPoint, GUI::textureColor, 5);
 	}
 	if (GUI::PlaceBillboard)
@@ -92,6 +102,7 @@ void InputController::collectedMouseController(int button, int state, int x, int
 		GUI::manualElevation = false;
 		GUI::editTerrainTexture = false;
 		GUI::PlaceBunny = false;
+		GUI::smoothTerrain = false;
 		billboard->addBillboard(picker->intersectionPoint);
 	}
 	
@@ -100,6 +111,7 @@ void InputController::collectedMouseController(int button, int state, int x, int
 		GUI::manualElevation = false;
 		GUI::editTerrainTexture = false;
 		GUI::PlaceBillboard = false;
+		GUI::smoothTerrain = false;
 		picker->updateIsPicking(true);
 		GUI::PlaceBunny = false;
 	}

@@ -23,6 +23,7 @@ public:
     float getHeightAtPoint(float x, float z) const;
     bool rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& intersectionPoint, std::vector<vec3>& intersectionVector);
     void editTerrainAtIntersectionPoint(vec3 intersectionPoint);
+    void smoothTerrainAtIntersectionPoint(vec3 intersectionPoint);
     void updateTerrain();
     void editTerrainTextureAtIntersectionPoint(vec3 intersectionPoint, GLubyte colorPixel[4], int radius);
 
