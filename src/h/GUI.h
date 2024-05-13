@@ -33,6 +33,12 @@ public:
 
     static bool showGUI;
 
+    static int fpsStringID;
+    static int fpsX, fpsY;  // Coordinates for the FPS display
+    static char fpsText[50];
+    static void setupFPSCounter();
+    static void updateFPSDisplay(int fps);
+
 private:
 
     void adjustWindowScale();

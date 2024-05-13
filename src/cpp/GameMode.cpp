@@ -7,6 +7,12 @@ GameMode::GameMode() {
     vec3 cameraUpVector = vec3(0, 1, 0);
     GLfloat cameraSpeed = 0.01f;
 
+	lastFrame = glutGet(GLUT_ELAPSED_TIME);
+    deltaTime = 0;
+    lastTime = lastFrame;
+    frameCount = 0;
+    fps = 0.0;
+
     objectPositions.reserve(100);
 
     camera = new Camera(cameraPosition, forwardVector, cameraUpVector, cameraSpeed);
@@ -178,11 +184,24 @@ void GameMode::updateCameraVariables() {
 }
 
 void GameMode::setupFrameTiming() {
-	// Update time based frames
-	GLfloat currentFrame = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
-	deltaTime = currentFrame - lastFrame;
-	lastFrame = currentFrame;
+    unsigned int currentFrame = glutGet(GLUT_ELAPSED_TIME);
+
+    deltaTime = static_cast<float>(currentFrame - lastFrame);
+    lastFrame = currentFrame;
+
+    unsigned int timeElapsed = currentFrame - lastTime;
+    if (timeElapsed >= 1000) { // Check if a second has passed (1000 milliseconds)
+        fps = frameCount / (timeElapsed / 1000.0);
+        GUI::updateFPSDisplay(fps);
+        frameCount = 0;
+        lastTime = currentFrame;
+    }
+    
+    frameCount++;
 }
+
+
+
 
 void GameMode::clearScreen() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

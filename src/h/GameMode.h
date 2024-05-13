@@ -71,8 +71,12 @@ private:
     void renderDebug();
 
     // State variables for time management
-    GLfloat deltaTime = 0.0f;
-    GLfloat lastFrame = 0.0f;
+    unsigned int lastFrame;
+    unsigned int deltaTime;
+    unsigned int lastTime;
+    int frameCount;
+    double fps;
+    
 
     // Essential game components
     Camera* camera;
