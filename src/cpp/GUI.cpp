@@ -8,6 +8,8 @@ bool GUI::PlaceBillboard = false;
 bool GUI::smoothTerrain = false;
 GLubyte GUI::textureColor[4] = {0, 0, 0, 255};
 
+bool GUI::showGUI = true;
+
 GUI::GUI() {
     // Constructor implementation
 	PlaceBunny = false;
@@ -17,7 +19,7 @@ void GUI::initTerrainGUI(Terrain* terrain)
 {
 	// sgSetScale(2);
 	adjustWindowScale();
-	sgCreateStaticString(400, 160, "GUI");
+	sgCreateStaticString(40, 180, "Hide GUI with 'h'");
 	sgCreateStaticString(40, 20, "Elevation slider"); 
 	sgCreateSlider(40, 40, 200, &terrain->currentElevation, 1, 20);
 	sgCreateDisplayFloat(40, 60, "Elevation value: ", &terrain->currentElevation);
@@ -55,6 +57,9 @@ void GUI::drawGUI()
 }
 
 void GUI::adjustWindowScale() {
+	// Define the base resolution dimensions for scale 1
+    const int baseWidth = 1280;
+    const int baseHeight = 720;
 
     // Calculate scale based on current resolution compared to base resolution
     float scaleX = static_cast<float>(Utils::windowWidth) / baseWidth;

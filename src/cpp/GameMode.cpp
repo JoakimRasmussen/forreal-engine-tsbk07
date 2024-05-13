@@ -85,7 +85,9 @@ void GameMode::run(int argc, char** argv) {
 	}
 
 	// GUI rendering
-	renderGUI();
+	if (GUI::showGUI){
+		renderGUI();
+	}
 
 	finalizeFrame();
 	printError("Post-run checks");

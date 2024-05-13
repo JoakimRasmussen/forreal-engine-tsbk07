@@ -24,7 +24,6 @@ public:
     static void PlaceBillboardButton();
     static void SmoothButton();
 
-
     static bool PlaceBunny;
     static bool manualElevation;
     static bool editTerrainTexture;
@@ -32,13 +31,11 @@ public:
     static bool smoothTerrain;
     static GLubyte textureColor[4];
 
+    static bool showGUI;
+
 private:
 
     void adjustWindowScale();
-    const float baseWidth = 1080.0f;
-    const float baseHeight = 720.0f;
-    // const float baseWidth = 1920.0f;
-    // const float baseHeight = 1080.0f;
 };
 
 #endif

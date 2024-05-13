@@ -28,8 +28,14 @@ public:
     static const bool isChanceSuccessful(int percentage);
     static float normalizeAngle(float angle);
     static float lerpAngle(float from, float to, float speed);
-    static const int windowWidth = 1080;
-    static const int windowHeight = 720;
+
+    // Some basic window dimensions
+    // static const int windowWidth = 1920; // 2
+    static const int windowWidth = 1280; // 1
+    // static const int windowHeight = 1080; // 2
+    static const int windowHeight = 720; // 1
+
+
 
     static const int numColors = 100;
 private:

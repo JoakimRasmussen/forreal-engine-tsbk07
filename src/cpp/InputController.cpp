@@ -10,6 +10,7 @@ InputController::InputController(Camera* camera, Terrain* terrain, Picking* pick
 	this->picker = picker;
 	this->billboard = billboard;
 	instance = this;
+	hKeyWasDown = false;
 }
 
 /* CHANGE TO GETTERS AND SETTERS */
@@ -58,8 +59,7 @@ void InputController::cameraControls(GLfloat deltaTime, Camera* camera) {
     }
 }
 
-void InputController::collectedMouseController(int button, int state, int x, int y)
-{
+void InputController::collectedMouseController(int button, int state, int x, int y) {
 
 	if (button == 0) sgMouse(state, x, y);
     glutPostRedisplay();
@@ -117,23 +117,26 @@ void InputController::collectedMouseController(int button, int state, int x, int
 	}
 	// TODO: fix
 	bool debug = true;
-	if (debug)
-		for (int i = 0; i < 100; i++)
-	{
-		{
-				// Create a vector of points along the ray
-				vec3 pos = camera->getPosition() + i*ray;
-				picker->debugRayVector.push_back(pos);
+	if (debug) {
+		for (int i = 0; i < 100; i++) {
+			// Create a vector of points along the ray
+			vec3 pos = camera->getPosition() + i*ray;
+			picker->debugRayVector.push_back(pos);
 		}
 	}
-
-	
 }
 
 void InputController::handleKeyboardInput(GLfloat deltaTime) {
     // Implementation of keyboard input handling
 	// General controlls
     cameraControls(deltaTime, camera);
+
+	// 'h' to toggle GUI
+    bool isHKeyDown = glutKeyIsDown('h');
+    if (isHKeyDown && !hKeyWasDown) {
+        GUI::showGUI = !GUI::showGUI;
+    }
+    hKeyWasDown = isHKeyDown;  // Update the state
 	
 	// Escape key
 	if (glutKeyIsDown(27)) {
