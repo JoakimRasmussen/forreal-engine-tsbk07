@@ -33,6 +33,8 @@ public:
 
     void performHitTest();
 
+    bool toggle = false;
+
     // Available colors for picking
     static const int numColors = Utils::numColors; // Define the number of colors
     int colorHits[numColors] = {0};  // Array to store the hits
@@ -69,8 +71,12 @@ private:
     void renderDebug();
 
     // State variables for time management
-    GLfloat deltaTime = 0.0f;
-    GLfloat lastFrame = 0.0f;
+    unsigned int lastFrame;
+    unsigned int deltaTime;
+    unsigned int lastTime;
+    int frameCount;
+    double fps;
+    
 
     // Essential game components
     Camera* camera;
@@ -84,18 +90,16 @@ private:
     // Collections for game objects
     std::vector<GameObject> gameObjects;
     std::vector<vec3> objectPositions;
-    int objectCount = 0;
-
-    // Object placement specifics
-    vec3 clickedPosition = vec3(0.0f, 0.0f, 0.0f);
     int objectID = 0;
+
+    vec3 clickedPosition = vec3(0.0f, 0.0f, 0.0f);
 
     // Shader programs
     GLuint program, objectShader, pickingShader, skyboxShader, billboardShader;
 
     // Texture data and models
     GLuint grass, rock, dirt, map, plant;
-    GLuint furTex, debugTex;
+    GLuint whiteFur, brownFur;
     GLuint skyboxTex;
     Model* tm, *bunnyModel, *skyboxModel, *bill;
 

@@ -28,8 +28,8 @@ public:
     void editTerrainTextureAtIntersectionPoint(vec3 intersectionPoint, GLubyte colorPixel[4], int radius);
 
     // Could be (should be...?) private with a getter
-    float currentElevation = 5.0;
-    float previousElevation = 5.0;
+    float currentElevation = 2.0;
+    float previousElevation = 2.0;
     float currentMountainHeight = 1100.0;
     float quadSize = 1.0;
     float previousQuadSize = 1.0;

@@ -48,12 +48,12 @@ public:
     static void collectedMouseControllerBridge(int button, int state, int x, int y);
     Utils utils;
 
-
 private:
 
     // Mouse variables
     int hitx = -1, hity = -1;
     static InputController* instance;
+    bool hKeyWasDown;
 };
 
 #endif

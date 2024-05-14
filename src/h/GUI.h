@@ -24,7 +24,6 @@ public:
     static void PlaceBillboardButton();
     static void SmoothButton();
 
-
     static bool PlaceBunny;
     static bool manualElevation;
     static bool editTerrainTexture;
@@ -32,13 +31,18 @@ public:
     static bool smoothTerrain;
     static GLubyte textureColor[4];
 
+    static bool showGUI;
+
+    static int fpsStringID;
+    static int fpsX, fpsY;  // Coordinates for the FPS display
+    static char fpsText[50];
+    static void setupFPSCounter();
+    static void updateFPSDisplay(int fps);
+    static float lightPosX;
+
 private:
 
     void adjustWindowScale();
-    const float baseWidth = 1080.0f;
-    const float baseHeight = 720.0f;
-    // const float baseWidth = 1920.0f;
-    // const float baseHeight = 1080.0f;
 };
 
 #endif

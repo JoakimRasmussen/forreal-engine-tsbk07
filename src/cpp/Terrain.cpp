@@ -336,7 +336,7 @@ bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& i
         if (t > eps) { // Intersection is in positive ray direction
             vec3 ip = rayOrigin + t * rayDirection;
             float dist = dot(ip - rayOrigin, ip - rayOrigin);
-            if (dist < closestDistance && dist < 5000.0f) {
+            if (dist < closestDistance) {
                 closestDistance = dist;
                 closestIntersectionPoint = ip;
                 hasIntersection = true;

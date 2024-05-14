@@ -8,6 +8,15 @@ bool GUI::PlaceBillboard = false;
 bool GUI::smoothTerrain = false;
 GLubyte GUI::textureColor[4] = {0, 0, 0, 255};
 
+bool GUI::showGUI = true;
+
+int GUI::fpsStringID = -1;
+int GUI::fpsX = 10;  // Example coordinates
+int GUI::fpsY = 20;
+char GUI::fpsText[50] = "FPS: 0";
+float GUI::lightPosX = 200.0f;
+
+
 GUI::GUI() {
     // Constructor implementation
 	PlaceBunny = false;
@@ -17,10 +26,11 @@ void GUI::initTerrainGUI(Terrain* terrain)
 {
 	// sgSetScale(2);
 	adjustWindowScale();
-	sgCreateStaticString(400, 160, "GUI");
-	sgCreateStaticString(40, 20, "Elevation slider"); 
-	sgCreateSlider(40, 40, 200, &terrain->currentElevation, 1, 20);
-	sgCreateDisplayFloat(40, 60, "Elevation value: ", &terrain->currentElevation);
+	setupFPSCounter();
+	sgCreateStaticString(40, 200, "Hide GUI with 'h'");
+	sgCreateStaticString(40, 40, "Elevation slider"); 
+	sgCreateSlider(40, 60, 200, &terrain->currentElevation, 1, 10);
+	sgCreateDisplayFloat(40, 80, "Elevation value: ", &terrain->currentElevation);
 	
 	sgCreateButton(500, 20, "Toggle Manual Elevation", ElevationButton);
 	sgCreateStaticString(500, 40, "--------------------------");
@@ -38,10 +48,11 @@ void GUI::initTerrainGUI(Terrain* terrain)
 	sgCreateButton(500, 220, "Toggle Smooth Terrain", SmoothButton);
 	sgCreateStaticString(500, 240, "--------------------------");
 
-	sgCreateStaticString(40, 80, "--------------------------");
-	sgCreateStaticString(40, 100, "Smooth slider");
-	sgCreateSlider(40, 120, 200, &terrain->quadSize, 1, 20);
-	sgCreateDisplayFloat(40, 140, "Smooth value: ", &terrain->quadSize);
+	sgCreateStaticString(40, 100, "--------------------------");
+	// Adjust the light source
+	sgCreateStaticString(40, 120, "Light source slider");
+	sgCreateSlider(40, 140, 200, &GUI::lightPosX, -500, 500);
+	sgCreateDisplayFloat(40, 160, "Light: ", &GUI::lightPosX);
 
 
 	sgCreateStaticString(40, 240, "--------------------------");
@@ -55,6 +66,9 @@ void GUI::drawGUI()
 }
 
 void GUI::adjustWindowScale() {
+	// Define the base resolution dimensions for scale 1
+    const int baseWidth = 1280;
+    const int baseHeight = 720;
 
     // Calculate scale based on current resolution compared to base resolution
     float scaleX = static_cast<float>(Utils::windowWidth) / baseWidth;
@@ -169,4 +183,15 @@ void GUI::RockButton()
 	textureColor[0] = 0;
 	textureColor[1] = 0;
 	textureColor[2] = 255;
+}
+
+void GUI::setupFPSCounter() {
+    fpsStringID = sgCreateDynamicString(fpsX, fpsY, fpsText);
+	printf("FPS string ID: %d\n", fpsStringID);
+}
+
+void GUI::updateFPSDisplay(int fps) {
+    if (fpsStringID != -1) {
+        sprintf(fpsText, "FPS: %d", fps);  // Format the FPS into the fpsText buffer as an integer
+    }
 }

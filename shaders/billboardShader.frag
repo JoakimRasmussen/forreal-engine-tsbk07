@@ -10,5 +10,5 @@ void main(void)
 	vec4 t = texture(tex, texCoord);
 	if (t.a < 0.01) discard;
 	else
-		outColor = t;
+		outColor = t*vec4(0.75, 0.75, 0.75, 1.0);
 }

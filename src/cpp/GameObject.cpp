@@ -1,249 +1,130 @@
 #include "../h/GameObject.h"
 
-// -------------------------------
-// Constructors and Destructors
-// -------------------------------
-
-GameObject::GameObject(Model* model, int objectID, float x, float y, float z, float rx, float ry, float rz, bool sleeping)
-    : model(model), x(x), y(y), z(z), rx(rx), ry(ry), rz(rz), sleeping(sleeping) {
+// Constructor
+GameObject::GameObject(Model* model, Terrain *terrain, int objectID) {
+    this->terrain = terrain;
     this->objectID = objectID;
-    newDestination();
+    this->model = model;
+    this->modelToWorldMatrix = IdentityMatrix();
+
+    // Initialize the object's position
+    this->posX = 0.0f;
+    this->posZ = 0.0f;
+    this->terrainY = 0.0f;
+    this->offsetY = 0.6f;
+    this->posY = 0.0f;
+
+    // Initialize the object's rotation
+    this->rotX = 0.0f;
+    this->rotY = 0.0f;
+    this->rotZ = 0.0f;
+
+    // Initialize the object's texture
+    this->objectTexture = 0;
+    this->textureUnit = 0;
+
+    // Initialize the object's jump state
+    this->jumpDirection = vec2(0.0f, 0.0f);
+    this->jumpSpeed = 4.0f;
+    this->jumpHeight = 2.0f;
+    this->gravity = 9.81f;
+
+    // Initialize the object's jump behavior
+    this->jumpPercentage = 1;
+    this->turnIterations = 0;
+    this->maxIterations = 100;
+
+    // Initialize the object's movement behavior
+    this->resetJumpState();
 }
 
-GameObject::~GameObject() {
-    // Destructor
+void GameObject::renderGameObject(GLuint& shaderProgram, bool pickingPhase)
+{
+    // Update the position of the object
+    this->terrainY = terrain->getHeightAtPoint(this->posX, this->posZ);
+    this->posY = terrainY + jumpY + offsetY;
+
+    // Align the object to the terrain
+    vec3 normal = terrain->getNormalAtPoint(posX, posZ);
+    this->rotX = atan2(normal.z, normal.y);
+
+    // Update the modelToWorldMatrix
+    this->modelToWorldMatrix = T(posX, posY, posZ) * Rx(rotX) * Ry(rotY) * Rz(rotZ);
+
+    // Upload the modelToWorldMatrix to the shader
+    glUseProgram(shaderProgram);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelToWorld"), 1, GL_TRUE, modelToWorldMatrix.m);
+
+    // Upload the fur texture to the shader
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_2D, objectTexture);
+    glUniform1i(glGetUniformLocation(shaderProgram, "objectTexture"), textureUnit);
+
+    // Render the object
+    if (pickingPhase) {
+        DrawModel(model, shaderProgram, "in_Position", NULL, NULL);
+    }
+    else {
+        DrawModel(model, shaderProgram, "in_Position", "in_Normal", "in_TexCoord");
+    }
 }
-// -------------------------------
-// Position and Movement Handling
-// -------------------------------
 
-void GameObject::move(float dx, float dy, float dz) {
-    x += dx;
-    y += dy;
-    z += dz;
+void GameObject::setTexture(GLuint& texture, GLuint textureUnit)
+{
+    this->objectTexture = texture;
+    this->textureUnit = textureUnit;
 }
 
-void GameObject::moveTowardsDestination(float distance) {
-    handleHorizontalMovement(distance);
-}
-
-/**
- * Moves the game object.
- * If the object is jumping, it handles the jumping behavior.
- * Otherwise, it selects a new random direction and rotates smoothly towards it.
- * If the object should move forward in the new direction, it starts a jump.
- */
-void GameObject::bunnyMovement() {
-
+void GameObject::bunnyMovement()
+{
     // Check if the object is jumping
-    if (isJumping) {
-        handleJumping();
+    if (jumpingPhase) {
+        updateJump();
         return;
     }
+
     // Select new random direction
     if (prepareNewJump) {
-        if (!shouldJump(1)) {
+        if (!Utils::isChanceSuccessful(jumpPercentage)) {
         return;
         }
-        jumpDirection = randomDirection();
+        jumpDirection = getRandomDirection();
         prepareNewJump = false;
     }
 
     // Rotate smoothly towards the new direction
-    float desiredRotation = calculateDesiredRotation(jumpDirection.x, jumpDirection.y);
-    rotateTowards(desiredRotation);
-
-    // Jump forward in the new direction
-    if (shouldMoveForward(desiredRotation)) {
-        startJump(2.0f);
+    rotateTowardsDirection(jumpDirection);
+    if (rotationComplete()) {
+        turnIterations = 0;
+        jumpingPhase = true;
     }
 }
 
-void GameObject::newDestination() {
-    // move to a random destination within 10 blocks of the current position
-    targetX = x + (rand() % 20 - 10);
-    targetZ = z + (rand() % 20 - 10);
-}
+void GameObject::updateJump()
+{
+    float timeStep = 1.0f / 30.0f;
+    yVelocity -= gravity * timeStep;
+    jumpY += yVelocity * timeStep;
 
-void GameObject::logic() {
-    if (sleeping) return;
-    bunnyMovement(); // New movement logic for bunny
-    // float distanceLeft = distanceToTarget();
-    // if (isCloseEnough(distanceLeft)) {
-    //     // Destination reached. Set new destination
-    //     newDestination();
-    // }
-    // else {
-    //     moveTowardsDestination(distanceLeft);
-    // }
-}
+    posX += jumpSpeed * jumpDirection.x * timeStep;
+    posZ += jumpSpeed * jumpDirection.y * timeStep;
 
-float GameObject::distanceToTarget() {
-    dx = targetX - x;
-    dz = targetZ - z;
-    return sqrt(dx * dx + dz * dz);
-}
-
-bool GameObject::isCloseEnough(float distance) {
-    return distance < 0.1f;
-}
-
-void GameObject::setPosition(float x, float y, float z) {
-    this->x = x;
-    this->y = y;
-    this->z = z;
-}
-
-vec3 GameObject::getPosition() const {
-    float x = this->x;
-    float y = this->y;
-    float z = this->z;
-    return vec3(x, y, z);
-}
-
-// -------------------------------
-// Rotation and Orientation
-// -------------------------------
-
-void GameObject::setRotation(float rx, float ry, float rz) {
-    this->rx = rx;
-    this->ry = ry;
-    this->rz = rz;
-}
-
-vec3 GameObject::getRotation() const {
-    float rx = this->rx;
-    float ry = this->ry;
-    float rz = this->rz;
-    return vec3(rx, ry, rz);
-}
-
-float GameObject::calculateDesiredRotation(float dx, float dz) {
-    float angle = atan2(dx, dz);
-    return normalizeAngle(angle);
-}
-
-void GameObject::rotateTowards(float desiredRy) {
-    ry = lerpAngle(ry, desiredRy, turnSpeed);
-    ry = normalizeAngle(ry);
-}
-
-void GameObject::updateAlignmentToTerrain(vec3 normal) {
-    rx = atan2(normal.z, normal.y);
-}
-
-float GameObject::lerpAngle(float from, float to, float t) {
-    float difference = to - from;
-    if (difference > M_PI) {
-        difference -= 2 * M_PI;  // Adjust for wrap-around
-    } else if (difference < -M_PI) {
-        difference += 2 * M_PI;  // Adjust for wrap-around
-    }
-
-    float adjusted = from + difference * t;
-    
-    // Normalize the result to keep within -PI to PI
-    if (adjusted > M_PI) {
-        adjusted -= 2 * M_PI;
-    } else if (adjusted < -M_PI) {
-        adjusted += 2 * M_PI;
-    }
-    return adjusted;
-}
-
-float GameObject::normalizeAngle(float angle) {
-    // Normalize angle to range [-PI, PI]
-    angle = fmod(angle + M_PI, 2 * M_PI);
-    if (angle < 0) angle += 2 * M_PI;
-    angle -= M_PI;
-
-    // Snap values close to -PI or PI to -PI or PI to handle precision issues at boundaries
-    const float epsilon = 1e-5;  // A small threshold to handle precision
-    if (fabs(angle - M_PI) < epsilon) {
-        angle = M_PI;
-    } else if (fabs(angle + M_PI) < epsilon) {
-        angle = -M_PI;
-    }
-
-    return angle;
-}
-
-// -------------------------------
-// Jumping and Physics
-// -------------------------------
-
-void GameObject::handleJumping() {
-    float timeStep = 1.0f / 30.0f; // Time step assuming 30 FPS
-
-    // Update vertical velocity and position
-    yVelocity -= 9.81f * timeStep; // Gravity effect on velocity
-    y += yVelocity * timeStep; // Update vertical position
-
-    // Calculate horizontal movement based on jump direction
-    float normX = jumpDirection.x; // Assuming jumpDirection is normalized
-    float normZ = jumpDirection.y; // Assuming jumpDirection is normalized
-    x += jumpSpeed * normX * timeStep;
-    z += jumpSpeed * normZ * timeStep;
-
-    // Check for landing
     if (hasLanded()) {
+        updateAlignmentToTerrain();
         resetJumpState();
+        return;
     }
 }
 
 bool GameObject::hasLanded() {
-    return y <= 0;
+    return jumpY<= 0;
 }
 
 void GameObject::resetJumpState() {
-    y = 0;
-    yVelocity = 0;
-    isJumping = false;
+    jumpY = 0;
+    yVelocity = sqrt(2 * gravity * jumpHeight);
+    jumpingPhase = false;
     prepareNewJump = true;
-}
-
-void GameObject::handleHorizontalMovement(float distance) {
-    // if (isJumping && y > 0) return; // Do not move horizontally if in mid-air
-
-    float desiredRy = calculateDesiredRotation(dx, dz);
-    rotateTowards(desiredRy);
-
-    if (shouldMoveForward(desiredRy)) {
-        moveForward(dx, dz, distance);
-    }
-    else {
-        turnIterations++;
-    }
-}
-
-bool GameObject::shouldMoveForward(float desiredRy) {
-    return fabs(ry - desiredRy) < 0.2 || turnIterations > maxIterations;
-}
-
-void GameObject::moveForward(float dx, float dz, float distance) {
-    x += speed * dx / distance;
-    z += speed * dz / distance;
-    turnIterations = 0;
-}
-
-void GameObject::jump() {
-    if (!isJumping) {
-        yVelocity = 0.5f; // Initial jump velocity, adjust as needed
-        isJumping = true;
-    }
-}
-
-/**
- * Determines whether the game object should jump based on a given percentage.
- * 
- * @param percentage The percentage chance (1 to 100) of the game object jumping.
- * @return True if the game object should jump, false otherwise.
- */
-bool GameObject::shouldJump(int percentage) {
-    if (percentage < 1 || percentage > 100) {
-        throw std::invalid_argument("Percentage must be between 1 and 100.");
-    }
-    return (rand() % 100) < percentage;
 }
 
 /**
@@ -251,7 +132,7 @@ bool GameObject::shouldJump(int percentage) {
  * 
  * @return A random direction vector, uniformly distributed.
  */
-vec2 GameObject::randomDirection() {
+vec2 GameObject::getRandomDirection() {
     // Generate a random angle between 0 and 2*PI radians
     float angle = (float)rand() / (float)RAND_MAX * 2.0f * M_PI;
 
@@ -263,14 +144,21 @@ vec2 GameObject::randomDirection() {
     return direction;
 }
 
-void GameObject::startJump(float jumpHeight) {
-    float gravity = 9.81f; // Gravity in meters per second squared
-    yVelocity = sqrt(2 * gravity * jumpHeight); // Calculate initial jump velocity for the desired height
-    isJumping = true; // Set jumping state to true
+void GameObject::rotateTowardsDirection(vec2 direction) {
+    float angle = atan2(direction.x, direction.y);
+    angle = Utils::normalizeAngle(angle);
+    rotY = Utils::lerpAngle(rotY, angle, 0.05f);
+    rotY = Utils::normalizeAngle(rotY);
 }
 
+bool GameObject::rotationComplete() {
+    float endAngle = Utils::normalizeAngle(atan2(jumpDirection.x, jumpDirection.y));
+    float angleCheck = fabs(rotY - endAngle) < 0.2f;
+    bool iterationCheck = turnIterations++ > maxIterations;
+    return angleCheck || iterationCheck;
+}
 
-
-
-
-
+void GameObject::updateAlignmentToTerrain() {
+    vec3 normal = terrain->getNormalAtPoint(posX, posZ);
+    rotX = atan2(normal.z, normal.y);
+}
