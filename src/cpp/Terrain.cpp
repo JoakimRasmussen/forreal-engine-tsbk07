@@ -165,7 +165,7 @@ void Terrain::smoothTerrainAtIntersectionPoint(vec3 intersectionPoint)
 	unsigned int z = intersectionPoint.z / quadSize;
 	GLfloat mean = 0.0;
 
-	// Iterate over the surrounding area with a radius of 1
+	// Iterate over the surrounding area with a radius of 2
 	for (int i = -2; i <= 2; i++) {
 		for (int j = -2; j <= 2; j++) {
 			unsigned int newX = x + i;
@@ -322,6 +322,10 @@ bool Terrain::rayTriangleIntersection(vec3 rayOrigin, vec3 rayDirection, vec3& i
 
         if (std::abs(det) < eps)
             return false; // Ray is parallel to the triangle
+
+		
+		// Check if the ray-plane intersection lies outside the triangle
+		// Check if collinear if they are we cannot find a solution
 
         float invDet = 1.0f / det;
         vec3 s = rayOrigin - v1;
