@@ -1,2 +1,2 @@
-# tsbk07-computer-graphics-project
-Computer Graphics project
+# forreal-engine-tsbk07
+A Computer Graphics project for the course TSBK07
