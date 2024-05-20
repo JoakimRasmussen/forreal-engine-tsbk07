@@ -11,9 +11,11 @@ class GUI {
 public:
 
     GUI();
+    void initGUI();
+    void initTextureGUI();
     void initTerrainGUI(Terrain* terrain);
-    void initObjectGUI();
     void drawGUI();
+    bool switchGUI();
 
     static void PlaceBunnyButton();
     static void ElevationButton();
@@ -23,6 +25,7 @@ public:
     static void RockButton();
     static void PlaceBillboardButton();
     static void SmoothButton();
+
 
     static bool PlaceBunny;
     static bool manualElevation;

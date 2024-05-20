@@ -105,7 +105,7 @@ void GameMode::renderDebug()
 	activateShader(objectShader);
 	for (const auto& position : picker->debugIntersectionVector) {
 		// Render the debug bunny
-		PlaceModelScale(bunnyModel, program, position.x, position.y, position.z, 0, 0, 0, 2, 2, 2);
+		PlaceModelScale(bunnyModel, program, position.x, position.y, position.z, 0, 0, 0, 1, 1, 1);
 		DrawModel(bunnyModel, program, "in_Position", "in_Normal", "in_TexCoord");
 		printf("Intersection position: %f %f %f\n", position.x, position.y, position.z);
 	}
@@ -116,7 +116,7 @@ void GameMode::renderDebug()
 	}
 
 	vec3 intersectionPoint = picker->getIntersectionPoint();
-	PlaceModelScale(bunnyModel, program, intersectionPoint.x, intersectionPoint.y, intersectionPoint.z, 0, 0, 0, 10, 10, 10);
+	PlaceModelScale(bunnyModel, program, intersectionPoint.x, intersectionPoint.y, intersectionPoint.z, 0, 0, 0, 3, 3, 3);
 	DrawModel(bunnyModel, program, "in_Position", "in_Normal", "in_TexCoord");
 
 	if (picker->debugIntersectionVector.size() > 0)
@@ -199,9 +199,6 @@ void GameMode::setupFrameTiming() {
     
     frameCount++;
 }
-
-
-
 
 void GameMode::clearScreen() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
